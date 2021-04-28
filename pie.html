@@ -1,0 +1,103 @@
+<html>
+    <head>
+        <title>
+            Pie chart
+        </title>
+        <style>
+            body {
+                font-family: Bahnschrift, sans-serif;
+            }
+            #pie {
+                transition: all 0.2s linear;
+            }
+            #value {
+                position: fixed;
+                background: #000;
+                transform: scale(0);
+                transition: all 0.2s linear;
+                z-index: 100;
+            }
+            .tabl {
+                text-align: center;
+                border-collapse: collapse;
+            }
+            .tabl tr {
+                border-bottom: 1px solid #ccc;
+            }
+            .tabl tr:nth-child(even) {
+                background: #f9f9f9;
+            }
+            #val {
+                position: absolute;
+            }
+            #pie.hover #value{
+                transform: scale(1);
+            }
+        </style>
+    </head>
+    <body>
+        <center ng-app="ApplicationPie">
+            <canvas id="pie">
+            </canvas>
+            <canvas id="val"></canvas>
+            <p>Name: <input type="text" ng-model="name" /></p>
+            Your name is <span ng-bind="name"></span>
+            <!-- <div ng-controller="Controller">Yo {{saveit}}</div> -->
+            <br /><br />
+            <div ng-controller="controlEverything">
+                <div ng-init="dict = [{locale:'en-US',name:'United States'}, {locale:'en-GB',name:'United Kingdom'}, {locale:'en-FR',name:'France'}]">
+                    <table width="300" class="tabl">
+                        <tr>
+                            <th>Locale</th>
+                            <th>Country Name</th>
+                        </tr>
+                        <tr ng-repeat="val in dict">
+                            <td>{{ val.locale }}</td>
+                            <td>{{ val.name }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <br />
+                <div ng-init="variable = getMember(dataPoints); col = getMember(colors)">
+                    <table width="300" class="tabl">
+                        <tr>
+                            <th>Colors</th>
+                            <th>Activities</th>
+                            <th>% of Activity</th>
+                            <!-- <th>Country Name</th> -->
+                        </tr>
+                        <tr ng-repeat="(key, val) in variable">
+                            <td><span ng-style="{'background': '{{col[key]}}'}">&nbsp;&nbsp;&nbsp;</span></td>
+                            <td>{{ key }}</td>
+                            <td>{{ val }}%</td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="file"></div>
+        </center>
+    </body>
+    <script src="javascript/diagrams/pie.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+
+    <script type='text/javascript'>
+        // console.log(dataPoints);
+        var Colors = returnColors();
+        angular.module("ApplicationPie", []).controller("controlEverything", ['$scope', '$window', function($scope, $window) {
+            // $scope.saveit = {};
+            $scope.saveit = "Wallah accha pie chart hai bhai";
+            $scope.dataPoints = $window.dataPoints;
+            $scope.colors = $window.Colors;
+
+            for(let color in $scope.colors) {
+                $scope.colors[color] = $scope.colors[color];
+            }
+
+            console.log("Angular", $scope.colors);
+
+            $scope.getMember = function(data) {
+                console.log(data);
+                return data;
+            }
+        }]);
+    </script>
+</html>

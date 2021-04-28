@@ -1,0 +1,72 @@
+/*light theme*/
+[data-theme="light"] {
+    --applied-options: #99fd99;
+    --bg-color: #f5f5f5;
+    --clr-color: black;
+    --options-bg-color: #343434;
+    --options-bg-hover-color: #212121;
+    --editable-background-focus: #e1e1e1;
+    --options-clr-color: white;
+    --insert-bg-color: white;
+    --insert-clr-color: black;
+    --inp-bg-color: #454545;
+    --inp-clr-color: white;
+    --color-pallet-bg-color: #343434;
+    --color-pallet-clr-color: white;
+    --color-pallet-track-color: white;
+    --navigation-bg-color: #212121;
+    --navigation-clr-color: white;
+    --navigation-open-hover-color: rgba(0, 0, 0, 0.125);
+    --navigation-close-hover-color: rgba(240, 240, 240, 0.125);
+    --hint-bg-color: #212121;
+    --hint-clr-color: white;
+    --transparent: rgba(0, 0, 0, 0);
+}
+/*Dark theme*/
+[data-theme="dark"] {
+    --applied-options: #99fd99;
+    --bg-color: #fffaf2;
+    --editable-background-focus: #efeae3;
+    --clr-color: #100000;
+    --options-bg-color: #322120;
+    --options-bg-hover-color: #221913;
+    --options-clr-color: #fffaf2;
+    --insert-bg-color: #fffaf2;
+    --insert-clr-color: #100000;
+    --inp-bg-color: #422f26;
+    --inp-clr-color: #fffaf2;
+    --color-pallet-bg-color: #221913;
+    --color-pallet-clr-color: #fffaf2;
+    --color-pallet-track-color: #fffaf2;
+    --navigation-bg-color: #221913;
+    --navigation-clr-color: #fffaf2;
+    --navigation-open-hover-color: rgba(240, 240, 240, 0.125);
+    --navigation-close-hover-color: rgba(0, 0, 0, 0.125);
+    --hint-bg-color: #221913;
+    --hint-clr-color: #fffaf2;
+    --transparent: rgba(0, 0, 0, 0);
+}
+/*Blue theme*/
+[data-theme="blue"] {
+    --applied-options: #99fd99;
+    --bg-color: #f2faff;
+    --editable-background-focus: #e0f0f0;
+    --clr-color: black;
+    --options-bg-color: #213243;
+    --options-bg-hover-color: #112032;
+    --options-clr-color: #f2f2ff;
+    --insert-bg-color: #f2f2ff;
+    --insert-clr-color: #213243;
+    --inp-bg-color: #2f4050;
+    --inp-clr-color: #f2f2ff;
+    --color-pallet-bg-color: #213243;
+    --color-pallet-clr-color: #f2f2ff;
+    --color-pallet-track-color: #f2f2ff;
+    --navigation-bg-color: #213243;
+    --navigation-clr-color: #f2f2ff;
+    --navigation-open-hover-color: rgba(240, 245, 254, 0.125);
+    --navigation-close-hover-color: rgba(0, 0, 0, 0.125);
+    --hint-bg-color: #203040;
+    --hint-clr-color: #f2f2ff;
+    --transparent: rgba(0, 0, 0, 0);
+}
