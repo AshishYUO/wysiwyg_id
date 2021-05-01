@@ -82,14 +82,14 @@ class Editor {
             let type = event.detail;
             let Node = selections.getCurrentNodeFromCaretPosition();
             if (Node) {
-                while (Node.parentNode !== this.Body && Node.nodeName != "LI") {
+                while (!this.isABlockNode(Node)) {
                     Node = Node.parentNode;
                 }
                 let element = document.createElement(type), list = document.createElement("li");
                 list.innerHTML = Node.innerHTML;
                 element.append(list);
                 if (Node.nodeName !== "LI") {
-                    this.Body.replaceChild(element, Node);
+                    Node.parentNode.replaceChild(element, Node);
                 } else {
                     Node.innerHTML = element.outerHTML;
                 }
