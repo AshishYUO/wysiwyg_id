@@ -8,11 +8,13 @@ class Editor {
                 selections.getSelection().deleteFromDocument();
             }
             let data = (event.clipboardData || window.clipboardData).getData('text/html');
-            let div = document.createElement('DIV');
-            div.innerHTML = data;
-            div.innerHTML = this.clearNode(div).innerHTML;
-            event.preventDefault();
-            selections.getSelection().getRangeAt(0).insertNode(div);
+            if (data.length != 0) {
+                event.preventDefault();
+                let div = document.createElement('DIV');
+                div.innerHTML = data;
+                div.innerHTML = this.clearNode(div).innerHTML;
+                selections.getSelection().getRangeAt(0).insertNode(div);
+            }
         }
 
         this.image = new ImageBuilder(Node);
@@ -97,20 +99,20 @@ class Editor {
         }.bind(this));
 
         this.Body.addEventListener("add_inline", function (event) {
-            let { cmd, showDef, valArg } = event.detail;
+            let { cmd, valArg } = event.detail;
             document.execCommand(cmd, false, valArg);
         });
     }
-    // Incomplete: if at least one of the child is a block node, take it out from there.
 
     isABlockNode(node) {
         return node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|DIV|OL|UL|PRE|P|DL|ADDRESS|IMG|LI)$/);
     }
 
-    clearNode(node) {
-        let newNode = document.createElement('DIV');
-        if (node.children || typeof (node) === 'object') {
-            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|UL|SPAN|A|IMG|PRE|CODE)$/)) {
+    // Incomplete: if at least one of the child is a block node, take it out from there.
+    clearNode(node, parentIsABlockNode) {
+        if (node.childNodes || typeof (node) === 'object') {
+            let newNode = document.createElement("DIV");
+            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH)$/)) {
                 newNode = document.createElement(node.nodeName);
             }
             if (node.nodeName === 'A') {
@@ -125,16 +127,16 @@ class Editor {
                     newNode.setAttribute('alt', node.getAttribute("alt"));
                 }
             }
+            for (let child of node.children) {
+                this.clearNode(child);
+            }
             newNode.innerHTML = node.innerHTML;
-            let parentNode = node.parentNode;
-            if (parentNode) {
+            
+            if (node.parentNode) {
                 node.parentNode.replaceChild(newNode, node);
             }
-            for (let child in newNode.children) {
-                this.clearNode(newNode.children[child]);
-            }
-        }
-        return newNode;
+            return newNode;
+        }    
     }
 
     addParagraphAt(node) {

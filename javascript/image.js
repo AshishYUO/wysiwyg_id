@@ -10,8 +10,8 @@ class ImageBuilder {
             this.selection = selections.getSelection();
             let URL = this.selection.toString().trimLeft().trimRight();
             if (URL.length > 0) 
-                if (!this.matchesWithExtURL(URL))
-                    document.execCommand("insertimage", false, selection.toString());
+                if (this.matchesWithExtURL(URL))
+                    document.execCommand("insertimage", false, this.selection.toString());
                 else 
                     alert("Invalid URL");
             else 
@@ -23,8 +23,9 @@ class ImageBuilder {
                 let imageNode = document.createElement("img");
                 imageNode.setAttribute("src", e.target.result);
                 let Node = selections.getCurrentNodeFromCaretPosition(this.selection);
-                while (Node.parentNode != this.MainBody)
+                while (Node.parentNode != this.MainBody) {
                     Node = Node.parentNode;
+                }
                 Node.innerHTML = "";
                 Node.appendChild(imageNode);
             }
@@ -37,7 +38,7 @@ class ImageBuilder {
         }
     }
 
-    matchesWithLocalFiles = (str) => {
-        return str.match(/https?:\/\/.*/).length > 0;
+    matchesWithExtURL = (str) => {
+        return str.match(/https?:\/\/.*/);
     }
 }

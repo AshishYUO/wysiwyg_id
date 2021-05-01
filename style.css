@@ -26,11 +26,12 @@ body {
 }
 .bodyeditable pre {
     background: #eee;
-    padding: 1px;
-    border-radius: 3px;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 4px;
 }
 .editor {
-    font-family: Arial, sans-serif;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif, sans-serif;
     width: 100%;
     border: 1px solid #ccc;
     padding: 0;

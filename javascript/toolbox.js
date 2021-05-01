@@ -190,7 +190,7 @@ class ToolBox {
         }.bind(this), event));
 
         this.objRefs = {
-            "B": this.bold, "I": this.italic, "U": this.underline, "SUB": this.subs, "SUP": this.sups,
+            "B": this.bold, "STRONG": this.bold, "I": this.italic, "EM": this.italic, "U": this.underline, "SUB": this.subs, "SUP": this.sups,
             "BLOCKQUOTE": this.quote, "A": this.anchor, "H1": this.header1, "H2": this.header2
         }
     }
@@ -218,7 +218,7 @@ class ToolBox {
         }
         if (node) {
             while (node !== this.bodyNode) {
-                if (this.objRefs[node.nodeName]) {
+                if (node && node.nodeName && this.objRefs[node.nodeName]) {
                     let objectReference = this.objRefs[node.nodeName];
                     if (objectReference && !objectReference.classList.contains('is-applied')) {
                         objectReference.classList.add('is-applied');
