@@ -105,14 +105,14 @@ class Editor {
     }
 
     isABlockNode(node) {
-        return node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|DIV|OL|UL|PRE|P|DL|ADDRESS|IMG|LI)$/);
+        return node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|DIV|OL|UL|PRE|P|DL|ADDRESS|IMG|LI|TABLE|TR)$/);
     }
 
     // Incomplete: if at least one of the child is a block node, take it out from there.
     clearNode(node, parentIsABlockNode) {
         if (node.childNodes || typeof (node) === 'object') {
             let newNode = document.createElement("DIV");
-            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH)$/)) {
+            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
                 newNode = document.createElement(node.nodeName);
             }
             if (node.nodeName === 'A') {

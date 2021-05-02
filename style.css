@@ -24,6 +24,15 @@
 body {
     font-family: Arial, sans-serif;
 }
+.bodyeditable {
+    width: 100%;
+    outline: none;
+    padding: 10px;
+    margin: -1px;
+    resize: none;
+    overflow-y: scroll;
+    height: 400px;
+}
 .bodyeditable pre {
     background: #eee;
     padding: 5px;
@@ -37,6 +46,12 @@ body {
     padding: 0;
     margin: 0;
     border-radius: 5px;
+}
+.bodyeditable table tr:nth-child(even) {
+    background: #ddd;
+}
+.bodyeditable table tr {
+    border: 1px solid #888;
 }
 .options {
     list-style: none;
@@ -60,6 +75,11 @@ body {
     margin: 5px;
     cursor: pointer;
     transition: background 0.2s ease-out;
+}
+.separator {
+    margin: 5px;
+    padding: 5px;
+    border-left: 1px solid #aaa;
 }
 .options button:hover {
     background:rgba(0, 0, 0, 0.05);
@@ -100,15 +120,6 @@ body {
 }
 .link-container .link-save:hover {
     background: #496fef;
-}
-.bodyeditable {
-    width: 100%;
-    outline: none;
-    padding: 10px;
-    margin: -1px;
-    resize: none;
-    overflow-y: scroll;
-    height: 300px;
 }
 .hint {
     position: absolute;
@@ -306,10 +317,6 @@ input[type=range]:focus {
     border: 1px solid var(--transparent);
     outline-width: 0;
 }
-.insert-end {
-    border: 1px solid var(--insert-clr-color);  
-    background: var(--insert-clr-color);;
-}
 .resizable td{
     resize: horizontal;
     overflow: auto;
@@ -318,30 +325,4 @@ input[type=range]:focus {
     cursor: col-resize;
     padding: 3px;
     display: none;
-}
-.newly-created-table {
-    border: 0;
-    border-collapse: collapse;
-}
-.newly-created-table tr {
-    border-bottom: 1px solid #aaa;
-}
-.newly-created-table th {
-    background: #6745ff;
-    color: white;
-}
-.newly-created-table tr:nth-child(even) {
-    background: #0041;
-}
-.newly-created-table td, .newly-created-table th {
-    border: 0;
-    padding: 3px;
-}
-.code-snippet {
-    font-family: 'Courier New', Courier, monospace;
-    background: #0002;
-    max-height: 400px;
-    overflow: scroll;
-    box-shadow: 2px 2px 4px 4px #0001;
-    border-radius: 4px;
 }

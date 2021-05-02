@@ -5,7 +5,6 @@ var Colors;
 function convertToHex(arrColor) {
     var hex = "0123456789ABCDEF";
     var hexp = (num) => hex[Math.floor(num / 16) % 16] + hex[num % 16]
-
     return '#' + hexp(arrColor[0]) + hexp(arrColor[1]) + hexp(arrColor[2]);
 }
 
@@ -48,7 +47,7 @@ function returnColors () {
             c2.clearRect(0, 0, 200, 30);
             c2.font = "20px Bahnschrift, sans-serif";
             c2.fillText(String(dataPoints[index])+"%: "+index, 20, 20, 150);
-            console.log("Hovered on", dataPoints[index], index);
+            // console.log("Hovered on", dataPoints[index], index);
 
         } else {
             c1.style.background = "#0000";

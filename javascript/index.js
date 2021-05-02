@@ -27,22 +27,6 @@ let model = [{
     id: 'hr',
     hint: 'Horizontal Line',
     button: '<i class="fa fa-ellipsis-h"></i>'
-    // }, {
-    //     id: 'foreColor',
-    //     hint: 'Color selected text',
-    //     button: 'A'
-    // }, {
-    //     id: 'font-color-sample',
-    //     hint: 'Select font color',
-    //     button: '&nbsp;&nbsp;&nbsp;&nbsp;'
-    // }, {
-    //     id: 'highlight',
-    //     hint: 'Highlight selected text',
-    //     button: '<i class="fa fa-paint-brush"></i>'
-    // }, {
-    //     id: 'highlight-color-sample',
-    //     hint: 'Select highlight color',
-    //     button: '&nbsp;&nbsp;&nbsp;&nbsp;'
 }, {
     id: 'header-1',
     hint: 'Header 1',
@@ -86,39 +70,37 @@ let model = [{
 }
 ];
 window.onload = () => {
-    let teditors = document.querySelectorAll('.editor');
-    teditors.forEach(function (_editor) {
-        let options = document.createElement('DIV');
-        options.classList.add('options');
-        let center = document.createElement('center');
-        let toolbar = document.createElement('span');
-        model.forEach(function (toolInfo) {
-            let { id, hint, button } = toolInfo;
-            let toolContainer = document.createElement('span');
-            toolContainer.classList.add('tool');
-            let tool = document.createElement('button');
-            tool.classList.add(id);
-            tool.title = hint;
-            tool.classList.add('no-highlight');
-            // let h = document.createElement("span");
-            // h.classList.add("hint");
-            // h.innerHTML = hint;
-            tool.innerHTML = button;
-            toolContainer.innerHTML = `${tool.outerHTML}`;
-            toolbar.appendChild(toolContainer);
-        });
-        options.appendChild(toolbar);
-        center.appendChild(options);
-        _editor.appendChild(center);
-        let body = document.createElement("DIV");
-        body.setAttribute('contenteditable', 'true');
-        body.classList.add('bodyeditable');
-        _editor.appendChild(body);
-        new Editor(_editor);
-        // new ColorPicker(_editor);
-    });
-    initUIMode();
+    initEditor();
+    // let teditors = document.querySelectorAll('.editor');
+    // teditors.forEach(function (_editor) {
+    //     let options = document.createElement('DIV');
+    //     options.classList.add('options');
+    //     let center = document.createElement('center');
+    //     let toolbar = document.createElement('span');
+    //     model.forEach(function (toolInfo) {
+    //         let { id, hint, button } = toolInfo;
+    //         let toolContainer = document.createElement('span');
+    //         toolContainer.classList.add('tool');
+    //         let tool = document.createElement('button');
+    //         tool.classList.add(id);
+    //         tool.title = hint;
+    //         tool.classList.add('no-highlight');
+    //         tool.innerHTML = button;
+    //         toolContainer.innerHTML = `${tool.outerHTML}`;
+    //         toolbar.appendChild(toolContainer);
+    //     });
+    //     options.appendChild(toolbar);
+    //     // center.appendChild(options);
+    //     _editor.appendChild(options);
+    //     let body = document.createElement("DIV");
+    //     body.setAttribute('contenteditable', 'true');
+    //     body.classList.add('bodyeditable');
+    //     _editor.appendChild(body);
+    //     new Editor(_editor);
+    //     // new ColorPicker(_editor);
+    // });
+    // initUIMode();
 
-    window.selections = new Selection();
+    // window.selections = new Selection();
     // window.navigation = new Navigation();
 }
