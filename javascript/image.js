@@ -10,10 +10,12 @@ class ImageBuilder {
             this.selection = selections.getSelection();
             let URL = this.selection.toString().trimLeft().trimRight();
             if (URL.length > 0) 
-                if (this.matchesWithExtURL(URL))
+                if (this.matchesWithExtURL(URL)) {
                     document.execCommand("insertimage", false, this.selection.toString());
-                else 
+                }
+                else {
                     alert("Invalid URL");
+                }
             else 
                 this.fileElement.click();
         });

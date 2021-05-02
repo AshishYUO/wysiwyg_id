@@ -92,16 +92,15 @@ var initEditor = function(enableTools) {
                        ["blockquote", "header1", "header2"],
                        ["unorderedList", "orderedList"],
                        ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
-                        ["image"]];
-    } 
-    else {
+                        ["link", "image"]];
+    } else {
         for (let array of enableTools) {
             if (!Array.isArray(array)) {
                 enableTools = [["bold", "italic", "underline", "subscript", "superscript"],
                     ["blockquote", "header1", "header2"],
                     ["unorderedList", "orderedList"],
                     ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
-                    ["image"]];
+                    ["link", "image"]];
                 break;
             }
         }
