@@ -126,7 +126,6 @@ var initEditor = function(enableTools) {
                 toolContainer.innerHTML = `${tool.outerHTML}`;
                 toolbar.appendChild(toolContainer);
             }
-            console.log('H');
             if (toolBatch != enableTools[enableTools.length - 1]) {
                 let vertical = document.createElement('SPAN');
                 vertical.classList.add('separator');

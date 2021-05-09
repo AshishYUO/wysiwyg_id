@@ -12,6 +12,7 @@ class Editor {
                 event.preventDefault();
                 let div = document.createElement('DIV');
                 div.innerHTML = data;
+                // console.log(this.clearNodeExperiment(div).innerHTML);
                 div.innerHTML = this.clearNode(div).innerHTML;
                 selections.getSelection().getRangeAt(0).insertNode(div);
             }
@@ -41,7 +42,19 @@ class Editor {
         }.bind(this);
 
         this.Body.onkeyup = function (event) {
-            this.IfBodyIsEmpty();
+            if (event.key == "Tab") {
+                event.preventDefault();
+                let textNode = document.createTextNode("\xa0\xa0\xa0\xa0");
+                selections.getSelection && selections.getSelection().getRangeAt(0).insertNode(textNode);
+                let tab = selections.getSelectionInfo();
+                selections.setSelectionAt({
+                    startNode: tab.endNode,
+                    startOffset: tab.endOffset,
+                    endNode: tab.endNode,
+                    endOffset: tab.endOffset
+                })
+            }
+            this.tools.formatsOnCurrentCaret();
         }.bind(this);
 
         this.Body.addEventListener("add_block", function (event) {
@@ -62,7 +75,7 @@ class Editor {
             if (parent) {
                 let temp = parent;
                 let caretNode = temp;
-                while (!this.isABlockNode(temp)) {
+                while (!isABlockNode(temp)) {
                     temp = temp.parentNode;
                 }
                 let Node = document.createElement(temp.nodeName == NodeType ? "DIV" : NodeType);
@@ -84,7 +97,7 @@ class Editor {
             let type = event.detail;
             let Node = selections.getCurrentNodeFromCaretPosition();
             if (Node) {
-                while (!this.isABlockNode(Node)) {
+                while (!isABlockNode(Node)) {
                     Node = Node.parentNode;
                 }
                 let element = document.createElement(type), list = document.createElement("li");
@@ -109,28 +122,33 @@ class Editor {
     }
 
     // Incomplete: if at least one of the child is a block node, take it out from there.
-    clearNode(node, parentIsABlockNode) {
+    clearNode(node) {
         if (node.childNodes || typeof (node) === 'object') {
-            let newNode = document.createElement("DIV");
-            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
+            if (isAnInlineNode(node) && node.innerText == "") {
+                // var img = node.querySelector('IMG');
+                // if (!img) {
+                    node.parentNode && node.parentNode.removeChild(node);
+                    return;
+                // }
+            } else if (this.isABlockNode(node)) {
+                var img = node.querySelector('IMG');
+            }
+            let newNode = document.createElement('DIV');
+            if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
                 newNode = document.createElement(node.nodeName);
+            } else if (node.nodeName == 'DIV' || node.nodeName == 'P') {
+                newNode = document.createElement('DIV');
             }
-            if (node.nodeName === 'A') {
-                newNode.setAttribute('href', node.getAttribute('href'));
-                if (newNode.hasAttribute('download')) {
-                    newNode.setAttribute('download', node.getAttribute('download'));
-                }
+            let toChange;
+            if (PasteFormattingOptions[node.nodeName]) {
+                toChange = PasteFormattingOptions[node.nodeName](node, newNode);
             }
-            if (node.nodeName == 'IMG') {
-                newNode.setAttribute('src', node.getAttribute("src"));
-                if (newNode.hasAttribute('alt')) {
-                    newNode.setAttribute('alt', node.getAttribute("alt"));
-                }
-            }
+            
             for (let child of node.children) {
                 this.clearNode(child);
             }
-            newNode.innerHTML = node.innerHTML;
+            if (toChange === undefined)
+                newNode.innerHTML = node.innerHTML;
             
             if (node.parentNode) {
                 node.parentNode.replaceChild(newNode, node);

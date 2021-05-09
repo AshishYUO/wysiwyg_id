@@ -64,7 +64,8 @@
     height: 400px;
 }
 .bodyeditable pre {
-    background: #eee;
+    background: #444;
+    color: #eee;
     padding: 5px;
     margin: 5px;
     border-radius: 4px;

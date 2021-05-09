@@ -25,7 +25,7 @@ class ImageBuilder {
                 let imageNode = document.createElement("img");
                 imageNode.setAttribute("src", e.target.result);
                 let Node = selections.getCurrentNodeFromCaretPosition(this.selection);
-                while (Node.parentNode != this.MainBody) {
+                while (!isABlockNode(Node.parentNode)) {
                     Node = Node.parentNode;
                 }
                 Node.innerHTML = "";
