@@ -18,7 +18,8 @@ let PasteFormattingOptions = {
     PRE: function (oldNode, newNode) { 
         // console.log("Here");
         let node = document.createTextNode(oldNode.innerText);
-        newNode.innerHTML = getKeyword(node.textContent);
+        // newNode.innerHTML = getKeyword(node.textContent);
+        newNode.innerHTML = node.textContent;
         return 1;
     },
     STRONG: function(oldNode, newNode) { },
