@@ -4,6 +4,7 @@ class Editor {
         this.Body = Node.getElementsByClassName("bodyeditable")[0];
         this.Body.innerHTML = "<div><br></div>";
         this.Body.onpaste = (event) => {
+            this.IfBodyIsEmpty();
             if (selections.getSelection().toString().length > 0) {
                 selections.getSelection().deleteFromDocument();
             }
@@ -26,6 +27,7 @@ class Editor {
         }.bind(this);
 
         this.Body.onkeydown = function (event) {
+            this.IfBodyIsEmpty();
             if (event.key == "Tab") {
                 event.preventDefault();
                 let textNode = document.createTextNode("\xa0\xa0\xa0\xa0");
@@ -42,18 +44,6 @@ class Editor {
         }.bind(this);
 
         this.Body.onkeyup = function (event) {
-            if (event.key == "Tab") {
-                event.preventDefault();
-                let textNode = document.createTextNode("\xa0\xa0\xa0\xa0");
-                selections.getSelection && selections.getSelection().getRangeAt(0).insertNode(textNode);
-                let tab = selections.getSelectionInfo();
-                selections.setSelectionAt({
-                    startNode: tab.endNode,
-                    startOffset: tab.endOffset,
-                    endNode: tab.endNode,
-                    endOffset: tab.endOffset
-                })
-            }
             this.tools.formatsOnCurrentCaret();
         }.bind(this);
 
@@ -97,16 +87,18 @@ class Editor {
             let type = event.detail;
             let Node = selections.getCurrentNodeFromCaretPosition();
             if (Node) {
-                while (!isABlockNode(Node)) {
+                while (!isABlockNode(Node) && Node.parentNode != this.Body) {
                     Node = Node.parentNode;
                 }
-                let element = document.createElement(type), list = document.createElement("li");
-                list.innerHTML = Node.innerHTML;
-                element.append(list);
-                if (Node.nodeName !== "LI") {
-                    Node.parentNode.replaceChild(element, Node);
-                } else {
-                    Node.innerHTML = element.outerHTML;
+                if (Node !== this.Body) {
+                    let element = document.createElement(type), list = document.createElement("li");
+                    list.innerHTML = Node.innerHTML;
+                    element.append(list);
+                    if (Node.nodeName !== "LI") {
+                        Node.parentNode.replaceChild(element, Node);
+                    } else {
+                        Node.innerHTML = element.outerHTML;
+                    }
                 }
             }
         }.bind(this));
@@ -114,6 +106,10 @@ class Editor {
         this.Body.addEventListener("add_inline", function (event) {
             let { cmd, valArg } = event.detail;
             document.execCommand(cmd, false, valArg);
+        });
+
+        this.Body.addEventListener("reset_caret", function(event) {
+            selections.setCaretPositionAtNode(this.children[0] || this);
         });
     }
 
@@ -123,19 +119,18 @@ class Editor {
 
     // Incomplete: if at least one of the child is a block node, take it out from there.
     clearNode(node) {
-        if (node.childNodes || typeof (node) === 'object') {
+        if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
             if (isAnInlineNode(node) && node.innerText == "") {
-                // var img = node.querySelector('IMG');
-                // if (!img) {
-                    node.parentNode && node.parentNode.removeChild(node);
-                    return;
-                // }
-            } else if (this.isABlockNode(node)) {
-                var img = node.querySelector('IMG');
+                node.parentNode && node.parentNode.removeChild(node);
+                return;
             }
             let newNode = document.createElement('DIV');
             if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
-                newNode = document.createElement(node.nodeName);
+                if (node.nodeName == 'LI' && (node.parentNode && node.parentNode.nodeName != 'OL' && node.parentNode.nodeName != 'UL')) {
+                    newNode = document.createElement('DIV');
+                } else {
+                    newNode = document.createElement(node.nodeName);
+                }
             } else if (node.nodeName == 'DIV' || node.nodeName == 'P') {
                 newNode = document.createElement('DIV');
             }
@@ -147,14 +142,35 @@ class Editor {
             for (let child of node.children) {
                 this.clearNode(child);
             }
-            if (toChange === undefined)
+            if (toChange === undefined) {
                 newNode.innerHTML = node.innerHTML;
-            
+            }
             if (node.parentNode) {
                 node.parentNode.replaceChild(newNode, node);
             }
             return newNode;
-        }    
+        }
+    }
+
+    clearNodeExp(pasteNode) {
+        if (node.childNodes || typeof (node) === 'object') {
+            for (let node of pasteNode.childNodes) {
+                this.compute(node);            
+            }
+        }
+    }
+
+    compute(node, parentNode) {
+        if (node.childNodes) {
+            let index = 0;
+            while (index < node.childNodes.length) {
+                let inBlocks = [];
+                while (index < node.childNodes.length && isAnInlineNode(node.childNodes[i])) {
+                    inBlocks.push('l');
+                    ++index;
+                }
+            }
+        }
     }
 
     addParagraphAt(node) {

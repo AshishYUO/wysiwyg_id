@@ -80,6 +80,16 @@ var initEditor = function(enableTools) {
             classname: 'align-justify',
             display: '<i class="fa fa-align-justify" aria-hidden="true"></i>'
         },
+        math: {
+            hint: "Math Symbol",
+            classname: "math",
+            display: "<span style='font-family: Cambria'>&pi;</span>"
+        },
+        currency: {
+            hint: "Currency Symbol",
+            classname: "currency",
+            display: "<span style='font-family: Cambria'>$</span>"
+        },
         image: {
             hint: 'Insert Image',
             classname: 'image',
@@ -92,6 +102,7 @@ var initEditor = function(enableTools) {
                        ["blockquote", "header1", "header2"],
                        ["unorderedList", "orderedList"],
                        ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
+                       ["math", "currency"],
                         ["link", "image"]];
     } else {
         for (let array of enableTools) {
@@ -139,6 +150,9 @@ var initEditor = function(enableTools) {
         body.setAttribute('contenteditable', 'true');
         body.classList.add('bodyeditable');
         _editor.appendChild(body);
+
+        constructSymbolTable(_editor, 0x2200, 0x22FF, 'math');
+        constructSymbolTable(_editor, 0x20A0, 0x20BF, 'currency');
         new Editor(_editor);
         // new ColorPicker(_editor);
     });

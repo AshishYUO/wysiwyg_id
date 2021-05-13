@@ -11,7 +11,7 @@ let PasteFormattingOptions = {
     },
     LI: function (oldNode, newNode) {
         if (oldNode.parentNode && !(oldNode.parentNode.nodeName == 'UL' || oldNode.parentNode.nodeName == 'OL')) {
-            oldNode.parentNode.removeChild(newNode);
+            oldNode.parentNode.removeChild(oldNode);
         }
     },
     CODE: function(oldNode, newNode) { }, 
@@ -19,7 +19,8 @@ let PasteFormattingOptions = {
         // console.log("Here");
         let node = document.createTextNode(oldNode.innerText);
         // newNode.innerHTML = getKeyword(node.textContent);
-        newNode.innerHTML = node.textContent;
+        newNode.innerHTML = node.textContent.replace("/", "&#47;").replace("<", "&lt;").replace(">", "&gt;");
+        newNode.setAttribute("style", "white-space: pre-wrap;");
         return 1;
     },
     STRONG: function(oldNode, newNode) { },
@@ -37,22 +38,26 @@ let PasteFormattingOptions = {
     }
 }
 
-class Trie {
-    constructor(color) {
-        this.nextTrie = {};
-        this.assignColors = colors || undefined;
+var constructSymbolTable = function(editor, start, end, type) {
+    var table = document.createElement('DIV');
+    table.classList.add('symbol-table')
+    table.classList.add(`${type}-table`);
+    table.classList.add('hide');
+    for (let i = start; i <= end; ++i) {
+        var symbolblock = document.createElement('BUTTON');
+        symbolblock.classList.add('symbol-blocks');
+        symbolblock.style.fontFamily = 'Cambria';
+        symbolblock.title = `&#${i};`;
+        symbolblock.innerHTML = `&#${i};`;
+        table.appendChild(symbolblock);
     }
-
-    createPath(str, root) {
-        let traverse = root;
-        let index = 0;
-        while (index < str.length) {
-            if (!traverse.nextTrie[str[i]]) {
-                traverse.nextTrie[str[i]] = new Trie();
-            }
-            traverse = traverse.nextTrie[str[i]];
+    let symbol = editor.querySelector(`.${type}`);
+    if (symbol) {
+        let tools = document.querySelector('.options')
+        symbol.append(table);
+        for (let x of symbol.querySelectorAll('.symbol-blocks')) {
+            x.onclick = () => document.execCommand('insertHTML', false, x.innerHTML);
         }
-
     }
 };
 

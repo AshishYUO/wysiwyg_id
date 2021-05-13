@@ -22,7 +22,7 @@
     float: left;
 }
 .editor {
-    width: 100%;
+    width: 85%;
     padding: 10px;
     margin: 0;
     border-radius: 5px;
@@ -44,14 +44,14 @@
     border: 1px solid rgba(0, 0, 0, 0);
     font-size: 16px;
     background: rgba(0, 0, 0, 0);
-    padding: 12px;
+    padding: 10px;
     /* margin: 5px; */
     cursor: pointer;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     transition: background 0.2s ease-out;
 }
 .bodyeditable {
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     width: 95%;
     outline: none;
     border-bottom-left-radius: 5px;
@@ -64,6 +64,7 @@
     height: 400px;
 }
 .bodyeditable pre {
+    font-size: 110%;
     background: #444;
     color: #eee;
     padding: 5px;
@@ -73,12 +74,12 @@
 .bodyeditable table tr:nth-child(even) {
     background: #ddd;
 }
-.bodyeditable table tr {
-    border: 1px solid #888;
+.bodyeditable table td {
+    border: 1px solid #ddd;
 }
 .separator {
-    margin: 8px;
-    padding: 8px;
+    margin: 6px;
+    padding: 6px;
     border-left: 1px solid #aaa;
 }
 .options button:hover {
@@ -130,6 +131,33 @@
     background: var(--hint-bg-color);
     color: var(--hint-clr-color);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.symbol-table {
+    width: 40%;
+    background: white;
+    position: absolute;
+    display: inline-block;
+    height: 150px;
+    padding: 10px;
+    border-radius: 3px;
+    box-shadow: 2px 2px 6px 4px rgba(0, 0, 0, 0.22);
+    transition: all 0.2s ease-out;
+    overflow-y: scroll;
+}
+.symbol-blocks {
+    width: 30px;
+    font-size: 16px;
+    padding: 4px;
+    /* margin: 2px; */
+    background: rgba(0, 0, 0, 0);
+    border: 1px solid rgba(0, 0, 0, 0);
+    transition: all 0.2s ease-out;
+    border-radius: 2px;
+    outline: none;
+}
+.symbol-blocks:hover {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(0, 0, 0, 0);
 }
 body {
     background: var(--bg-color);
@@ -317,13 +345,4 @@ input[type=range]:focus {
 .no-highlight:focus {
     border: 1px solid var(--transparent);
     outline-width: 0;
-}
-.resizable td{
-    resize: horizontal;
-    overflow: auto;
-}
-.resizable td::-webkit-resizer{
-    cursor: col-resize;
-    padding: 3px;
-    display: none;
 }

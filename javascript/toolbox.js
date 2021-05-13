@@ -189,6 +189,32 @@ class ToolBox {
             this.bodyNode.dispatchEvent(new CustomEvent("add_list", { "detail": "ol" }));
         }.bind(this), event));
 
+        // Handle math symbols
+        this.mathsymbols = Node.getElementsByClassName('math')[0];
+        this.math_symbol_table = undefined;
+        this.mathsymbols && (this.mathsymbols.onclick = (event) => this.applyTools(function (event) {
+            this.math_symbol_table = this.math_symbol_table || Node.querySelector(".math-table");
+            if (this.currency_symbol_table && !this.currency_symbol_table.classList.contains('hide')) {
+                this.currency_symbol_table.classList.add('hide');
+            }
+            this.math_symbol_table.classList.toggle('hide');
+            this.math_symbol_table.style.top = `${this.mathsymbols.offsetTop + 50}px`;
+            this.math_symbol_table.style.left = `${this.mathsymbols.offsetLeft - this.math_symbol_table.offsetWidth / 2}px`;
+        }.bind(this), event));
+
+        // Handling currency 
+        this.currencysymbols = Node.getElementsByClassName('currency')[0];
+        this.currency_symbol_table = undefined;
+        this.currencysymbols && (this.currencysymbols.onclick = (event) => this.applyTools(function (event) {
+            this.currency_symbol_table = this.currency_symbol_table || Node.querySelector(".currency-table");
+            if (this.math_symbol_table && !this.math_symbol_table.classList.contains('hide')) {
+                this.math_symbol_table.classList.add('hide');
+            }
+            this.currency_symbol_table.classList.toggle('hide');
+            this.currency_symbol_table.style.top = `${this.currencysymbols.offsetTop + 50}px`;
+            this.currency_symbol_table.style.left = `${this.currencysymbols.offsetLeft - this.currency_symbol_table.offsetWidth / 2}px`;
+        }.bind(this), event));
+
         this.objRefs = {
             "B": this.bold, "STRONG": this.bold, "I": this.italic, "EM": this.italic, "U": this.underline, "SUB": this.subs, "SUP": this.sups,
             "BLOCKQUOTE": this.quote, "A": this.anchor, "H1": this.header1, "H2": this.header2
@@ -201,6 +227,9 @@ class ToolBox {
         } else {
             let select = selections.getSelectionInfo();
             let { startNode } = select;
+            if (!startNode) {
+                this.bodyNode.dispatchEvent(new CustomEvent("reset_caret"));
+            }
             while (startNode !== this.bodyNode && (startNode.nodeName == '#text' || (startNode.classList && startNode.classList.contains('bodyeditable') === false))) {
                 startNode = startNode.parentNode;
             }
