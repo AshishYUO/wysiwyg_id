@@ -12,8 +12,7 @@ You can include this script, and css (`style.css`) file in your homepage to use 
 ```
 <html>
     <head>
-        <link rel="stylesheet" href="/path/to/style.css">
-        <script src="/path/to/main.js"></script> 
+        <script src="/path/to/main.js"></script>
     </head>
     <body>
         ...

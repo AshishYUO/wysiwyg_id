@@ -1,6 +1,8 @@
 import Editor from './Editor/Editor';
 import { constructSymbolTable } from './CodeFormatting';
 import { initUIMode } from './Mode';
+import '../styles/style.css';
+import '../styles/theme.css';
 
 export const initEditor = function(enableTools) {
     let enablingTools = {
@@ -100,6 +102,11 @@ export const initEditor = function(enableTools) {
             display: '<i class="fa fa-image" aria-hidden="true"></i>'
         }
     }
+
+    let cssLink = document.createElement('LINK');
+    cssLink.setAttribute('rel', 'stylesheet');
+    cssLink.setAttribute('href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
+    document.head.appendChild(cssLink);
 
     if (!Array.isArray(enableTools)) {
         enableTools = [["bold", "italic", "underline", "subscript", "superscript"], 
