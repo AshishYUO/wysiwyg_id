@@ -22,60 +22,50 @@ export default class ToolBox {
 
         this.bold = Node.getElementsByClassName('bold')[0];
         this.bold && (this.bold.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "bold",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "bold",
+                "showDef": undefined,
+                "valArg": undefined
+            });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.italic = Node.getElementsByClassName('italic')[0];
         this.italic && (this.italic.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "italic",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "italic",
+                "showDef": undefined,
+                "valArg": undefined
+            });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.underline = Node.getElementsByClassName('underline')[0];
         this.underline && (this.underline.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "underline",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "underline",
+                "showDef": undefined,
+                "valArg": undefined
+            });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.subs = Node.getElementsByClassName('subscript')[0];
         this.subs && (this.subs.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "subscript",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "subscript",
+                "showDef": undefined,
+                "valArg": undefined
+            });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.sups = Node.getElementsByClassName('superscript')[0];
         this.sups && (this.sups.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", { 
-                "detail": {
-                    "cmd": "superscript", 
-                    "showDef": undefined, 
-                    "valArg": undefined
-                }
+            this.Editor.addInline(new CustomEvent("add_inline", { 
+                "cmd": "superscript", 
+                "showDef": undefined, 
+                "valArg": undefined
             }));
             this.formatsOnCurrentCaret();
         }.bind(this), event));
@@ -88,37 +78,31 @@ export default class ToolBox {
 
         this.hr = Node.getElementsByClassName('hr')[0];
         this.hr && (this.hr.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "insertHTML",
-                    "showDef": undefined,
-                    "valArg": "<hr class=\"hline edit-paragraph\" style=\"width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;\" />"
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "insertHTML",
+                "showDef": undefined,
+                "valArg": "<hr class=\"hline edit-paragraph\" style=\"width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;\" />"
+            });
         }.bind(this), event));
 
         this.anchor = Node.getElementsByClassName('link')[0];
         this.anchor && (this.anchor.onclick = (event) => this.applyTools(function (event) {
             let parent = selections.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
-                this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                    "detail": {
-                        "cmd": "unlink",
-                        "showDef": false,
-                        "valArg": undefined
-                    }
-                }));
+                this.Editor.addInline({
+                    "cmd": "unlink",
+                    "showDef": false,
+                    "valArg": undefined
+                });
             } else {
                 let url = prompt("Enter the URL");
                 console.log(url);
                 if (url) {
-                    this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                        "detail": {
-                            "cmd": "createLink",
-                            "showDef": false,
-                            "valArg": url
-                        }
-                    }));
+                    this.Editor.addInline({
+                        "cmd": "createLink",
+                        "showDef": false,
+                        "valArg": url
+                    });
                 } else {
                     alert("Please enter the link");
                 }
@@ -141,51 +125,43 @@ export default class ToolBox {
 
         this.AlignLeft = Node.getElementsByClassName("align-left")[0];
         this.AlignLeft && (this.AlignLeft.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "justifyLeft",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "justifyLeft",
+                "showDef": undefined,
+                "valArg": undefined
+            });
         }.bind(this), event));
 
         this.AlignRight = Node.getElementsByClassName("align-right")[0];
         this.AlignRight && (this.AlignRight.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "justifyRight",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "justifyRight",
+                "showDef": undefined,
+                "valArg": undefined
+            });
         }.bind(this), event));
 
         this.AlignCenter = Node.getElementsByClassName("align-center")[0];
         this.AlignCenter && (this.AlignCenter.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "justifyCenter",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "justifyCenter",
+                "showDef": undefined,
+                "valArg": undefined
+            });
         }.bind(this), event));
 
         this.Justify = Node.getElementsByClassName("align-justify")[0];
         this.Justify && (this.Justify.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
-                "detail": {
-                    "cmd": "justifyFull",
-                    "showDef": undefined,
-                    "valArg": undefined
-                }
-            }));
+            this.Editor.addInline({
+                "cmd": "justifyFull",
+                "showDef": undefined,
+                "valArg": undefined
+            });
         }.bind(this), event));
 
         this.unorderedList = Node.getElementsByClassName("ulist")[0];
         this.unorderedList && (this.unorderedList.onclick = (event) => this.applyTools(function (event) {
-            this.Editor.addList({ nodeName: "OL" });
+            this.Editor.addList({ nodeName: "UL" });
         }.bind(this), event));
 
         this.orderedList = Node.getElementsByClassName("olist")[0];

@@ -65,6 +65,11 @@ export default class Editor {
         });
     }
 
+    addInline(details) {
+        let { cmd, valArg } = details;
+        document.execCommand(cmd, false, valArg);
+    }
+    
     // Incomplete: if at least one of the child is a block node, take it out from there.
     clearNode(node) {
         if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
