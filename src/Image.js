@@ -1,4 +1,9 @@
-class ImageBuilder {
+import Selection from './Selection';
+import { isABlockNode } from './Utils';
+
+const selections = new Selection();
+
+export default class Image {
     constructor (Node) {
         this.MainBody = Node;
         this.ImageButton = Node.getElementsByClassName("image")[0];
@@ -16,8 +21,9 @@ class ImageBuilder {
                 else {
                     alert("Invalid URL");
                 }
-            else 
+            else {
                 this.fileElement.click();
+            }
         });
 
         this.FileRead.onload = (e) => {

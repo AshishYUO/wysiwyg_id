@@ -1,4 +1,4 @@
-let PasteFormattingOptions = {
+export const PasteFormattingOptions = {
     DIV: function (oldNode, newNode) { 
 
     }, 
@@ -19,7 +19,7 @@ let PasteFormattingOptions = {
         // console.log("Here");
         let node = document.createTextNode(oldNode.innerText);
         // newNode.innerHTML = getKeyword(node.textContent);
-        newNode.innerHTML = node.textContent.replace("/", "&#47;").replace("<", "&lt;").replace(">", "&gt;");
+        newNode.innerText = node.textContent;
         newNode.setAttribute("style", "white-space: pre-wrap;");
         return 1;
     },
@@ -38,7 +38,7 @@ let PasteFormattingOptions = {
     }
 }
 
-var constructSymbolTable = function(editor, start, end, type) {
+export const constructSymbolTable = function(editor, start, end, type) {
     var table = document.createElement('DIV');
     table.classList.add('symbol-table')
     table.classList.add(`${type}-table`);

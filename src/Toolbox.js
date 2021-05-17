@@ -1,20 +1,24 @@
-class ToolBox {
-    constructor(Node) {
+import Selection from './Selection';
+const selections = new Selection();
+
+export default class ToolBox {
+    constructor(Node, mainEditor) {
+        this.Editor = mainEditor;
         this.toolbox = Node.getElementsByClassName("options")[0];
         this.bodyNode = Node.getElementsByClassName("bodyeditable")[0];
         this.linkContainer = document.createElement("div");
         this.linkContainer.classList.add("link-container", 'hide');
-        this.linkInp = document.createElement("input");
-        this.linkInp.classList.add("link-input");
-        this.linkInp.setAttribute("type", "text");
-        this.linkInp.setAttribute("placeholder", "Enter the link.");
-        this.linkSave = document.createElement("button");
-        this.linkSave.setAttribute("type", "button");
-        this.linkSave.classList.add('link-save');
-        this.linkSave.innerHTML = "Save";
-        this.linkContainer.append(this.linkInp);
-        this.linkContainer.append(this.linkSave);
-        this.toolbox.appendChild(this.linkContainer);
+        // this.linkInp = document.createElement("input");
+        // this.linkInp.classList.add("link-input");
+        // this.linkInp.setAttribute("type", "text");
+        // this.linkInp.setAttribute("placeholder", "Enter the link.");
+        // this.linkSave = document.createElement("button");
+        // this.linkSave.setAttribute("type", "button");
+        // this.linkSave.classList.add('link-save');
+        // this.linkSave.innerHTML = "Save";
+        // this.linkContainer.append(this.linkInp);
+        // this.linkContainer.append(this.linkSave);
+        // this.toolbox.appendChild(this.linkContainer);
 
         this.bold = Node.getElementsByClassName('bold')[0];
         this.bold && (this.bold.onclick = (event) => this.applyTools(function (event) {
@@ -78,7 +82,7 @@ class ToolBox {
 
         this.quote = Node.getElementsByClassName("blockquote")[0];
         this.quote && (this.quote.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_block", { "detail": "BLOCKQUOTE" }));
+            this.Editor.addBlock({ nodeName: "BLOCKQUOTE" });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
@@ -96,7 +100,6 @@ class ToolBox {
         this.anchor = Node.getElementsByClassName('link')[0];
         this.anchor && (this.anchor.onclick = (event) => this.applyTools(function (event) {
             let parent = selections.getCurrentNodeFromCaretPosition();
-            let selectionLength = selections.getSelection().toString().length;
             if (parent && parent.nodeName === 'A') {
                 this.bodyNode.dispatchEvent(new CustomEvent("add_inline", {
                     "detail": {
@@ -125,13 +128,14 @@ class ToolBox {
 
         this.header1 = Node.getElementsByClassName("header-1")[0];
         this.header1 && (this.header1.onmousedown = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_block", { "detail": "H1" }));
+            this.Editor.addBlock({ nodeName: "H1" });
+            // this.bodyNode.dispatchEvent(new CustomEvent("add_block", { "detail": "H1" }));
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.header2 = Node.getElementsByClassName("header-2")[0];
         this.header2 && (this.header2.onmousedown = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_block", { "detail": "H2" }));
+            this.Editor.addBlock({ nodeName: "H2" });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
@@ -181,12 +185,12 @@ class ToolBox {
 
         this.unorderedList = Node.getElementsByClassName("ulist")[0];
         this.unorderedList && (this.unorderedList.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_list", { "detail": "ul" }));
+            this.Editor.addList({ nodeName: "OL" });
         }.bind(this), event));
 
         this.orderedList = Node.getElementsByClassName("olist")[0];
         this.orderedList && (this.orderedList.onclick = (event) => this.applyTools(function (event) {
-            this.bodyNode.dispatchEvent(new CustomEvent("add_list", { "detail": "ol" }));
+            this.Editor.addList({ nodeName: "OL" });
         }.bind(this), event));
 
         // Handle math symbols
@@ -222,18 +226,16 @@ class ToolBox {
     }
 
     applyTools(call, callData) {
+        this.Editor.IfBodyIsEmpty();
         if (typeof call !== 'function') {
-            throw (`Wait, the call should be callable! Not ${typeof (call)}`);
+            throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
             let select = selections.getSelectionInfo();
             let { startNode } = select;
-            if (!startNode) {
-                this.bodyNode.dispatchEvent(new CustomEvent("reset_caret"));
-            }
-            while (startNode !== this.bodyNode && (startNode.nodeName == '#text' || (startNode.classList && startNode.classList.contains('bodyeditable') === false))) {
+            while (startNode !== this.Editor.Body && (startNode.nodeName == '#text' || (startNode.classList && startNode.classList.contains('bodyeditable') === false))) {
                 startNode = startNode.parentNode;
             }
-            if (this.bodyNode === startNode) {
+            if (this.Editor.Body === startNode) {
                 call(callData);
             }
         }
@@ -246,7 +248,7 @@ class ToolBox {
             tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
         }
         if (node) {
-            while (node !== this.bodyNode) {
+            while (node !== this.Editor.Body) {
                 if (node && node.nodeName && this.objRefs[node.nodeName]) {
                     let objectReference = this.objRefs[node.nodeName];
                     if (objectReference && !objectReference.classList.contains('is-applied')) {

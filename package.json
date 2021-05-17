@@ -1,0 +1,28 @@
+{
+  "name": "wysiwyg_id",
+  "version": "1.0.0",
+  "description": "A simple web word editor (In development).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run",
+    "dev": "webpack --mode development",
+    "build": "webpack"
+  },
+  "keywords": [
+    "word",
+    "editor"
+  ],
+  "author": "Ashish Daulatabad",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.14.2",
+    "@babel/preset-env": "^7.14.2",
+    "babel": "^6.23.0",
+    "babel-loader": "^8.2.2",
+    "webpack": "^5.37.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.7.0"
+  }
+}

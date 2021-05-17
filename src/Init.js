@@ -1,4 +1,8 @@
-var initEditor = function(enableTools) {
+import Editor from './Editor/Editor';
+import { constructSymbolTable } from './CodeFormatting';
+import { initUIMode } from './Mode';
+
+export const initEditor = function(enableTools) {
     let enablingTools = {
         bold: {
             hint: "Bold text",
@@ -157,6 +161,4 @@ var initEditor = function(enableTools) {
         // new ColorPicker(_editor);
     });
     initUIMode();
-
-    window.selections = new Selection();
 };
