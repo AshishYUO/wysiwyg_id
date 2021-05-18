@@ -222,14 +222,21 @@ export default class ToolBox {
         for (let obj in this.objRefs) {
             let tmpRef = this.objRefs[obj];
             tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
+            tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
         }
         if (node) {
             while (node !== this.Editor.Body) {
                 if (node && node.nodeName && this.objRefs[node.nodeName]) {
                     let objectReference = this.objRefs[node.nodeName];
-                    if (objectReference && !objectReference.classList.contains('is-applied')) {
-                        objectReference.classList.add('is-applied');
-                    }
+                    if (objectReference) {
+                        if (objectReference.classList.contains('no-highlight')) {
+                            objectReference.classList.toggle('no-highlight');
+                        }
+                        if (!objectReference.classList.contains('is-applied')) {
+                            objectReference.classList.add('is-applied');
+                        }
+                    } 
+
                 }
                 node = node.parentNode;
             }
