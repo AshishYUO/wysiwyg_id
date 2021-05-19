@@ -60,27 +60,3 @@ export const constructSymbolTable = function(editor, start, end, type) {
         }
     }
 };
-
-
-// var getKeyword = (str) => {
-//     let keyword = /(\s)(int|float|double|long|short|function|def|auto|for|while|if|else|using|def|struct|let|public|private|protected|default|interface|return|of)(\s)/g;
-//     let functype = /(\.?)([a-zA-Z][\da-zA-Z]*)(\(.*\))/g;
-//     let strings = /(\&quot;.*\&quot;|\&\#39;.*\&\#39;)/g;
-//     let strng = /(\".*\"|\'.*\')/g;
-//     let numbers = /(\s)(\d+)(\s)/g;
-//     // let operator = /(\+|\-|\*|\/|\&|\|\%|\^|\|\||\&\&|\*\*|\=)/g;
-//     return str.replace('&', '&amp;')
-//               .replace('<', '&lt;')
-//               .replace('>', '&gt;')
-//               .replace('"', '&quot;')
-//               .replace("'", '&#39;')
-//               .replace("/", '&#x2F;')
-//               .replace(strng, '<span style="color: #abee54">$1</span>')
-//               .replace(functype, '$1<span style=\'color: #1493ef\'>$2</span>$3')
-//               .replace(keyword, '$1<span style="color: #ab99ed">$2</span>$3')
-              
-//         // .replace(functype, '<span style=\'color: #1493ef\'>$1</span>$2')
-              
-//             //   .replace(operator, '<span style=\'color: #a36632\'>$1</span>');
-
-// }

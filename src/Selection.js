@@ -64,9 +64,9 @@ export default class Selection {
         let selection = this.getSelection();
         if (selection) {
             return {
-                startNode: selection.anchorNode,
+                startNode: selection.getRangeAt(0).startContainer,
                 startOffset: selection.anchorOffset,
-                endNode: selection.focusNode,
+                endNode: selection.getRangeAt(0).endContainer,
                 endOffset: selection.focusOffset
             };
         }

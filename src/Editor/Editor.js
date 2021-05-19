@@ -116,22 +116,40 @@ export default class Editor {
     }
 
     addBlock(detail) {
+        let getParentBlockNode = function(node) {
+            let temp = node;
+            while (!isABlockNode(temp)) {
+                temp = temp.parentNode;
+            }
+            return temp;
+        }
+
         let NodeType = detail.nodeName;
         let Info = selections.getSelectionInfo();
         let parentStart = Info.startNode, parentEnd = Info.endNode;
         let isTextSelected = selections.getSelection().toString().length > 0;
         if (parentStart) {
-            let temp = parentStart;
-            while (!isABlockNode(temp)) {
-                temp = temp.parentNode;
+            let tempStartNode = getParentBlockNode(parentStart), tempEndNode = getParentBlockNode(parentEnd);
+            let caretNewNodeStart;//  = this.getCaretNode(tempStartNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+            let caretNewNodeEnd;// = this.getCaretNode(tempEndNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
+            let Node = tempStartNode;
+            while (Node && Node != tempEndNode) {
+                let nextNode = Node.nextSibling;
+                let newNode = document.createElement(Node.nodeName == NodeType ? "DIV" : NodeType);
+                newNode.innerHTML = Node.innerHTML;
+                if (Node === tempStartNode) {
+                    caretNewNodeStart = this.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+                }
+                Node.parentNode.replaceChild(newNode, Node);
+                Node = nextNode;
             }
+            let newNode = document.createElement(Node.nodeName == NodeType ? "DIV" : NodeType);
+            newNode.innerHTML = Node.innerHTML;
+            caretNewNodeEnd = this.getCaretNode(newNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
+            Node.parentNode.replaceChild(newNode, Node);
 
-            let Node = document.createElement(temp.nodeName == NodeType ? "DIV" : NodeType);
-            Node.innerHTML = temp.innerHTML;
-            let caretNewNodeStart = this.getCaretNode(Node, temp, parentStart, (parentStart.nodeName == "#text"));
-            let caretNewNodeEnd = this.getCaretNode(Node, temp, parentEnd, (parentEnd.nodeName == "#text"));
-
-            temp.parentNode.replaceChild(Node, temp);
+            // let caretNewNodeStart = this.getCaretNode(tempStartNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+            // let caretNewNodeEnd = this.getCaretNode(tempEndNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
             selections.setSelectionAt({
                 startNode: caretNewNodeStart || Node,
                 startOffset: Info.startOffset,
