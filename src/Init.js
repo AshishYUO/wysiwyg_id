@@ -24,12 +24,12 @@ export const initEditor = function(enableTools) {
         subscript: {
             hint: 'Subscript',
             classname: 'subscript',
-            display: 'H<sub>2</sub>O'
+            display: 'x<sub>2</sub>'
         },
         superscript: {
             hint: 'Superscript',
             classname: 'superscript',
-            display: '1<sup>st</sup>'
+            display: 'x<sup>2</sup>'
         },
         blockquote: {
             hint: 'Blockquote',

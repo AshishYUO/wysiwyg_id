@@ -23,9 +23,7 @@ export default class ToolBox {
         this.bold = Node.getElementsByClassName('bold')[0];
         this.bold && (this.bold.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "bold",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "bold"
             });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
@@ -33,9 +31,7 @@ export default class ToolBox {
         this.italic = Node.getElementsByClassName('italic')[0];
         this.italic && (this.italic.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "italic",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "italic"
             });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
@@ -43,9 +39,7 @@ export default class ToolBox {
         this.underline = Node.getElementsByClassName('underline')[0];
         this.underline && (this.underline.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "underline",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "underline"
             });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
@@ -53,20 +47,16 @@ export default class ToolBox {
         this.subs = Node.getElementsByClassName('subscript')[0];
         this.subs && (this.subs.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "subscript",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "subscript"
             });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.sups = Node.getElementsByClassName('superscript')[0];
         this.sups && (this.sups.onclick = (event) => this.applyTools(function (event) {
-            this.Editor.addInline(new CustomEvent("add_inline", { 
-                "cmd": "superscript", 
-                "showDef": undefined, 
-                "valArg": undefined
-            }));
+            this.Editor.addInline({ 
+                cmd: "superscript"
+            });
             this.formatsOnCurrentCaret();
         }.bind(this), event));
 
@@ -79,9 +69,8 @@ export default class ToolBox {
         this.hr = Node.getElementsByClassName('hr')[0];
         this.hr && (this.hr.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "insertHTML",
-                "showDef": undefined,
-                "valArg": "<hr class=\"hline edit-paragraph\" style=\"width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;\" />"
+                cmd: "insertHTML",
+                valArg: "<hr class=\"hline edit-paragraph\" style=\"width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;\" />"
             });
         }.bind(this), event));
 
@@ -90,18 +79,17 @@ export default class ToolBox {
             let parent = selections.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
                 this.Editor.addInline({
-                    "cmd": "unlink",
-                    "showDef": false,
-                    "valArg": undefined
+                    cmd: "unlink",
+                    showDef: false,
                 });
             } else {
                 let url = prompt("Enter the URL");
                 console.log(url);
                 if (url) {
                     this.Editor.addInline({
-                        "cmd": "createLink",
-                        "showDef": false,
-                        "valArg": url
+                        cmd: "createLink",
+                        showDef: false,
+                        valArg: url
                     });
                 } else {
                     alert("Please enter the link");
@@ -126,36 +114,28 @@ export default class ToolBox {
         this.AlignLeft = Node.getElementsByClassName("align-left")[0];
         this.AlignLeft && (this.AlignLeft.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "justifyLeft",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "justifyLeft"
             });
         }.bind(this), event));
 
         this.AlignRight = Node.getElementsByClassName("align-right")[0];
         this.AlignRight && (this.AlignRight.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "justifyRight",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "justifyRight"
             });
         }.bind(this), event));
 
         this.AlignCenter = Node.getElementsByClassName("align-center")[0];
         this.AlignCenter && (this.AlignCenter.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "justifyCenter",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "justifyCenter"
             });
         }.bind(this), event));
 
         this.Justify = Node.getElementsByClassName("align-justify")[0];
         this.Justify && (this.Justify.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
-                "cmd": "justifyFull",
-                "showDef": undefined,
-                "valArg": undefined
+                cmd: "justifyFull"
             });
         }.bind(this), event));
 
@@ -235,8 +215,7 @@ export default class ToolBox {
                         if (!objectReference.classList.contains('is-applied')) {
                             objectReference.classList.add('is-applied');
                         }
-                    } 
-
+                    }
                 }
                 node = node.parentNode;
             }

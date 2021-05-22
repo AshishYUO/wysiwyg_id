@@ -47,8 +47,8 @@ export default class Selection {
         let selection = this.getSelection();
         selection.removeAllRanges();
         let NewRange = document.createRange();
-        NewRange.setEnd(selectionInfo.endNode, selectionInfo.endOffset);
         NewRange.setStart(selectionInfo.startNode, selectionInfo.startOffset);
+        NewRange.setEnd(selectionInfo.endNode, selectionInfo.endOffset);
         selection.addRange(NewRange);
     }
 
@@ -60,14 +60,22 @@ export default class Selection {
             return selection.anchorNode;
     }
 
+    getCommonParentFromCurrentSelection() {
+        let currentSelection = this.getSelection();
+        if (currentSelection) {
+            let range = currentSelection.getRangeAt(0);
+            return range.commonAncestorContainer;
+        }
+    }
+
     getSelectionInfo() {
         let selection = this.getSelection();
         if (selection) {
             return {
                 startNode: selection.getRangeAt(0).startContainer,
-                startOffset: selection.anchorOffset,
+                startOffset: selection.getRangeAt(0).startOffset,
                 endNode: selection.getRangeAt(0).endContainer,
-                endOffset: selection.focusOffset
+                endOffset: selection.getRangeAt(0).endOffset
             };
         }
     }

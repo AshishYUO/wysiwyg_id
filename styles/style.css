@@ -46,8 +46,6 @@
 .bodyeditable {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     outline: none;
-    min-height: 100px;
-    max-height: 400px;
     border-bottom-left-radius: 1px;
     border-bottom-right-radius: 1px;
     padding: 2.45%;
@@ -56,6 +54,15 @@
     background: var(--bg-color);
     color: var(--clr-color);
     overflow-y: scroll;
+}
+.bodyeditable::-webkit-scrollbar {
+    border-radius: 2px;
+    width: 8px;
+}
+.bodyeditable::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+    width: 8px;
 }
 .bodyeditable pre {
     font-size: 110%;

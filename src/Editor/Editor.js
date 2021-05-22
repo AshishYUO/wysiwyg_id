@@ -1,6 +1,7 @@
 import Selection from '../Selection';
 import Image from '../Image';
 import ToolBox from '../Toolbox';
+import Block from './Block';
 import { PasteFormattingOptions } from '../CodeFormatting';
 import { isABlockNode, isAnInlineNode } from '../Utils';
 
@@ -10,9 +11,10 @@ export default class Editor {
     constructor(Node) {
         const Toolbox = new ToolBox(Node, this);
         const image = new Image(Node);
+        this.Block = new Block(this);
         this.editorNode = Node;
         this.Body = Node.getElementsByClassName("bodyeditable")[0];
-        this.Body.innerHTML = "<div><br></div>";
+        this.Body.innerHTML = "<P><br></P>";
         this.Body.onpaste = (event) => {
             this.IfBodyIsEmpty();
             if (selections.getSelection().toString().length > 0) {
@@ -61,7 +63,12 @@ export default class Editor {
         });
 
         this.Body.addEventListener("reset_caret", function(event) {
-            selections.setCaretPositionAtNode(this.children[0] || this);
+            if (!this.children || !this.children) {
+                let firstNode = document.createElement('P');
+                firstNode.innerHTML = "<br />";
+                this.appendChild(firstNode);
+            }
+            selections.setCaretPositionAtNode(this.children[0]);
         });
     }
 
@@ -77,15 +84,15 @@ export default class Editor {
                 node.parentNode && node.parentNode.removeChild(node);
                 return;
             }
-            let newNode = document.createElement('DIV');
+            let newNode = document.createElement('P');
             if (node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
                 if (node.nodeName == 'LI' && (node.parentNode && node.parentNode.nodeName != 'OL' && node.parentNode.nodeName != 'UL')) {
-                    newNode = document.createElement('DIV');
+                    newNode = document.createElement('P');
                 } else {
                     newNode = document.createElement(node.nodeName);
                 }
             } else if (node.nodeName == 'DIV' || node.nodeName == 'P') {
-                newNode = document.createElement('DIV');
+                newNode = document.createElement('P');
             }
             let toChange;
             if (PasteFormattingOptions[node.nodeName]) {
@@ -108,6 +115,9 @@ export default class Editor {
         let domRet;
         for (let i = 0, j = 0; i < temp.childNodes.length && j < newNode.childNodes.length; ++i, ++j) {
             domRet = this.getCaretNode(newNode.childNodes[j], temp.childNodes[i], caretNode, isTextNode) || domRet;
+            if (domRet) {
+                return domRet;
+            }
             if (caretNode == temp.childNodes[i]) {
                 return newNode.childNodes[i];
             }
@@ -115,60 +125,8 @@ export default class Editor {
         return domRet;
     }
 
-    addBlock(detail) {
-        let getParentBlockNode = function(node) {
-            let temp = node;
-            while (!isABlockNode(temp)) {
-                temp = temp.parentNode;
-            }
-            return temp;
-        }
-
-        let NodeType = detail.nodeName;
-        let Info = selections.getSelectionInfo();
-        let parentStart = Info.startNode, parentEnd = Info.endNode;
-        let isTextSelected = selections.getSelection().toString().length > 0;
-        if (parentStart) {
-            let tempStartNode = getParentBlockNode(parentStart), tempEndNode = getParentBlockNode(parentEnd);
-            let caretNewNodeStart;//  = this.getCaretNode(tempStartNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
-            let caretNewNodeEnd;// = this.getCaretNode(tempEndNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
-            let Node = tempStartNode;
-            while (Node && Node != tempEndNode) {
-                let nextNode = Node.nextSibling;
-                let newNode = document.createElement(Node.nodeName == NodeType ? "DIV" : NodeType);
-                newNode.innerHTML = Node.innerHTML;
-                if (Node === tempStartNode) {
-                    caretNewNodeStart = this.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
-                }
-                Node.parentNode.replaceChild(newNode, Node);
-                Node = nextNode;
-            }
-            let newNode = document.createElement(Node.nodeName == NodeType ? "DIV" : NodeType);
-            newNode.innerHTML = Node.innerHTML;
-            caretNewNodeEnd = this.getCaretNode(newNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
-            Node.parentNode.replaceChild(newNode, Node);
-
-            // let caretNewNodeStart = this.getCaretNode(tempStartNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
-            // let caretNewNodeEnd = this.getCaretNode(tempEndNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
-            selections.setSelectionAt({
-                startNode: caretNewNodeStart || Node,
-                startOffset: Info.startOffset,
-                endNode: caretNewNodeEnd || Node,
-                endOffset: Info.endOffset
-            });
-            // check whether caret set done properly
-            if (isTextSelected) {
-                const check = selections.getSelectionInfo();
-                if (check.startNode == check.endNode && check.startOffset == check.endOffset) {
-                    selections.setSelectionAt({
-                        startNode: caretNewNodeEnd || Node,
-                        startOffset: Info.endOffset,
-                        endNode: caretNewNodeStart || Node,
-                        endOffset: Info.startOffset
-                    });
-                }
-            }
-        }
+    addBlock(details) {
+        this.Block.addBlock(details);
     }
 
     focusOnBody() {
@@ -207,7 +165,7 @@ export default class Editor {
 
     IfBodyIsEmpty() {
         if (this.Body.innerHTML == "" || this.Body.innerHTML == "<br>") {
-            this.Body.innerHTML = "<div><br></div>";
+            this.Body.innerHTML = "<P><br></P>";
         }
         this.focusOnBody();
     }
