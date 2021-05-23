@@ -63,9 +63,9 @@ export default class Block {
             Node.parentNode.replaceChild(newNode, Node);
 
             selections.setSelectionAt({
-                startNode: caretNewNodeStart || Node,
+                startNode: caretNewNodeStart,
                 startOffset: Info.startOffset,
-                endNode: caretNewNodeEnd || Node,
+                endNode: caretNewNodeEnd,
                 endOffset: Info.endOffset
             });
         }

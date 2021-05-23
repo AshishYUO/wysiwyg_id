@@ -113,7 +113,8 @@ export default class Editor {
 
     getCaretNode(newNode, temp, caretNode, isTextNode) {
         let domRet;
-        for (let i = 0, j = 0; i < temp.childNodes.length && j < newNode.childNodes.length; ++i, ++j) {
+        let temp_length = temp.childNodes.length, newNode_length = newNode.childNodes.length;
+        for (let i = 0, j = 0; i < temp_length && j < newNode_length; ++i, ++j) {
             domRet = this.getCaretNode(newNode.childNodes[j], temp.childNodes[i], caretNode, isTextNode) || domRet;
             if (domRet) {
                 return domRet;
@@ -122,10 +123,46 @@ export default class Editor {
                 return newNode.childNodes[i];
             }
         }
+        if (caretNode == temp) {
+            return newNode;
+        }
         return domRet;
     }
 
+    traverseAllSelectedTextNodes (startNode, endNode) {
+        if (startNode == endNode) {
+            return [endNode];
+        }
+        while (startNode && startNode.childNodes && startNode.childNodes.length > 0) {
+            startNode = startNode.childNodes[0];
+        }
+        let elem;
+        if (startNode.nodeName == '#text') {
+            elem = [startNode];
+        }
+        if (startNode == endNode) {
+            return elem || [];
+        }
+        while (!startNode.nextSibling && startNode != this.Body) {
+            startNode = startNode.parentNode;
+        }
+        if (startNode != this.Body) {
+            if (elem) {
+                return [...elem, ...this.traverseAllSelectedTextNodes(startNode.nextSibling, endNode)];
+            } else {
+                return this.traverseAllSelectedTextNodes(startNode.nextSibling, endNode);
+            }
+        }
+        return [];
+    }
+
+    getAllTextNodeInsideSelection() {
+        let selection = selections.getSelectionInfo();
+        return this.traverseAllSelectedTextNodes(selection.startNode, selection.endNode);
+    }
+
     addBlock(details) {
+        // console.log(this.getAllTextNodeInsideSelection());
         this.Block.addBlock(details);
     }
 

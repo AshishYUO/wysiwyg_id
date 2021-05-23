@@ -198,26 +198,49 @@ export default class ToolBox {
     }
 
     formatsOnCurrentCaret() {
-        let node = selections.getCurrentNodeFromCaretPosition();
+        let nodeArray = this.Editor.getAllTextNodeInsideSelection();
+        let formatApplied = {
+            B: false,
+            I: false,
+            U: false,
+            SUB: false,
+            SUP: false,
+            H1: false,
+            H2: false,
+            BLOCKQUOTE: false,
+            A: false
+        }
         for (let obj in this.objRefs) {
             let tmpRef = this.objRefs[obj];
             tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
             tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
         }
-        if (node) {
+        for (let node of nodeArray) {
+            for (let formats in formatApplied) {
+                formatApplied[formats] = false;
+            }
             while (node !== this.Editor.Body) {
-                if (node && node.nodeName && this.objRefs[node.nodeName]) {
-                    let objectReference = this.objRefs[node.nodeName];
-                    if (objectReference) {
-                        if (objectReference.classList.contains('no-highlight')) {
-                            objectReference.classList.toggle('no-highlight');
-                        }
-                        if (!objectReference.classList.contains('is-applied')) {
-                            objectReference.classList.add('is-applied');
-                        }
-                    }
+                if (this.objRefs[node.nodeName] && node.nodeName in formatApplied) {
+                    formatApplied[node.nodeName] = true;
                 }
                 node = node.parentNode;
+            }
+            for (let formats in formatApplied) {
+                if (formatApplied[formats] == false) {
+                    delete formatApplied[formats];
+                }
+            }
+            if (Object.keys(formatApplied).length == 0) {
+                break;
+            }
+        }
+        if (Object.keys(formatApplied).length > 0) {
+            for (let format in formatApplied) {
+                if (this.objRefs[format]) {
+                    let tmpRef = this.objRefs[format];
+                    tmpRef && tmpRef.classList && tmpRef.classList.add('is-applied');
+                    tmpRef && tmpRef.classList && tmpRef.classList.remove('no-highlight');
+                }
             }
         }
     }
