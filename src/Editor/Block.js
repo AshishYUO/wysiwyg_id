@@ -19,6 +19,7 @@ export default class Block {
     }
     // Note, this code works on assumption that all block nodes are at same level.
     // and they are not lists.
+    // To do: maintain alignment
     addBlock(details) {
         let NodeType = details.nodeName;
         let Info = selections.getSelectionInfo();
@@ -48,6 +49,10 @@ export default class Block {
                 if (Node === tempStartNode) {
                     caretNewNodeStart = this.Editor.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
                 }
+                // maintaining alignment
+                if (Node.style && Node.style.textAlign) {
+                    newNode.style.textAlign = newNode.style.textAlign;
+                }
                 if (Node.nodeName !== NodeType && Node != newNode) {
                     Node.parentNode.replaceChild(newNode, Node);
                 }
@@ -59,6 +64,9 @@ export default class Block {
             caretNewNodeEnd = this.Editor.getCaretNode(newNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
             if (!caretNewNodeStart) {
                 caretNewNodeStart = this.Editor.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+            }
+            if (Node.style && Node.style.textAlign) {
+                newNode.style.textAlign = Node.style.textAlign;
             }
             Node.parentNode.replaceChild(newNode, Node);
 

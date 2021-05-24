@@ -53,10 +53,9 @@ export const constructSymbolTable = function(editor, start, end, type) {
     }
     let symbol = editor.querySelector(`.${type}`);
     if (symbol) {
-        let tools = document.querySelector('.options')
         symbol.append(table);
         for (let x of symbol.querySelectorAll('.symbol-blocks')) {
-            x.onclick = () => document.execCommand('insertHTML', false, x.innerHTML);
+            x.onclick = (event) => document.execCommand('insertHTML', false, x.innerHTML);
         }
     }
 };

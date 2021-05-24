@@ -57,11 +57,6 @@ export default class Editor {
             Toolbox.formatsOnCurrentCaret();
         }.bind(this);
 
-        this.Body.addEventListener("add_inline", function (event) {
-            let { cmd, valArg } = event.detail;
-            document.execCommand(cmd, false, valArg);
-        });
-
         this.Body.addEventListener("reset_caret", function(event) {
             if (!this.children || !this.children) {
                 let firstNode = document.createElement('P');
@@ -71,13 +66,13 @@ export default class Editor {
             selections.setCaretPositionAtNode(this.children[0]);
         });
     }
-
+    // Incomplete, add better inline.
     addInline(details) {
         let { cmd, valArg } = details;
         document.execCommand(cmd, false, valArg);
     }
     
-    // Incomplete: if at least one of the child is a block node, take it out from there.
+    // Incomplete: pasted text should have all block/list nodes in one level.
     clearNode(node) {
         if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
             if (isAnInlineNode(node) && node.innerText == "") {

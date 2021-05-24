@@ -116,6 +116,7 @@ export default class ToolBox {
             this.Editor.addInline({
                 cmd: "justifyLeft"
             });
+            this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.AlignRight = Node.getElementsByClassName("align-right")[0];
@@ -123,6 +124,7 @@ export default class ToolBox {
             this.Editor.addInline({
                 cmd: "justifyRight"
             });
+            this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.AlignCenter = Node.getElementsByClassName("align-center")[0];
@@ -130,13 +132,15 @@ export default class ToolBox {
             this.Editor.addInline({
                 cmd: "justifyCenter"
             });
+            this.formatsOnCurrentCaret();
         }.bind(this), event));
 
-        this.Justify = Node.getElementsByClassName("align-justify")[0];
-        this.Justify && (this.Justify.onclick = (event) => this.applyTools(function (event) {
+        this.AlignJustify = Node.getElementsByClassName("align-justify")[0];
+        this.AlignJustify && (this.AlignJustify.onclick = (event) => this.applyTools(function (event) {
             this.Editor.addInline({
                 cmd: "justifyFull"
             });
+            this.formatsOnCurrentCaret();
         }.bind(this), event));
 
         this.unorderedList = Node.getElementsByClassName("ulist")[0];
@@ -176,8 +180,19 @@ export default class ToolBox {
         }.bind(this), event));
 
         this.objRefs = {
-            "B": this.bold, "STRONG": this.bold, "I": this.italic, "EM": this.italic, "U": this.underline, "SUB": this.subs, "SUP": this.sups,
-            "BLOCKQUOTE": this.quote, "A": this.anchor, "H1": this.header1, "H2": this.header2
+            B: this.bold, 
+            STRONG: this.bold, 
+            I: this.italic, 
+            EM: this.italic, 
+            U: this.underline, 
+            SUB: this.subs, 
+            SUP: this.sups,
+            BLOCKQUOTE: this.quote, 
+            A: this.anchor, 
+            H1: this.header1, 
+            H2: this.header2, 
+            UL : this.unorderedList, 
+            OL: this.orderedList
         }
     }
 
@@ -208,14 +223,26 @@ export default class ToolBox {
             H1: false,
             H2: false,
             BLOCKQUOTE: false,
-            A: false
+            A: false,
+            OL: false,
+            UL: false
         }
+        let Align = false;
+        let size = 11;
         for (let obj in this.objRefs) {
             let tmpRef = this.objRefs[obj];
             tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
             tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
         }
+        for (let alignType of ["Left", "Right", "Center", "Justify"]) {
+            let tmpRef = this[`Align${alignType}`];
+            tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
+            tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
+        }
         for (let node of nodeArray) {
+            if (Align !== undefined) {
+                Align = false;
+            }
             for (let formats in formatApplied) {
                 formatApplied[formats] = false;
             }
@@ -223,18 +250,25 @@ export default class ToolBox {
                 if (this.objRefs[node.nodeName] && node.nodeName in formatApplied) {
                     formatApplied[node.nodeName] = true;
                 }
+                if (node.style && node.style.textAlign) {
+                    Align = node.style.textAlign;
+                }
                 node = node.parentNode;
             }
             for (let formats in formatApplied) {
                 if (formatApplied[formats] == false) {
                     delete formatApplied[formats];
+                    --size;
                 }
             }
-            if (Object.keys(formatApplied).length == 0) {
+            if (size == 0) {
                 break;
+            } 
+            if (Align === false) {
+                Align = undefined;
             }
         }
-        if (Object.keys(formatApplied).length > 0) {
+        if (size > 0) {
             for (let format in formatApplied) {
                 if (this.objRefs[format]) {
                     let tmpRef = this.objRefs[format];
@@ -242,6 +276,15 @@ export default class ToolBox {
                     tmpRef && tmpRef.classList && tmpRef.classList.remove('no-highlight');
                 }
             }
+        }
+        if (Align !== undefined) {
+            const capitalize = (s) => {
+                if (typeof s !== 'string') return ''
+                return s.charAt(0).toUpperCase() + s.slice(1)
+            }
+            let tmpRef = this[`Align${capitalize(Align)}`];
+            tmpRef && tmpRef.classList && tmpRef.classList.add('is-applied');
+            tmpRef && tmpRef.classList && tmpRef.classList.remove('no-highlight');
         }
     }
 };

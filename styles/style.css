@@ -44,7 +44,7 @@
     transition: background 0.2s ease-out;
 }
 .bodyeditable {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: sans-serif;
     outline: none;
     border-bottom-left-radius: 1px;
     border-bottom-right-radius: 1px;
