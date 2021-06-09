@@ -111,7 +111,7 @@ export const initEditor = function(enableTools) {
     if (!Array.isArray(enableTools)) {
         enableTools = [["bold", "italic", "underline", "subscript", "superscript"], 
                        ["blockquote", "header1", "header2"],
-                       ["unorderedList", "orderedList"],
+                       // ["unorderedList", "orderedList"],
                        ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
                        ["math", "currency"],
                         ["link", "image"]];
@@ -120,7 +120,7 @@ export const initEditor = function(enableTools) {
             if (!Array.isArray(array)) {
                 enableTools = [["bold", "italic", "underline", "subscript", "superscript"],
                     ["blockquote", "header1", "header2"],
-                    ["unorderedList", "orderedList"],
+                    // ["unorderedList", "orderedList"],
                     ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
                     ["link", "image"]];
                 break;

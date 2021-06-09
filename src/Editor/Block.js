@@ -1,4 +1,5 @@
 import Selection from '../Selection';
+import { isABlockNode } from '../Utils';
 const selections = new Selection();
 
 export default class Block {
@@ -7,7 +8,7 @@ export default class Block {
     }
 
     isABlockNode(node) {
-        return node && node.nodeName && node.nodeName.match(/H[1-6]/) || node.nodeName.match(/^(BLOCKQUOTE|DIV|PRE|P|DL|ADDRESS|IMG|LI|TABLE|TR)$/);
+        return node && node.nodeName && node.nodeName.match(/H[1-6]/i) || node.nodeName.match(/^(BLOCKQUOTE|DIV|PRE|P|DL|ADDRESS|IMG|LI|TABLE|TR)$/i);
     }
 
     getParentBlockNode(node) {
@@ -17,41 +18,59 @@ export default class Block {
         }
         return temp;
     }
+
+    getAllBlockNodesInCurrentSelection() {
+        let currentSelection = selections.getSelectionInfo();
+        let { startNode, endNode } = currentSelection;
+        let startBlockNode = this.getParentBlockNode(startNode), endBlockNode = this.getParentBlockNode(endNode);
+        // Assumption that the nodes are at a same level, and lists are not included.
+        let nodeTraversal = startBlockNode, blockNodes = [];
+        while (nodeTraversal && nodeTraversal != endBlockNode) {
+            blockNodes.push(nodeTraversal);
+            nodeTraversal = nodeTraversal.nextSibling;
+        }
+        if (nodeTraversal) {
+            blockNodes.push(nodeTraversal)
+        }
+        return blockNodes;
+    }
+
     // Note, this code works on assumption that all block nodes are at same level.
     // and they are not lists.
-    // To do: maintain alignment
     addBlock(details) {
         let NodeType = details.nodeName;
         let Info = selections.getSelectionInfo();
         let parentStart = Info.startNode, parentEnd = Info.endNode;
 
         if (parentStart) {
-            let tempStartNode = this.getParentBlockNode(parentStart), tempEndNode = this.getParentBlockNode(parentEnd);
-            let caretNewNodeStart, caretNewNodeEnd;
-            let Node = tempStartNode;
-            while (Node && Node != tempEndNode && Node.nodeName == tempStartNode.nodeName) {
+            let blockStartNode = this.getParentBlockNode(parentStart), blockEndNode = this.getParentBlockNode(parentEnd);
+            let newStartNode, newEndNode;
+            let Node = blockStartNode;
+            while (Node && Node != blockEndNode && Node.nodeName == blockStartNode.nodeName) {
                 Node = Node.nextSibling;
             }
-            if (Node == tempEndNode) {
-                if (Node.nodeName == tempStartNode.nodeName) {
+            if (Node == blockEndNode) {
+                if (Node.nodeName == blockStartNode.nodeName) {
                     NodeType = Node.nodeName == NodeType ? "P" : NodeType;
                 }
             }
-            Node = tempStartNode;
-            while (Node && Node != tempEndNode) {
+            Node = blockStartNode;
+            while (Node && Node != blockEndNode) {
                 let nextNode = Node.nextSibling, newNode;
                 if (Node.nodeName !== NodeType) {
                     newNode = document.createElement(NodeType);
-                    newNode.innerHTML = Node.innerHTML;
+                    while (Node.childNodes.length > 0) {
+                        newNode.appendChild(Node.childNodes[0]);
+                    }
                 } else {
                     newNode = Node;
                 }
-                if (Node === tempStartNode) {
-                    caretNewNodeStart = this.Editor.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+                if (Node === blockStartNode) {
+                    newStartNode = newNode;
                 }
                 // maintaining alignment
                 if (Node.style && Node.style.textAlign) {
-                    newNode.style.textAlign = newNode.style.textAlign;
+                    newNode.style.textAlign = Node.style.textAlign;
                 }
                 if (Node.nodeName !== NodeType && Node != newNode) {
                     Node.parentNode.replaceChild(newNode, Node);
@@ -60,20 +79,30 @@ export default class Block {
             }
             
             let newNode = document.createElement(NodeType);
-            newNode.innerHTML = Node.innerHTML;
-            caretNewNodeEnd = this.Editor.getCaretNode(newNode, tempEndNode, parentEnd, (parentEnd.nodeName == "#text"));
-            if (!caretNewNodeStart) {
-                caretNewNodeStart = this.Editor.getCaretNode(newNode, tempStartNode, parentStart, (parentStart.nodeName == "#text"));
+            while (Node.childNodes.length > 0) {
+                newNode.appendChild(Node.childNodes[0]);
             }
             if (Node.style && Node.style.textAlign) {
                 newNode.style.textAlign = Node.style.textAlign;
             }
+            if (Node === blockEndNode) {
+                newEndNode = newNode;
+            }
+            if (newStartNode === undefined && blockStartNode == blockEndNode) {
+                newStartNode = newEndNode;
+            }
             Node.parentNode.replaceChild(newNode, Node);
-
+            // probably at start.
+            if (isABlockNode(Info.startNode) && Info.startOffset == 0) {
+                Info.startNode = newStartNode;
+            }
+            if (isABlockNode(Info.endNode) && Info.endOffset == 0) {
+                Info.endNode = newEndNode;
+            }
             selections.setSelectionAt({
-                startNode: caretNewNodeStart,
+                startNode: Info.startNode,
                 startOffset: Info.startOffset,
-                endNode: caretNewNodeEnd,
+                endNode: Info.endNode,
                 endOffset: Info.endOffset
             });
         }

@@ -22,12 +22,13 @@ export default class Editor {
             }
             let data = (event.clipboardData || window.clipboardData).getData('text/html');
             if (data.length != 0) {
-                console.log(data);
                 event.preventDefault();
                 let div = document.createElement('DIV');
                 div.innerHTML = data;
                 div.innerHTML = this.clearNode(div).innerHTML;
-                selections.getSelection().getRangeAt(0).insertNode(div);
+                console.log('No paste implemetation yet!');
+                console.log(this.construct(this.getAllTextNodesInsideElement(div)));
+                // selections.getSelection().getRangeAt(0).insertNode(div);
             }
         }
 
@@ -68,10 +69,29 @@ export default class Editor {
     }
     // Incomplete, add better inline.
     addInline(details) {
+        console.log(this.getAllTextNodeInsideSelection());
         let { cmd, valArg } = details;
         document.execCommand(cmd, false, valArg);
     }
     
+    construct(nodeArray) {
+        let parentNode = undefined;
+        let dictionary = [];
+        for (let node of nodeArray) {
+            let temp = node;
+            while (!isABlockNode(temp)) {
+                temp = temp.parentNode;
+            }
+            if (parentNode != temp) {
+                parentNode = temp;
+                dictionary.push({blockParent: parentNode, child: [{node: node}]});
+            } else {
+                dictionary[dictionary.length - 1].child.push(node);
+            }
+        }
+        return dictionary;
+    }
+
     // Incomplete: pasted text should have all block/list nodes in one level.
     clearNode(node) {
         if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
@@ -156,8 +176,14 @@ export default class Editor {
         return this.traverseAllSelectedTextNodes(selection.startNode, selection.endNode);
     }
 
+    getAllTextNodesInsideElement(node) {
+        while (node.childNodes.length == 1) {
+            node = node.childNodes[0];
+        }
+        return this.traverseAllSelectedTextNodes(node.childNodes[0], node.childNodes[node.childNodes.length - 1]);
+    }
+
     addBlock(details) {
-        // console.log(this.getAllTextNodeInsideSelection());
         this.Block.addBlock(details);
     }
 
