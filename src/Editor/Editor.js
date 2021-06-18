@@ -3,7 +3,6 @@ import Image from '../Image';
 import ToolBox from '../Toolbox';
 import Block from './Block';
 import { PasteFormattingOptions } from '../CodeFormatting';
-import { isABlockNode, isAnInlineNode } from '../Utils';
 
 const selections = new Selection();
 
@@ -48,9 +47,15 @@ export default class Editor {
                     startOffset: tab.endOffset,
                     endNode: tab.endNode,
                     endOffset: tab.endOffset
-                })
+                });
             }
             Toolbox.formatsOnCurrentCaret();
+        }.bind(this);
+
+        this.Body.onkeypress = function (event) {
+            if (event.key === "Enter") {
+                this.checkIfDiv();
+            }
         }.bind(this);
 
         this.Body.onkeyup = function (event) {
@@ -73,13 +78,28 @@ export default class Editor {
         let { cmd, valArg } = details;
         document.execCommand(cmd, false, valArg);
     }
+
+    checkIfDiv() {
+        let selection = selections.getSelectionInfo();
+        let Node = selection.startNode;
+        while (!this.Block.isABlockNode(Node) && Node !== this.Body) {
+            Node = Node.parentNode;
+        } 
+        if (Node !== this.Body) {
+            if (Node.nodeName == "DIV") {
+                let x = document.createElement("P");
+                x.innerHTML = Node.innerHTML;
+                Node.parentNode.replaceChild(x, Node);
+            }
+        }
+    }
     
     construct(nodeArray) {
         let parentNode = undefined;
         let dictionary = [];
         for (let node of nodeArray) {
             let temp = node;
-            while (!isABlockNode(temp)) {
+            while (!this.Block.isABlockNode(temp)) {
                 temp = temp.parentNode;
             }
             if (parentNode != temp) {
@@ -205,7 +225,7 @@ export default class Editor {
         let type = details.nodeName;
         let Node = selections.getCurrentNodeFromCaretPosition();
         if (Node) {
-            while (!isABlockNode(Node) && Node.parentNode != this.Body) {
+            while (!this.Block.isABlockNode(Node) && Node.parentNode != this.Body) {
                 Node = Node.parentNode;
             }
             if (Node !== this.Body) {

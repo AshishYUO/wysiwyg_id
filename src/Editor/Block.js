@@ -1,14 +1,14 @@
 import Selection from '../Selection';
-import { isABlockNode } from '../Utils';
 const selections = new Selection();
 
 export default class Block {
     constructor (Editor) {
         this.Editor = Editor;
+        this.blockSet = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "DIV", "PRE", "P", "DL", "ADDRESS", "IMG", "LI", "TABLE", "TR"]);
     }
 
     isABlockNode(node) {
-        return node && node.nodeName && node.nodeName.match(/H[1-6]/i) || node.nodeName.match(/^(BLOCKQUOTE|DIV|PRE|P|DL|ADDRESS|IMG|LI|TABLE|TR)$/i);
+        return this.blockSet.has(node.nodeName);
     }
 
     getParentBlockNode(node) {
@@ -93,10 +93,10 @@ export default class Block {
             }
             Node.parentNode.replaceChild(newNode, Node);
             // probably at start.
-            if (isABlockNode(Info.startNode) && Info.startOffset == 0) {
+            if (this.isABlockNode(Info.startNode) && Info.startOffset == 0) {
                 Info.startNode = newStartNode;
             }
-            if (isABlockNode(Info.endNode) && Info.endOffset == 0) {
+            if (this.isABlockNode(Info.endNode) && Info.endOffset == 0) {
                 Info.endNode = newEndNode;
             }
             selections.setSelectionAt({
