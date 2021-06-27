@@ -48,14 +48,10 @@ export default class Editor {
                     endNode: tab.endNode,
                     endOffset: tab.endOffset
                 });
-            }
-            Toolbox.formatsOnCurrentCaret();
-        }.bind(this);
-
-        this.Body.onkeypress = function (event) {
-            if (event.key === "Enter") {
+            } else if (event.key === "Enter") {
                 this.checkIfDiv();
             }
+            Toolbox.formatsOnCurrentCaret();
         }.bind(this);
 
         this.Body.onkeyup = function (event) {
@@ -88,8 +84,11 @@ export default class Editor {
         if (Node !== this.Body) {
             if (Node.nodeName == "DIV") {
                 let x = document.createElement("P");
-                x.innerHTML = Node.innerHTML;
+                for (let childNode of Node.childNodes) {
+                    x.appendChild(childNode);
+                }
                 Node.parentNode.replaceChild(x, Node);
+                selections.setSelectionAt(selection);
             }
         }
     }
