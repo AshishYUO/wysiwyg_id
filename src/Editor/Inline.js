@@ -17,7 +17,7 @@ export default class Inline {
     insertString(str) {
         const selection = selections.getSelection();
         const startNode = selection.getRangeAt(0).startContainer, startOffset = selection.getRangeAt(0).startOffset;
-        if (selection.toString().length > 0) {
+        if (selection.toString().length) {
             selection.deleteFromDocument();
         }
         if (startNode.nodeName === '#text') {

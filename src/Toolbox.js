@@ -271,7 +271,7 @@ export default class ToolBox {
         if (Object.keys(formatApplied).length) {
             for (const [tagName, boolValue] of Object.entries(formatApplied)) {
                 const elementReference = this.elementReferences[tagName];
-                if (elementReference && elementReference.classList) {
+                if (boolValue && elementReference && elementReference.classList) {
                     elementReference.classList.add('is-applied');
                     elementReference.classList.remove('no-highlight');
                 }

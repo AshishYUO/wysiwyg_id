@@ -40,7 +40,6 @@ export default class Editor {
             if (event.key === 'Tab') {
                 event.preventDefault();
                 this.inline.insertString('\xA0\xA0\xA0\xA0');
-                
             } else if (event.key === 'Enter') {
                 this.checkIfDiv();
             }
@@ -101,7 +100,7 @@ export default class Editor {
                 node.parentNode && node.parentNode.removeChild(node);
                 return;
             }
-            let newNode = document.createElement('P');
+            const newNode = document.createElement('P');
             if (node.nodeName.match(/^H[1-6]$/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
                 if (node.nodeName == 'LI' && (node.parentNode && node.parentNode.nodeName != 'OL' && node.parentNode.nodeName != 'UL')) {
                     newNode = document.createElement('P');
@@ -127,33 +126,33 @@ export default class Editor {
             return newNode;
         }
     }
-
-    traverseAllSelectedTextNodes (startNode, endNode) {
-        if (startNode === endNode) {
-            return [endNode];
+    /**
+     * Retrieve all the text nodes.
+     * @param startNode 
+     * @param endNode 
+     * @returns 
+     */
+    getAllTextNodes(startNode, endNode) {
+        const textNodes = startNode === endNode ? [startNode] : [];
+        while (startNode !== endNode) {
+            while (startNode.nodeName !== '#text') {
+                startNode = startNode.childNodes[0];
+            }
+            textNodes.push(startNode);
+            while (startNode !== this.Body && !startNode.nextSibling) {
+                startNode = startNode.parentNode;
+            }
+            if (startNode === this.Body) {
+                break;
+            }
+            startNode = startNode.nextSibling;
         }
-        while (startNode && startNode.childNodes && startNode.childNodes.length) {
-            startNode = startNode.childNodes[0];
-        }
-        const elem = [];
-        if (startNode.nodeName === '#text') {
-            elem.push(startNode);
-        }
-        if (startNode === endNode) {
-            return elem;
-        }
-        while (!startNode.nextSibling && startNode !== this.Body) {
-            startNode = startNode.parentNode;
-        }
-        if (startNode !== this.Body) {
-            return [...elem, ...this.traverseAllSelectedTextNodes(startNode.nextSibling, endNode)];
-        }
-        return [];
+        return textNodes;
     }
 
     getAllTextNodeInsideSelection() {
         const selection = selections.getSelectionInfo();
-        return this.traverseAllSelectedTextNodes(selection.startNode, selection.endNode);
+        return this.getAllTextNodes(selection.startNode, selection.endNode);
     }
 
     addBlock(details) {

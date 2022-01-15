@@ -4,8 +4,8 @@ import { initUIMode } from './Mode';
 import '../styles/style.css';
 import '../styles/theme.css';
 
-export const initEditor = function(enableTools) {
-    let enablingTools = {
+export const initEditor = enableTools => {
+    const enablingTools = {
         bold: {
             hint: "Bold text",
             classname: 'bold',
@@ -103,7 +103,7 @@ export const initEditor = function(enableTools) {
         }
     }
 
-    let cssLink = document.createElement('LINK');
+    const cssLink = document.createElement('LINK');
     cssLink.setAttribute('rel', 'stylesheet');
     cssLink.setAttribute('href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
     document.head.appendChild(cssLink);
@@ -129,18 +129,17 @@ export const initEditor = function(enableTools) {
         }
     }
 
-    const teditors = document.querySelectorAll('.editor');
-    teditors.forEach(function (_editor) {
+    const allEditorDOM = document.querySelectorAll('.editor');
+    allEditorDOM.forEach(editor => {
         const options = document.createElement('DIV');
         options.classList.add('options');
         const toolbar = document.createElement('span');
 
         enableTools.forEach(toolBatch => {
             for (const toolInfo of toolBatch) {
-                console.log(toolInfo);
-                const { hint, classname, display } = enablingTools[toolInfo], 
-                    toolContainer = document.createElement('span'),
-                    tool = document.createElement('button');
+                const { hint, classname, display } = enablingTools[toolInfo];
+                const toolContainer = document.createElement('span');
+                const tool = document.createElement('button');
 
                 toolContainer.classList.add('tool');
                 tool.classList.add(classname);
@@ -150,7 +149,7 @@ export const initEditor = function(enableTools) {
                 toolContainer.innerHTML = `${tool.outerHTML}`;
                 toolbar.appendChild(toolContainer);
             }
-            if (toolBatch != enableTools[enableTools.length - 1]) {
+            if (toolBatch !== enableTools[enableTools.length - 1]) {
                 const vertical = document.createElement('SPAN');
                 vertical.classList.add('separator');
                 toolbar.appendChild(vertical);
@@ -158,16 +157,15 @@ export const initEditor = function(enableTools) {
         });
 
         options.appendChild(toolbar);
-        _editor.appendChild(options);
+        editor.appendChild(options);
         const body = document.createElement('DIV');
         body.setAttribute('contenteditable', 'true');
         body.classList.add('bodyeditable');
-        _editor.appendChild(body);
+        editor.appendChild(body);
 
-        constructSymbolTable(_editor, 0x2200, 0x22FF, 'math');
-        constructSymbolTable(_editor, 0x20A0, 0x20BF, 'currency');
-        new Editor(_editor);
-        // new ColorPicker(_editor);
+        constructSymbolTable(editor, 0x2200, 0x22FF, 'math');
+        constructSymbolTable(editor, 0x20A0, 0x20BF, 'currency');
+        new Editor(editor);
     });
     initUIMode();
 };
