@@ -23,8 +23,8 @@ export default class Selection {
      * @returns undefined
      */
     setCaretPositionAtNode(newNode) {
-        let selection = this.getSelection();
-        let NewRange = document.createRange();
+        const selection = this.getSelection();
+        const NewRange = document.createRange();
         selection.removeAllRanges();
         NewRange.setStart(newNode, 0);
         selection.addRange(NewRange);
@@ -36,40 +36,41 @@ export default class Selection {
      * @param {*} offset 
      */
     setCaretPositionAtNodeWithOffset(newNode, offset) {
-        let selection = this.getSelection();
+        const selection = this.getSelection();
         selection.removeAllRanges();
-        let NewRange = document.createRange();
+        const NewRange = document.createRange();
         NewRange.setStart(newNode, offset);
         selection.addRange(NewRange);
     }
     
     setSelectionAt(selectionInfo) {
-        let selection = this.getSelection();
+        const selection = this.getSelection();
         selection.removeAllRanges();
-        let NewRange = document.createRange();
+        const NewRange = document.createRange();
         NewRange.setStart(selectionInfo.startNode, selectionInfo.startOffset);
         NewRange.setEnd(selectionInfo.endNode, selectionInfo.endOffset);
         selection.addRange(NewRange);
     }
 
     getCurrentNodeFromCaretPosition(selectionObj) {
-        let selection = selectionObj || this.getSelection();
-        if (selection.anchorNode && selection.anchorNode.nodeName === '#text')
+        const selection = selectionObj || this.getSelection();
+        if (selection.anchorNode && selection.anchorNode.nodeName === '#text') {
             return selection.anchorNode.parentNode;
-        else
+        } else {
             return selection.anchorNode;
+        }
     }
 
     getCommonParentFromCurrentSelection() {
-        let currentSelection = this.getSelection();
+        const currentSelection = this.getSelection();
         if (currentSelection) {
-            let range = currentSelection.getRangeAt(0);
+            const range = currentSelection.getRangeAt(0);
             return range.commonAncestorContainer;
         }
     }
 
     getSelectionInfo() {
-        let selection = this.getSelection();
+        const selection = this.getSelection();
         if (selection) {
             return {
                 startNode: selection.getRangeAt(0).startContainer,

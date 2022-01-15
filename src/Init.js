@@ -66,22 +66,22 @@ export const initEditor = function(enableTools) {
             classname: 'link',
             display: '<i class="fa fa-link"></i>'
         },
-        alignLeft: {
+        'align-left': {
             hint: 'Align text left',
             classname: 'align-left',
             display: '<i class="fa fa-align-left" aria-hidden="true"></i>'
         },
-        alignRight: {
+        'align-right': {
             hint: 'Align text right',
             classname: 'align-right',
             display: '<i class="fa fa-align-right" aria-hidden="true"></i>'
         },
-        alignCenter: {
+        'align-center': {
             hint: 'Align text center',
             classname: 'align-center',
             display: '<i class="fa fa-align-center" aria-hidden="true"></i>'
         },
-        alignJustify: {
+        'align-justify': {
             hint: 'Justify text',
             classname: 'align-justify',
             display: '<i class="fa fa-align-justify" aria-hidden="true"></i>'
@@ -109,34 +109,36 @@ export const initEditor = function(enableTools) {
     document.head.appendChild(cssLink);
 
     if (!Array.isArray(enableTools)) {
-        enableTools = [["bold", "italic", "underline", "subscript", "superscript"], 
-                       ["blockquote", "header1", "header2"],
-                       // ["unorderedList", "orderedList"],
-                       ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
-                       ["math", "currency"],
-                        ["link", "image"]];
+        enableTools = [['bold', 'italic', 'underline', 'subscript', 'superscript'], 
+            ['blockquote', 'header1', 'header2'],
+            // ['unorderedList', 'orderedList'],
+            ['align-left', 'align-right', 'align-center', 'align-justify'],
+            ['math', 'currency'],
+            ['link', 'image']];
     } else {
-        for (let array of enableTools) {
-            if (!Array.isArray(array)) {
-                enableTools = [["bold", "italic", "underline", "subscript", "superscript"],
-                    ["blockquote", "header1", "header2"],
-                    // ["unorderedList", "orderedList"],
-                    ["alignLeft", "alignRight", "alignCenter", "alignJustify"],
-                    ["link", "image"]];
+        for (const toolsArray of enableTools) {
+            if (!Array.isArray(toolsArray)) {
+                enableTools = [['bold', 'italic', 'underline', 'subscript', 'superscript'], 
+                    ['blockquote', 'header1', 'header2'],
+                    // ['unorderedList', 'orderedList'],
+                    ['align-left', 'align-right', 'align-center', 'align-justify'],
+                    ['math', 'currency'],
+                    ['link', 'image']];
                 break;
             }
         }
     }
 
-    let teditors = document.querySelectorAll('.editor');
+    const teditors = document.querySelectorAll('.editor');
     teditors.forEach(function (_editor) {
-        let options = document.createElement('DIV');
+        const options = document.createElement('DIV');
         options.classList.add('options');
-        let toolbar = document.createElement('span');
+        const toolbar = document.createElement('span');
 
-        enableTools.forEach(function (toolBatch) {
-            for (let toolInfo of toolBatch) {
-                let { hint, classname, display } = enablingTools[toolInfo], 
+        enableTools.forEach(toolBatch => {
+            for (const toolInfo of toolBatch) {
+                console.log(toolInfo);
+                const { hint, classname, display } = enablingTools[toolInfo], 
                     toolContainer = document.createElement('span'),
                     tool = document.createElement('button');
 
@@ -149,7 +151,7 @@ export const initEditor = function(enableTools) {
                 toolbar.appendChild(toolContainer);
             }
             if (toolBatch != enableTools[enableTools.length - 1]) {
-                let vertical = document.createElement('SPAN');
+                const vertical = document.createElement('SPAN');
                 vertical.classList.add('separator');
                 toolbar.appendChild(vertical);
             }
@@ -157,7 +159,7 @@ export const initEditor = function(enableTools) {
 
         options.appendChild(toolbar);
         _editor.appendChild(options);
-        let body = document.createElement("DIV");
+        const body = document.createElement('DIV');
         body.setAttribute('contenteditable', 'true');
         body.classList.add('bodyeditable');
         _editor.appendChild(body);

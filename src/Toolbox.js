@@ -4,182 +4,172 @@ const selections = new Selection();
 export default class ToolBox {
     constructor(Node, mainEditor) {
         this.Editor = mainEditor;
-        this.toolbox = Node.getElementsByClassName("options")[0];
-        this.bodyNode = Node.getElementsByClassName("bodyeditable")[0];
-        this.linkContainer = document.createElement("div");
-        this.linkContainer.classList.add("link-container", 'hide');
-        // this.linkInp = document.createElement("input");
-        // this.linkInp.classList.add("link-input");
-        // this.linkInp.setAttribute("type", "text");
-        // this.linkInp.setAttribute("placeholder", "Enter the link.");
-        // this.linkSave = document.createElement("button");
-        // this.linkSave.setAttribute("type", "button");
-        // this.linkSave.classList.add('link-save');
-        // this.linkSave.innerHTML = "Save";
-        // this.linkContainer.append(this.linkInp);
-        // this.linkContainer.append(this.linkSave);
-        // this.toolbox.appendChild(this.linkContainer);
+        this.toolbox = Node.querySelector('.options');
+        this.bodyNode = Node.querySelector('.bodyeditable');
+        this.linkContainer = document.createElement('div');
+        this.linkContainer.classList.add('link-container', 'hide');
 
-        this.bold = Node.getElementsByClassName('bold')[0];
-        this.bold && (this.bold.onclick = (event) => this.applyTools(function (event) {
+        this.bold = Node.querySelector('.bold');
+        this.bold && (this.bold.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "bold"
+                cmd: 'bold'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.italic = Node.getElementsByClassName('italic')[0];
-        this.italic && (this.italic.onclick = (event) => this.applyTools(function (event) {
+        this.italic = Node.querySelector('.italic');
+        this.italic && (this.italic.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "italic"
+                cmd: 'italic'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.underline = Node.getElementsByClassName('underline')[0];
-        this.underline && (this.underline.onclick = (event) => this.applyTools(function (event) {
+        this.underline = Node.querySelector('.underline');
+        this.underline && (this.underline.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "underline"
+                cmd: 'underline'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.subs = Node.getElementsByClassName('subscript')[0];
-        this.subs && (this.subs.onclick = (event) => this.applyTools(function (event) {
+        this.subs = Node.querySelector('.subscript');
+        this.subs && (this.subs.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "subscript"
+                cmd: 'subscript'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.sups = Node.getElementsByClassName('superscript')[0];
-        this.sups && (this.sups.onclick = (event) => this.applyTools(function (event) {
+        this.sups = Node.querySelector('.superscript');
+        this.sups && (this.sups.onclick = event => this.applyTools(event => {
             this.Editor.addInline({ 
-                cmd: "superscript"
+                cmd: 'superscript'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.quote = Node.getElementsByClassName("blockquote")[0];
-        this.quote && (this.quote.onclick = (event) => this.applyTools(function (event) {
-            this.Editor.addBlock({ nodeName: "BLOCKQUOTE" });
+        this.quote = Node.querySelector('.blockquote');
+        this.quote && (this.quote.onclick = event => this.applyTools(event => {
+            this.Editor.addBlock({ nodeName: 'BLOCKQUOTE' });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.hr = Node.getElementsByClassName('hr')[0];
-        this.hr && (this.hr.onclick = (event) => this.applyTools(function (event) {
+        this.hr = Node.querySelector('.hr');
+        this.hr && (this.hr.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "insertHTML",
-                valArg: "<hr class=\"hline edit-paragraph\" style=\"width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;\" />"
+                cmd: 'insertHTML',
+                valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
             });
-        }.bind(this), event));
+        }, event));
 
-        this.anchor = Node.getElementsByClassName('link')[0];
-        this.anchor && (this.anchor.onclick = (event) => this.applyTools(function (event) {
-            let parent = selections.getCurrentNodeFromCaretPosition();
+        this.anchor = Node.querySelector('.link');
+        this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
+            const parent = selections.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
                 this.Editor.addInline({
                     cmd: "unlink",
                     showDef: false,
                 });
             } else {
-                let url = prompt("Enter the URL");
+                const url = prompt('Enter the URL');
                 console.log(url);
                 if (url) {
                     this.Editor.addInline({
-                        cmd: "createLink",
+                        cmd: 'createLink',
                         showDef: false,
                         valArg: url
                     });
                 } else {
-                    alert("Please enter the link");
+                    alert('Please enter the link');
                 }
             }
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.header1 = Node.getElementsByClassName("header-1")[0];
-        this.header1 && (this.header1.onmousedown = (event) => this.applyTools(function (event) {
-            this.Editor.addBlock({ nodeName: "H1" });
-            // this.bodyNode.dispatchEvent(new CustomEvent("add_block", { "detail": "H1" }));
+        this.header1 = Node.querySelector('.header-1');
+        this.header1 && (this.header1.onmousedown = event => this.applyTools(event => {
+            this.Editor.addBlock({ nodeName: 'H1' });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.header2 = Node.getElementsByClassName("header-2")[0];
-        this.header2 && (this.header2.onmousedown = (event) => this.applyTools(function (event) {
-            this.Editor.addBlock({ nodeName: "H2" });
+        this.header2 = Node.querySelector('.header-2');
+        this.header2 && (this.header2.onmousedown = event => this.applyTools(event => {
+            this.Editor.addBlock({ nodeName: 'H2' });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.AlignLeft = Node.getElementsByClassName("align-left")[0];
-        this.AlignLeft && (this.AlignLeft.onclick = (event) => this.applyTools(function (event) {
+        this.Alignleft = Node.querySelector('.align-left');
+        this.Alignleft && (this.Alignleft.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "justifyLeft"
+                cmd: 'justifyLeft'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.AlignRight = Node.getElementsByClassName("align-right")[0];
-        this.AlignRight && (this.AlignRight.onclick = (event) => this.applyTools(function (event) {
+        this.Alignright = Node.querySelector('.align-right');
+        this.Alignright && (this.Alignright.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "justifyRight"
+                cmd: 'justifyRight'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.AlignCenter = Node.getElementsByClassName("align-center")[0];
-        this.AlignCenter && (this.AlignCenter.onclick = (event) => this.applyTools(function (event) {
+        this.Aligncenter = Node.querySelector('.align-center');
+        this.Aligncenter && (this.Aligncenter.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "justifyCenter"
+                cmd: 'justifyCenter'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.AlignJustify = Node.getElementsByClassName("align-justify")[0];
-        this.AlignJustify && (this.AlignJustify.onclick = (event) => this.applyTools(function (event) {
+        this.Alignjustify = Node.querySelector('.align-justify');
+        this.Alignjustify && (this.Alignjustify.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
-                cmd: "justifyFull"
+                cmd: 'justifyFull'
             });
             this.formatsOnCurrentCaret();
-        }.bind(this), event));
+        }, event));
 
-        this.unorderedList = Node.getElementsByClassName("ulist")[0];
-        this.unorderedList && (this.unorderedList.onclick = (event) => this.applyTools(function (event) {
-            this.Editor.addList({ nodeName: "UL" });
-        }.bind(this), event));
+        this.unorderedList = Node.querySelector('.ulist');
+        this.unorderedList && (this.unorderedList.onclick = event => this.applyTools(event => {
+            this.Editor.addList({ nodeName: 'UL' });
+        }, event));
 
-        this.orderedList = Node.getElementsByClassName("olist")[0];
-        this.orderedList && (this.orderedList.onclick = (event) => this.applyTools(function (event) {
-            this.Editor.addList({ nodeName: "OL" });
-        }.bind(this), event));
+        this.orderedList = Node.querySelector('.olist');
+        this.orderedList && (this.orderedList.onclick = event => this.applyTools(event => {
+            this.Editor.addList({ nodeName: 'OL' });
+        }, event));
 
         // Handle math symbols
-        this.mathsymbols = Node.getElementsByClassName('math')[0];
+        this.mathsymbols = Node.querySelector('.math');
+
         this.math_symbol_table = undefined;
-        this.mathsymbols && (this.mathsymbols.onclick = (event) => this.applyTools(function (event) {
-            this.math_symbol_table = this.math_symbol_table || Node.querySelector(".math-table");
+        this.mathsymbols && (this.mathsymbols.onclick = event => this.applyTools(event => {
+            this.math_symbol_table = this.math_symbol_table || Node.querySelector('.math-table');
             if (this.currency_symbol_table && !this.currency_symbol_table.classList.contains('hide')) {
                 this.currency_symbol_table.classList.add('hide');
             }
             this.math_symbol_table.classList.toggle('hide');
             this.math_symbol_table.style.top = `${this.mathsymbols.offsetTop + 50}px`;
             this.math_symbol_table.style.left = `${this.mathsymbols.offsetLeft - this.math_symbol_table.offsetWidth / 2}px`;
-        }.bind(this), event));
+        }, event));
 
         // Handling currency 
-        this.currencysymbols = Node.getElementsByClassName('currency')[0];
+        this.currencysymbols = Node.querySelector('.currency');
+        
         this.currency_symbol_table = undefined;
-        this.currencysymbols && (this.currencysymbols.onclick = (event) => this.applyTools(function (event) {
-            this.currency_symbol_table = this.currency_symbol_table || Node.querySelector(".currency-table");
+        this.currencysymbols && (this.currencysymbols.onclick = event => this.applyTools(event => {
+            this.currency_symbol_table = this.currency_symbol_table || Node.querySelector('.currency-table');
             if (this.math_symbol_table && !this.math_symbol_table.classList.contains('hide')) {
                 this.math_symbol_table.classList.add('hide');
             }
             this.currency_symbol_table.classList.toggle('hide');
             this.currency_symbol_table.style.top = `${this.currencysymbols.offsetTop + 50}px`;
             this.currency_symbol_table.style.left = `${this.currencysymbols.offsetLeft - this.currency_symbol_table.offsetWidth / 2}px`;
-        }.bind(this), event));
+        }, event));
 
-        this.objRefs = {
+        this.elementReferences = {
             B: this.bold, 
             STRONG: this.bold, 
             I: this.italic, 
@@ -194,16 +184,21 @@ export default class ToolBox {
             UL : this.unorderedList, 
             OL: this.orderedList
         }
+        this.alignment = {
+            left: this.Alignleft,
+            right: this.Alignright,
+            center: this.Aligncenter,
+            justify: this.Alignjustify
+        }
     }
 
     applyTools(call, callData) {
-        this.Editor.IfBodyIsEmpty();
+        this.Editor.ifBodyIsEmpty();
         if (typeof call !== 'function') {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
-            let select = selections.getSelectionInfo();
-            let { startNode } = select;
-            while (startNode !== this.Editor.Body && (startNode.nodeName == '#text' || (startNode.classList && startNode.classList.contains('bodyeditable') === false))) {
+            let { startNode } = selections.getSelectionInfo();
+            while (startNode.parentNode && startNode !== this.Editor.Body) {
                 startNode = startNode.parentNode;
             }
             if (this.Editor.Body === startNode) {
@@ -212,9 +207,25 @@ export default class ToolBox {
         }
     }
 
+    clearAllFormats() {
+        for (const [tagNames, reference] of Object.entries(this.elementReferences)) {
+            if (reference) {
+                reference.classList.remove('is-applied');
+                reference.classList.add('no-highlight');
+            }
+        }
+        for (const [alignment, reference] of Object.entries(this.alignment)) {
+            if (reference) {
+                reference.classList.remove('is-applied');
+                reference.classList.add('no-highlight');
+            }
+        }
+    }
+
     formatsOnCurrentCaret() {
-        let nodeArray = this.Editor.getAllTextNodeInsideSelection();
-        let formatApplied = {
+        const nodeArray = this.Editor.getAllTextNodeInsideSelection();
+        let align = false;
+        const formatApplied = {
             B: false,
             I: false,
             U: false,
@@ -227,64 +238,51 @@ export default class ToolBox {
             OL: false,
             UL: false
         }
-        let Align = false;
-        let size = 11;
-        for (let obj in this.objRefs) {
-            let tmpRef = this.objRefs[obj];
-            tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
-            tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
-        }
-        for (let alignType of ["Left", "Right", "Center", "Justify"]) {
-            let tmpRef = this[`Align${alignType}`];
-            tmpRef && tmpRef.classList && tmpRef.classList.remove('is-applied');
-            tmpRef && tmpRef.classList && tmpRef.classList.add('no-highlight');
-        }
-        for (let node of nodeArray) {
-            if (Align !== undefined) {
-                Align = false;
+        this.clearAllFormats();
+        for (const node of nodeArray) {
+            if (align !== undefined) {
+                align = false;
             }
-            for (let formats in formatApplied) {
-                formatApplied[formats] = false;
+            for (const format in formatApplied) {
+                formatApplied[format] = false;
             }
-            while (node !== this.Editor.Body) {
-                if (this.objRefs[node.nodeName] && node.nodeName in formatApplied) {
-                    formatApplied[node.nodeName] = true;
+            let traverse = node;
+            while (traverse !== this.Editor.Body) {
+                if (traverse.nodeName in formatApplied) {
+                    formatApplied[traverse.nodeName] = true;
                 }
-                if (node.style && node.style.textAlign) {
-                    Align = node.style.textAlign;
+                if (traverse.style && traverse.style.textAlign) {
+                    align = traverse.style.textAlign;
                 }
-                node = node.parentNode;
+                traverse = traverse.parentNode;
             }
-            for (let formats in formatApplied) {
-                if (formatApplied[formats] == false) {
+            for (const formats in formatApplied) {
+                if (!formatApplied[formats]) {
                     delete formatApplied[formats];
-                    --size;
                 }
             }
-            if (size == 0) {
+            if (!align) {
+                align = undefined;
+            }
+            if (!Object.keys(formatApplied).length) {
                 break;
-            } 
-            if (Align === false) {
-                Align = undefined;
             }
         }
-        if (size > 0) {
-            for (let format in formatApplied) {
-                if (this.objRefs[format]) {
-                    let tmpRef = this.objRefs[format];
-                    tmpRef && tmpRef.classList && tmpRef.classList.add('is-applied');
-                    tmpRef && tmpRef.classList && tmpRef.classList.remove('no-highlight');
+        if (Object.keys(formatApplied).length) {
+            for (const [tagName, boolValue] of Object.entries(formatApplied)) {
+                const elementReference = this.elementReferences[tagName];
+                if (elementReference && elementReference.classList) {
+                    elementReference.classList.add('is-applied');
+                    elementReference.classList.remove('no-highlight');
                 }
             }
         }
-        if (Align !== undefined) {
-            const capitalize = (s) => {
-                if (typeof s !== 'string') return ''
-                return s.charAt(0).toUpperCase() + s.slice(1)
+        if (align) {
+            const elementReference = this.alignment[align]; 
+            if (elementReference && elementReference.classList) {
+                elementReference.classList.add('is-applied');
+                elementReference.classList.remove('no-highlight');
             }
-            let tmpRef = this[`Align${capitalize(Align)}`];
-            tmpRef && tmpRef.classList && tmpRef.classList.add('is-applied');
-            tmpRef && tmpRef.classList && tmpRef.classList.remove('no-highlight');
         }
     }
 };

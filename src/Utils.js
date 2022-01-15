@@ -3,5 +3,5 @@ export const isABlockNode = function(node) {
 }
 
 export const isAnInlineNode = function(node) {
-    return !isABlockNode(node) && node && node.hasOwnProperty('nodeName') && node.nodeName  && node.nodeName !== 'comment';
+    return !isABlockNode(node) && node && node.hasOwnProperty('nodeName') && node.nodeName && node.nodeName !== 'comment';
 }

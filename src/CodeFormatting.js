@@ -5,8 +5,8 @@ export const PasteFormattingOptions = {
     UL: function (oldNode, newNode) { },
     OL: function (oldNode, newNode) { }, 
     A: function (oldNode, newNode) {
-        for (let attribute of ['href', 'alt', "title"]) {
-            newNode.setAttribute(attribute, oldNode.getAttribute(attribute) || oldNode.getAttribute("href"));
+        for (let attribute of ['href', 'alt', 'title']) {
+            newNode.setAttribute(attribute, oldNode.getAttribute(attribute) || oldNode.getAttribute('href'));
         }
     },
     LI: function (oldNode, newNode) {
@@ -20,7 +20,7 @@ export const PasteFormattingOptions = {
         let node = document.createTextNode(oldNode.innerText);
         // newNode.innerHTML = getKeyword(node.textContent);
         newNode.innerText = node.textContent;
-        newNode.setAttribute("style", "white-space: pre-wrap;");
+        newNode.setAttribute('style', 'white-space: pre-wrap;');
         return 1;
     },
     STRONG: function(oldNode, newNode) { },
@@ -38,13 +38,13 @@ export const PasteFormattingOptions = {
     }
 }
 
-export const constructSymbolTable = function(editor, start, end, type) {
+export const constructSymbolTable = (editor, start, end, type) => {
     var table = document.createElement('DIV');
     table.classList.add('symbol-table')
     table.classList.add(`${type}-table`);
     table.classList.add('hide');
     for (let i = start; i <= end; ++i) {
-        var symbolblock = document.createElement('BUTTON');
+        const symbolblock = document.createElement('BUTTON');
         symbolblock.classList.add('symbol-blocks');
         symbolblock.style.fontFamily = 'Cambria';
         symbolblock.title = `&#${i};`;
