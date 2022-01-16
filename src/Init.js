@@ -162,9 +162,7 @@ export const initEditor = enableTools => {
         body.setAttribute('contenteditable', 'true');
         body.classList.add('bodyeditable');
         editor.appendChild(body);
-
-        // constructSymbolTable(editor, 0x2200, 0x22FF, 'math');
-        // constructSymbolTable(editor, 0x20A0, 0x20BF, 'currency');
+        
         new Editor(editor);
     });
     initUIMode();

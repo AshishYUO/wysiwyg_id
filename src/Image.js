@@ -45,25 +45,32 @@ export default class Image {
      * @param imageElement 
      */
     setImageEvents(imageElement) {
+        const mousemoveOnResizingEvent = event => {
+            event.preventDefault(), this.executeResizingEvent(event);
+        }
         const mouseupEvent = event => {
-            imageElement.removeEventListener('mousemove', this.executeResizingEvent);
             this.setImageEvents(imageElement);
         }
-        const mousemoveEvent = event => {
-            event.preventDefault();
-            this.executeResizingEvent(event);
+
+        const setupResizingEvents = event => {
+            imageElement.focus();
+            const inRange = (value, check) => check >= value - 5 && check <= value + 5;
+            const resizeType = (inRange(event.offsetY, imageElement.height) ? 's' : '') + 
+                            (inRange(event.offsetX, imageElement.width) ? 'e' : '');
+
+            imageElement.style.cursor = resizeType.length ? `${resizeType}-resize` : 'default';
         }
-        imageElement.removeEventListener('mouseup', mouseupEvent);
-        imageElement.onmousemove = this.setupResizingEvents;
-        imageElement.onmousedown = event => {
-            console.log('mouse down', imageElement.style.cursor);
+
+        const imageClickHold = event => {
             if (imageElement.style.cursor !== 'default') {
-                imageElement.removeEventListener('mousemove', this.setupResizingEvents);
-                [ this.offsetX, this.offsetY ] = [event.offsetX, event.offsetY];
-                imageElement.onmousemove = mousemoveEvent;
+                imageElement.onmousemove = mousemoveOnResizingEvent;
                 imageElement.onmouseup = mouseupEvent;
             }
         }
+
+        imageElement.removeEventListener('mouseup', mouseupEvent);
+        imageElement.onmousemove = setupResizingEvents;
+        imageElement.onmousedown = imageClickHold;
     }
 
     executeResizingEvent(event) {
@@ -83,15 +90,6 @@ export default class Image {
         }
     }
 
-    setupResizingEvents(event) {
-        const imageElement = event.target;
-        const inRange = (value, check) => check >= value - 5 && check <= value + 5;
-        const resizeType = inRange(event.offsetY, imageElement.height) ? 's' : '' + 
-                           inRange(event.offsetX, imageElement.width) ? 'e' : '';
-
-        imageElement.style.cursor = resizeType.length ? `${resizeType}-resize` : 'default';
-    }
-
     loadImage(urlStr) {
         const imageNode = document.createElement('img');
         imageNode.setAttribute('src', urlStr);
@@ -101,6 +99,7 @@ export default class Image {
         }
         this.setImageEvents(imageNode);
         imageNode.setAttribute('width', '1000');
+        imageNode.setAttribute('tabindex', '0');
         Node.innerHTML = '';
         Node.appendChild(imageNode);
     }

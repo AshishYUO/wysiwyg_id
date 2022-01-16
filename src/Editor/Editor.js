@@ -18,17 +18,8 @@ export default class Editor {
         const image = new Image(Node);
         this.Body.onpaste = event => {
             this.ifBodyIsEmpty();
-            // if (selections.getSelection().toString().length > 0) {
-            //     selections.getSelection().deleteFromDocument();
-            // }
-            // const data = (event.clipboardData || window.clipboardData).getData('text/html');
-            // if (data.length != 0) {
             event.preventDefault();
-            // const div = document.createElement('DIV');
-            // div.innerHTML = data;
-            // div.innerHTML = this.clearNode(div).innerHTML;
             console.log('No paste implemetation yet!');
-            // }
         }
 
         this.Body.onmouseup = event => {
