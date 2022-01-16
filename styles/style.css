@@ -197,6 +197,9 @@ input[type=range]{
 input[type=range]:focus {
     outline: none;
 }
+img::after {
+    cursor: nw-resize;
+}
 #color-tab {
     color: var(--color-pallet-clr-color);
     padding: 5px;

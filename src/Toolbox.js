@@ -2,6 +2,11 @@ import Selection from './Selection';
 const selections = new Selection();
 
 export default class ToolBox {
+    /**
+     * @details Constructor
+     * @param  Node 
+     * @param  mainEditor 
+     */
     constructor(Node, mainEditor) {
         this.Editor = mainEditor;
         this.mainNode = Node;
@@ -31,7 +36,7 @@ export default class ToolBox {
             this.underline.onclick = event => this.executeCommand({
                 command: 'underline',
                 type: 'inline'
-            })
+            });
         }
 
         this.subs = Node.querySelector('.subscript');
@@ -39,7 +44,7 @@ export default class ToolBox {
             this.subs.onclick = event => this.executeCommand({
                 command: 'subscript',
                 type: 'inline'
-            })
+            });
         }
 
         this.sups = Node.querySelector('.superscript');
@@ -47,7 +52,7 @@ export default class ToolBox {
             this.sups.onclick = event => this.executeCommand({
                 command: 'superscript',
                 type: 'inline'
-            })
+            });
         }
 
         this.quote = Node.querySelector('.blockquote');
@@ -55,7 +60,7 @@ export default class ToolBox {
             this.quote.onclick = event => this.executeCommand({
                 command: 'BLOCKQUOTE',
                 type: 'block'
-            })
+            });
         }
         
         this.hr = Node.querySelector('.hr');
@@ -95,15 +100,15 @@ export default class ToolBox {
             this.header1.onclick = event => this.executeCommand({
                 command: 'H1',
                 type: 'block'
-            })
+            });
         }
 
-        this.header1 = Node.querySelector('.header-1');
-        if (this.header1) {
-            this.header1.onclick = event => this.executeCommand({
-                command: 'H1',
+        this.header2 = Node.querySelector('.header-2');
+        if (this.header2) {
+            this.header2.onclick = event => this.executeCommand({
+                command: 'H2',
                 type: 'block'
-            })
+            });
         }
 
         this.Alignleft = Node.querySelector('.align-left');
@@ -181,7 +186,11 @@ export default class ToolBox {
             justify: this.Alignjustify
         }
     }
-
+    /**
+     * @details Execute command on editor based on mentioned details
+     * @param details object showing details.
+     * @returns none.
+     */
     executeCommand(details) {
         this.applyTools(event => {
             switch(details.type) {

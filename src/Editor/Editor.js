@@ -126,34 +126,7 @@ export default class Editor {
             return newNode;
         }
     }
-    /**
-     * Retrieve all the text nodes.
-     * @param startNode 
-     * @param endNode 
-     * @returns 
-     */
-    getAllTextNodes(startNode, endNode) {
-        const textNodes = startNode === endNode ? [startNode] : [];
-        while (startNode !== endNode) {
-            while (startNode.nodeName !== '#text') {
-                startNode = startNode.childNodes[0];
-            }
-            textNodes.push(startNode);
-            while (startNode !== this.Body && !startNode.nextSibling) {
-                startNode = startNode.parentNode;
-            }
-            if (startNode === this.Body) {
-                break;
-            }
-            startNode = startNode.nextSibling;
-        }
-        return textNodes;
-    }
-
-    getAllTextNodeInsideSelection() {
-        const selection = selections.getSelectionInfo();
-        return this.getAllTextNodes(selection.startNode, selection.endNode);
-    }
+    
 
     addBlock(details) {
         this.Block.addBlock(details);
@@ -161,6 +134,11 @@ export default class Editor {
 
     insertString(str) {
         this.inline.insertString(str);
+    }
+
+    getAllTextNodeInsideSelection() {
+        const selection = selections.getSelectionInfo();
+        return this.inline.getAllTextNodes(selection.startNode, selection.endNode);
     }
 
     focusOnBody() {
