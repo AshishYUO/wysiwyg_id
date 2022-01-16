@@ -136,7 +136,7 @@ export const initEditor = enableTools => {
         const toolbar = document.createElement('span');
 
         enableTools.forEach(toolBatch => {
-            for (const toolInfo of toolBatch) {
+            toolBatch.forEach(toolInfo => {
                 const { hint, classname, display } = enablingTools[toolInfo];
                 const toolContainer = document.createElement('span');
                 const tool = document.createElement('button');
@@ -148,7 +148,7 @@ export const initEditor = enableTools => {
                 tool.innerHTML = display;
                 toolContainer.innerHTML = `${tool.outerHTML}`;
                 toolbar.appendChild(toolContainer);
-            }
+            });
             if (toolBatch !== enableTools[enableTools.length - 1]) {
                 const vertical = document.createElement('SPAN');
                 vertical.classList.add('separator');
@@ -163,8 +163,8 @@ export const initEditor = enableTools => {
         body.classList.add('bodyeditable');
         editor.appendChild(body);
 
-        constructSymbolTable(editor, 0x2200, 0x22FF, 'math');
-        constructSymbolTable(editor, 0x20A0, 0x20BF, 'currency');
+        // constructSymbolTable(editor, 0x2200, 0x22FF, 'math');
+        // constructSymbolTable(editor, 0x20A0, 0x20BF, 'currency');
         new Editor(editor);
     });
     initUIMode();

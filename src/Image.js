@@ -6,47 +6,50 @@ const selections = new Selection();
 export default class Image {
     constructor (Node) {
         this.MainBody = Node;
-        this.ImageButton = Node.getElementsByClassName("image")[0];
-        this.fileElement = document.createElement("input");
-        this.fileElement.setAttribute("type", "file");
+        this.ImageButton = Node.querySelector('.image');
+        this.fileElement = document.createElement('input');
+        this.fileElement.setAttribute('type', 'file');
         this.FileRead = new FileReader();
         this.selection = undefined;
-        this.ImageButton.addEventListener("click", (event) => {
+        this.ImageButton.onclick = event => {
             this.selection = selections.getSelection();
-            let URL = this.selection.toString().trimLeft().trimRight();
-            if (URL.length > 0) 
+            const URL = this.selection.toString().trim();
+            if (URL.length) 
                 if (this.matchesWithExtURL(URL)) {
-                    document.execCommand("insertimage", false, this.selection.toString());
+                    this.loadImage(URL);
                 }
                 else {
-                    alert("Invalid URL");
+                    alert('Invalid URL');
                 }
             else {
                 this.fileElement.click();
             }
-        });
+        };
 
-        this.FileRead.onload = (e) => {
+        this.FileRead.onload = event => {
             if (this.selection) {
-                let imageNode = document.createElement("img");
-                imageNode.setAttribute("src", e.target.result);
-                let Node = selections.getCurrentNodeFromCaretPosition(this.selection);
-                while (!isABlockNode(Node.parentNode)) {
-                    Node = Node.parentNode;
-                }
-                Node.innerHTML = "";
-                Node.appendChild(imageNode);
+                this.loadImage(event.target.result);
             }
         }
 
-        this.fileElement.onchange = (event) => {
-            let image = event.target.files[0];
-            console.log(image);
+        this.fileElement.onchange = event => {
+            const image = event.target.files[0];
             this.FileRead.readAsDataURL(image);
         }
     }
 
-    matchesWithExtURL = (str) => {
+    loadImage(urlStr) {
+        const imageNode = document.createElement('img');
+        imageNode.setAttribute('src', urlStr);
+        const Node = selections.getCurrentNodeFromCaretPosition(this.selection);
+        while (!isABlockNode(Node.parentNode)) {
+            Node = Node.parentNode;
+        }
+        Node.innerHTML = '';
+        Node.appendChild(imageNode);
+    }
+
+    matchesWithExtURL(str){
         return str.match(/https?:\/\/.*/);
     }
 }

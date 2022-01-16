@@ -4,57 +4,60 @@ const selections = new Selection();
 export default class ToolBox {
     constructor(Node, mainEditor) {
         this.Editor = mainEditor;
+        this.mainNode = Node;
         this.toolbox = Node.querySelector('.options');
         this.bodyNode = Node.querySelector('.bodyeditable');
         this.linkContainer = document.createElement('div');
         this.linkContainer.classList.add('link-container', 'hide');
 
         this.bold = Node.querySelector('.bold');
-        this.bold && (this.bold.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
-                cmd: 'bold'
+        if (this.bold) {
+            this.bold.onclick = event => this.executeCommand({
+                command: 'bold',
+                type: 'inline'
             });
-            this.formatsOnCurrentCaret();
-        }, event));
+        }
 
         this.italic = Node.querySelector('.italic');
-        this.italic && (this.italic.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
-                cmd: 'italic'
+        if (this.italic) {
+            this.italic.onclick = event => this.executeCommand({
+                command: 'italic',
+                type: 'inline'
             });
-            this.formatsOnCurrentCaret();
-        }, event));
+        }
 
         this.underline = Node.querySelector('.underline');
-        this.underline && (this.underline.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
-                cmd: 'underline'
-            });
-            this.formatsOnCurrentCaret();
-        }, event));
+        if (this.underline) {
+            this.underline.onclick = event => this.executeCommand({
+                command: 'underline',
+                type: 'inline'
+            })
+        }
 
         this.subs = Node.querySelector('.subscript');
-        this.subs && (this.subs.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
-                cmd: 'subscript'
-            });
-            this.formatsOnCurrentCaret();
-        }, event));
+        if (this.subs) {
+            this.subs.onclick = event => this.executeCommand({
+                command: 'subscript',
+                type: 'inline'
+            })
+        }
 
         this.sups = Node.querySelector('.superscript');
-        this.sups && (this.sups.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({ 
-                cmd: 'superscript'
-            });
-            this.formatsOnCurrentCaret();
-        }, event));
+        if (this.sups) {
+            this.sups.onclick = event => this.executeCommand({
+                command: 'superscript',
+                type: 'inline'
+            })
+        }
 
         this.quote = Node.querySelector('.blockquote');
-        this.quote && (this.quote.onclick = event => this.applyTools(event => {
-            this.Editor.addBlock({ nodeName: 'BLOCKQUOTE' });
-            this.formatsOnCurrentCaret();
-        }, event));
-
+        if (this.quote) {
+            this.quote.onclick = event => this.executeCommand({
+                command: 'BLOCKQUOTE',
+                type: 'block'
+            })
+        }
+        
         this.hr = Node.querySelector('.hr');
         this.hr && (this.hr.onclick = event => this.applyTools(event => {
             this.Editor.addInline({
@@ -88,16 +91,20 @@ export default class ToolBox {
         }, event));
 
         this.header1 = Node.querySelector('.header-1');
-        this.header1 && (this.header1.onmousedown = event => this.applyTools(event => {
-            this.Editor.addBlock({ nodeName: 'H1' });
-            this.formatsOnCurrentCaret();
-        }, event));
+        if (this.header1) {
+            this.header1.onclick = event => this.executeCommand({
+                command: 'H1',
+                type: 'block'
+            })
+        }
 
-        this.header2 = Node.querySelector('.header-2');
-        this.header2 && (this.header2.onmousedown = event => this.applyTools(event => {
-            this.Editor.addBlock({ nodeName: 'H2' });
-            this.formatsOnCurrentCaret();
-        }, event));
+        this.header1 = Node.querySelector('.header-1');
+        if (this.header1) {
+            this.header1.onclick = event => this.executeCommand({
+                command: 'H1',
+                type: 'block'
+            })
+        }
 
         this.Alignleft = Node.querySelector('.align-left');
         this.Alignleft && (this.Alignleft.onclick = event => this.applyTools(event => {
@@ -142,32 +149,15 @@ export default class ToolBox {
         }, event));
 
         // Handle math symbols
-        this.mathsymbols = Node.querySelector('.math');
-
-        this.math_symbol_table = undefined;
-        this.mathsymbols && (this.mathsymbols.onclick = event => this.applyTools(event => {
-            this.math_symbol_table = this.math_symbol_table || Node.querySelector('.math-table');
-            if (this.currency_symbol_table && !this.currency_symbol_table.classList.contains('hide')) {
-                this.currency_symbol_table.classList.add('hide');
-            }
-            this.math_symbol_table.classList.toggle('hide');
-            this.math_symbol_table.style.top = `${this.mathsymbols.offsetTop + 50}px`;
-            this.math_symbol_table.style.left = `${this.mathsymbols.offsetLeft - this.math_symbol_table.offsetWidth / 2}px`;
-        }, event));
-
+        this.math = Node.querySelector('.math');
+        if (this.math) {
+            this.math.onclick = event => this.enableBox(Node, 0x2200, 0x22FF, event);
+        }
         // Handling currency 
-        this.currencysymbols = Node.querySelector('.currency');
-        
-        this.currency_symbol_table = undefined;
-        this.currencysymbols && (this.currencysymbols.onclick = event => this.applyTools(event => {
-            this.currency_symbol_table = this.currency_symbol_table || Node.querySelector('.currency-table');
-            if (this.math_symbol_table && !this.math_symbol_table.classList.contains('hide')) {
-                this.math_symbol_table.classList.add('hide');
-            }
-            this.currency_symbol_table.classList.toggle('hide');
-            this.currency_symbol_table.style.top = `${this.currencysymbols.offsetTop + 50}px`;
-            this.currency_symbol_table.style.left = `${this.currencysymbols.offsetLeft - this.currency_symbol_table.offsetWidth / 2}px`;
-        }, event));
+        this.currency = Node.querySelector('.currency');
+        if (this.currency) {
+            this.currency.onclick = event => this.enableBox(Node, 0x20A0, 0x20BF, event);
+        }
 
         this.elementReferences = {
             B: this.bold, 
@@ -192,6 +182,85 @@ export default class ToolBox {
         }
     }
 
+    executeCommand(details) {
+        this.applyTools(event => {
+            switch(details.type) {
+                case 'inline':
+                    this.Editor.addInline({
+                        cmd: details.command
+                    });
+                    break;
+                case 'block':
+                    this.Editor.addBlock({
+                        nodeName: details.command
+                    });
+                    break;
+                default:
+                    break;
+            }
+            this.formatsOnCurrentCaret();
+        }, details);
+    }
+
+    /**
+     * @details Enable window for selecting special characters.
+     * @param editorNode main editor node
+     * @param startRange range from which these characters start
+     * @param endRange last unicode character value
+     * @param event a callback event data passed.
+     */
+    enableBox(editorNode, startRange, endRange, event) {
+        this.applyTools(event => {
+            if (this.symbolTable) {
+                this.symbolTable.remove();
+            }
+            this.constructSymbolTable(editorNode, startRange, endRange);
+            if (this.symbolTable && !this.symbolTable.classList.contains('hide')) {
+                this.symbolTable.classList.add('hide');
+            }
+            if (this.symbolTable.classList)
+            this.symbolTable.classList.toggle('hide');
+            this.symbolTable.style.top = `${event.target.offsetTop + 50}px`;
+            this.symbolTable.style.left = `${event.target.offsetLeft - this.symbolTable.offsetWidth / 2}px`;
+        }, event);
+    }
+
+    /**
+     * @details Constructs the symbol table.
+     * @param editor main editor node.
+     * @param start start value of unicode character
+     * @param end end value of unicode character.
+     */
+    constructSymbolTable (editor, start, end) {
+        const table = document.createElement('DIV');
+        table.classList.add('symbol-table')
+        table.classList.add('hide');
+        for (let i = start; i <= end; ++i) {
+            const symbolblock = document.createElement('BUTTON');
+            symbolblock.classList.add('symbol-blocks');
+            symbolblock.title = `&#${i};`;
+            symbolblock.innerHTML = `&#${i};`;
+            table.appendChild(symbolblock);
+        }
+        editor.appendChild(table);
+        const symbol = table;
+        this.symbolTable = table;
+        if (symbol) {
+            this.symbolTable = symbol;
+            for (const symbolButtons of symbol.querySelectorAll('.symbol-blocks')) {
+                symbolButtons.onclick = event => {
+                    this.Editor.insertString(symbolButtons.innerHTML);
+                }
+            }
+        }
+    }
+
+    /**
+     * @details checks whether these events are being called from the given editor or 
+     * not.
+     * @param call 
+     * @param callData 
+     */
     applyTools(call, callData) {
         this.Editor.ifBodyIsEmpty();
         if (typeof call !== 'function') {
@@ -207,6 +276,10 @@ export default class ToolBox {
         }
     }
 
+    /**
+     * @details Remove all button highlights for recomputing 
+     * which styles/tags are applied.
+     */
     clearAllFormats() {
         for (const [tagNames, reference] of Object.entries(this.elementReferences)) {
             if (reference) {
@@ -222,6 +295,11 @@ export default class ToolBox {
         }
     }
 
+    /**
+     * @details The code that evaluates what styles are applied
+     * in the current selection. Highlights the format by evaluating
+     * intersection of all styles from a given caret selection.
+     */
     formatsOnCurrentCaret() {
         const nodeArray = this.Editor.getAllTextNodeInsideSelection();
         let align = false;

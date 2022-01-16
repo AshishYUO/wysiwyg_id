@@ -37,25 +37,3 @@ export const PasteFormattingOptions = {
         }
     }
 }
-
-export const constructSymbolTable = (editor, start, end, type) => {
-    var table = document.createElement('DIV');
-    table.classList.add('symbol-table')
-    table.classList.add(`${type}-table`);
-    table.classList.add('hide');
-    for (let i = start; i <= end; ++i) {
-        const symbolblock = document.createElement('BUTTON');
-        symbolblock.classList.add('symbol-blocks');
-        symbolblock.style.fontFamily = 'Cambria';
-        symbolblock.title = `&#${i};`;
-        symbolblock.innerHTML = `&#${i};`;
-        table.appendChild(symbolblock);
-    }
-    let symbol = editor.querySelector(`.${type}`);
-    if (symbol) {
-        symbol.append(table);
-        for (let x of symbol.querySelectorAll('.symbol-blocks')) {
-            x.onclick = (event) => document.execCommand('insertHTML', false, x.innerHTML);
-        }
-    }
-};

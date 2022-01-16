@@ -9,13 +9,13 @@ const selections = new Selection();
 
 export default class Editor {
     constructor(Node) {
-        const Toolbox = new ToolBox(Node, this);
-        const image = new Image(Node);
         this.Block = new Block(this);
         this.inline = new Inline(this);
         this.editorNode = Node;
         this.Body = Node.querySelector('.bodyeditable');
         this.Body.innerHTML = "<P><br></P>";
+        const Toolbox = new ToolBox(Node, this);
+        const image = new Image(Node);
         this.Body.onpaste = event => {
             this.ifBodyIsEmpty();
             // if (selections.getSelection().toString().length > 0) {
@@ -157,6 +157,10 @@ export default class Editor {
 
     addBlock(details) {
         this.Block.addBlock(details);
+    }
+
+    insertString(str) {
+        this.inline.insertString(str);
     }
 
     focusOnBody() {
