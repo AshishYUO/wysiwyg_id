@@ -1,21 +1,24 @@
-import Selection from '../Selection';
+import selection from '../Selection';
 import Image from '../Image';
 import ToolBox from '../Toolbox';
-import Block from './Block';
-import Inline from './Inline';
-import { PasteFormattingOptions } from '../CodeFormatting';
-
-const selections = new Selection();
+import {
+    isABlockNode,
+    addBlock
+} from './Block';
+import {
+    getAllTextNodes,
+    insertString,
+    optimizeNodes
+} from './Inline';
 
 export default class Editor {
     constructor(Node) {
-        this.Block = new Block(this);
-        this.inline = new Inline(this);
         this.editorNode = Node;
         this.Body = Node.querySelector('.bodyeditable');
-        this.Body.innerHTML = "<P><br></P>";
+        this.Body.innerHTML = "";
         const Toolbox = new ToolBox(Node, this);
         const image = new Image(Node);
+        
         this.Body.onpaste = event => {
             this.ifBodyIsEmpty();
             event.preventDefault();
@@ -28,13 +31,15 @@ export default class Editor {
 
         this.Body.onkeydown = event => {
             this.ifBodyIsEmpty();
-            if (event.key === 'Tab') {
-                event.preventDefault();
-                this.inline.insertString('\xA0\xA0\xA0\xA0');
-            } else if (event.key === 'Enter') {
-                this.checkIfDiv();
+            switch(event.key) {
+                case 'Tab':
+                    event.preventDefault();
+                    insertString(this.Body, '\xA0\xA0\xA0\xA0');
+                    break;
+                case 'Enter':
+                    this.checkIfDiv();
+                    break;
             }
-            Toolbox.formatsOnCurrentCaret();
         }
 
         this.Body.onkeyup = event => {
@@ -49,8 +54,10 @@ export default class Editor {
     }
 
     checkIfDiv () {
-        const selection = selections.getSelectionInfo();
-        let node = selection.startNode;
+        const {
+            startNode
+        } = selection.getSelectionInfo();
+        let node = startNode;
         while (node.parentNode !== this.Body) {
             node = node.parentNode;
         } 
@@ -61,27 +68,9 @@ export default class Editor {
                     blockElement.appendChild(childNode);
                 }
                 Node.parentNode.replaceChild(blockElement, node);
-                selections.setSelectionAt(selection);
+                selection.setSelectionAt(selection);
             }
         }
-    }
-    
-    construct (nodeArray) {
-        let parentNode = undefined;
-        const dictionary = [];
-        for (const node of nodeArray) {
-            let temp = node;
-            while (!this.Block.isABlockNode(temp)) {
-                temp = temp.parentNode;
-            }
-            if (parentNode != temp) {
-                parentNode = temp;
-                dictionary.push({blockParent: parentNode, child: [{node: node}]});
-            } else {
-                dictionary[dictionary.length - 1].child.push(node);
-            }
-        }
-        return dictionary;
     }
 
     // Incomplete: pasted text should have all block/list nodes in one level.
@@ -117,26 +106,25 @@ export default class Editor {
             return newNode;
         }
     }
-    
 
-    addBlock(details) {
-        this.Block.addBlock(details);
+    applyBlocks(details) {
+        addBlock(this.Body, details);
     }
 
     insertString(str) {
-        this.inline.insertString(str);
+        insertString(this.Body, str);
     }
 
     getAllTextNodeInsideSelection() {
-        const selection = selections.getSelectionInfo();
-        return this.inline.getAllTextNodes(selection.startNode, selection.endNode);
+        const { startNode, endNode } = selection.getSelectionInfo();
+        return getAllTextNodes(this.Body, startNode, endNode);
     }
 
     focusOnBody() {
         this.Body.focus();
-        const selectionInfo = selections.getSelectionInfo()
+        const selectionInfo = selection.getSelectionInfo()
         if (!selectionInfo) {
-            selections.setSelectionAt({
+            selection.setSelectionAt({
                 startNode: this.Body.children[0],
                 startOffset: 0,
                 endNode: this.Body.children[0],
@@ -145,12 +133,16 @@ export default class Editor {
         }
     }
 
+    /**
+     * @details Perform list operation in a different file.
+     * @param details 
+     */
     addList(details) {
         this.ifBodyIsEmpty();
         const type = details.nodeName;
-        let Node = selections.getCurrentNodeFromCaretPosition();
+        let Node = selection.getCurrentNodeFromCaretPosition();
         if (Node) {
-            while (!this.Block.isABlockNode(Node) && Node.parentNode != this.Body) {
+            while (!isABlockNode(this.Body, Node) && Node.parentNode != this.Body) {
                 Node = Node.parentNode;
             }
             if (Node !== this.Body) {

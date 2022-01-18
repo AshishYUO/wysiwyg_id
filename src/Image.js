@@ -1,7 +1,5 @@
-import Selection from './Selection';
+import selection from './Selection';
 import { isABlockNode } from './Utils';
-
-const selections = new Selection();
 
 export default class Image {
     constructor (Node) {
@@ -11,10 +9,8 @@ export default class Image {
         this.fileElement.setAttribute('type', 'file');
         this.FileRead = new FileReader();
         this.selection = undefined;
-        this.offsetX = null;
-        this.offsetY = null;
         this.ImageButton.onclick = event => {
-            this.selection = selections.getSelection();
+            this.selection = selection.getSelection();
             const URL = this.selection.toString().trim();
             if (URL.length) 
                 if (this.matchesWithExtURL(URL)) {
@@ -93,7 +89,7 @@ export default class Image {
     loadImage(urlStr) {
         const imageNode = document.createElement('img');
         imageNode.setAttribute('src', urlStr);
-        const Node = selections.getCurrentNodeFromCaretPosition(this.selection);
+        const Node = selection.getCurrentNodeFromCaretPosition(this.selection);
         while (!isABlockNode(Node.parentNode)) {
             Node = Node.parentNode;
         }

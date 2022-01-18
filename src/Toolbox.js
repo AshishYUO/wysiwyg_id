@@ -1,5 +1,5 @@
-import Selection from './Selection';
-const selections = new Selection();
+import selection from './Selection';
+import { getIntersectingFormattingOptions } from './Formatting';
 
 export default class ToolBox {
     /**
@@ -73,10 +73,10 @@ export default class ToolBox {
 
         this.anchor = Node.querySelector('.link');
         this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
-            const parent = selections.getCurrentNodeFromCaretPosition();
+            const parent = selection.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
                 this.Editor.addInline({
-                    cmd: "unlink",
+                    cmd: 'unlink',
                     showDef: false,
                 });
             } else {
@@ -200,7 +200,7 @@ export default class ToolBox {
                     });
                     break;
                 case 'block':
-                    this.Editor.addBlock({
+                    this.Editor.applyBlocks({
                         nodeName: details.command
                     });
                     break;
@@ -275,7 +275,7 @@ export default class ToolBox {
         if (typeof call !== 'function') {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
-            let { startNode } = selections.getSelectionInfo();
+            let { startNode } = selection.getSelectionInfo();
             while (startNode.parentNode && startNode !== this.Editor.Body) {
                 startNode = startNode.parentNode;
             }
@@ -290,18 +290,14 @@ export default class ToolBox {
      * which styles/tags are applied.
      */
     clearAllFormats() {
-        for (const [tagNames, reference] of Object.entries(this.elementReferences)) {
-            if (reference) {
-                reference.classList.remove('is-applied');
-                reference.classList.add('no-highlight');
-            }
-        }
-        for (const [alignment, reference] of Object.entries(this.alignment)) {
-            if (reference) {
-                reference.classList.remove('is-applied');
-                reference.classList.add('no-highlight');
-            }
-        }
+        [this.elementReferences, this.alignment].forEach(elementReferences => {
+            Object.entries(elementReferences).forEach(referenceKey => {
+                const [ tagName, reference ] = referenceKey;
+                if (reference && reference.classList) {
+                    reference.classList.add('no-highlight');
+                }
+            });
+        })
     }
 
     /**
@@ -311,63 +307,19 @@ export default class ToolBox {
      */
     formatsOnCurrentCaret() {
         const nodeArray = this.Editor.getAllTextNodeInsideSelection();
-        let align = false;
-        const formatApplied = {
-            B: false,
-            I: false,
-            U: false,
-            SUB: false,
-            SUP: false,
-            H1: false,
-            H2: false,
-            BLOCKQUOTE: false,
-            A: false,
-            OL: false,
-            UL: false
-        }
         this.clearAllFormats();
-        for (const node of nodeArray) {
-            if (align !== undefined) {
-                align = false;
-            }
-            for (const format in formatApplied) {
-                formatApplied[format] = false;
-            }
-            let traverse = node;
-            while (traverse !== this.Editor.Body) {
-                if (traverse.nodeName in formatApplied) {
-                    formatApplied[traverse.nodeName] = true;
-                }
-                if (traverse.style && traverse.style.textAlign) {
-                    align = traverse.style.textAlign;
-                }
-                traverse = traverse.parentNode;
-            }
-            for (const formats in formatApplied) {
-                if (!formatApplied[formats]) {
-                    delete formatApplied[formats];
-                }
-            }
-            if (!align) {
-                align = undefined;
-            }
-            if (!Object.keys(formatApplied).length) {
-                break;
-            }
-        }
-        if (Object.keys(formatApplied).length) {
-            for (const [tagName, boolValue] of Object.entries(formatApplied)) {
+        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.Editor.Body, nodeArray);
+        if (formatApplied.size) {
+            formatApplied.forEach(tagName => {
                 const elementReference = this.elementReferences[tagName];
-                if (boolValue && elementReference && elementReference.classList) {
-                    elementReference.classList.add('is-applied');
+                if (elementReference && elementReference.classList) {
                     elementReference.classList.remove('no-highlight');
                 }
-            }
+            });
         }
         if (align) {
             const elementReference = this.alignment[align]; 
             if (elementReference && elementReference.classList) {
-                elementReference.classList.add('is-applied');
                 elementReference.classList.remove('no-highlight');
             }
         }

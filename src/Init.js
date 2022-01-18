@@ -1,5 +1,4 @@
 import Editor from './Editor/Editor';
-import { constructSymbolTable } from './CodeFormatting';
 import { initUIMode } from './Mode';
 import '../styles/style.css';
 import '../styles/theme.css';
