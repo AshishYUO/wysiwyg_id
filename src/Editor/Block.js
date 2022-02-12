@@ -1,6 +1,8 @@
 import selection from '../Selection';
+import { applyBlockNodes } from '../Formatting';
 
 const blockSet = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "DIV", "PRE", "P", "DL", "ADDRESS", "IMG", "LI", "TABLE", "TR"]);
+
 /**
  * @details Check to see if a node is a block node or not.
  * @param node node to check
@@ -15,7 +17,10 @@ const isABlockNode = node => {
  * @param node the node to evaluate it's parent.
  * @returns block node that is just below main text editor.
  */
-const getParentBlockNode = (editor, node) => {
+const getParentBlockNode = (editor, node, offset) => {
+    if (node === editor) {
+        return node.childNodes[offset];
+    }
     while (node !== editor && node.parentNode !== editor) {
         node = node.parentNode;
     }
@@ -33,8 +38,8 @@ const getSelectedBlockNode = editor => {
         startOffset,
         endOffset
     } = selection.getSelectionInfo();
-    const stNode = startNode === editor ? editor.children[startOffset] : getParentBlockNode(editor, startNode);
-    const edNode = endNode === editor ? (editor.children[endOffset] || editor.children[editor.children.length - 1]) : getParentBlockNode(editor, endNode);
+    const stNode = getParentBlockNode(editor, startNode, startOffset);
+    const edNode = getParentBlockNode(editor, endNode, endOffset);
     return [ stNode, edNode ];
 }
 
@@ -68,26 +73,6 @@ const isEachNodeSame = (blockNodes, nodeName) => {
 }
 
 /**
- * @details Apply node element to selected block elements.
- * @param blockNodes list of all block nodes.
- * @param nodeName node to apply.
- * @returns void, but applies node changes to all selected
- * elements.
- */
-const applyBlockNodes = (blockNodes, nodeName) => {
-    blockNodes.forEach((node, index, blockNodes) => {
-        if (node.nodeName !== nodeName) {
-            const blockElement = document.createElement(nodeName);
-            while (node.childNodes.length) {
-                blockElement.appendChild(node.childNodes[0]);
-            }
-            node.parentNode.replaceChild(blockElement, node);
-            blockNodes[index] = blockElement;
-        }
-    });
-}
-
-/**
  * @details Return nodes for setting caret.
  * @param blockNode name of the block node.
  * @param node previous node.
@@ -96,7 +81,11 @@ const applyBlockNodes = (blockNodes, nodeName) => {
  */
 const setNodes = (editor, blockNode, node, offset) => {
     if (node === editor) {
-        return [ Body, offset ];
+        if (offset < editor.childNodes.length) {
+            return [ editor.childNodes[offset], 0 ];
+        } else {
+            return [ editor.childNodes[editor.childNodes.length - 1], 1 ];
+        }
     } else if(!node.parentNode) {
         return [ blockNode, offset ];
     } else {
@@ -133,7 +122,7 @@ const addBlock = (editor, details) => {
     const parentStart = Info.startNode, parentEnd = Info.endNode;
     if (parentStart && parentEnd) {
         const blockNodes = getAllBlockNodesInCurrentSelection(editor);
-        const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'P' : nodeType;   
+        const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'P' : nodeType;
         applyBlockNodes(blockNodes, nodeName);
         selection.setSelectionAt(setCaretSelection(editor, blockNodes, Info));
     }

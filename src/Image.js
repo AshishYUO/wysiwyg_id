@@ -1,5 +1,5 @@
 import selection from './Selection';
-import { isABlockNode } from './Utils';
+import { isABlockNode } from './Editor/Block';
 
 export default class Image {
     constructor (Node) {
@@ -38,7 +38,7 @@ export default class Image {
 
     /**
      * @details Setting up image events
-     * @param imageElement 
+     * @param {HTMLElement} imageElement Image elements for resizing events.
      */
     setImageEvents(imageElement) {
         const mousemoveOnResizingEvent = event => {

@@ -3,173 +3,151 @@ import Image from '../Image';
 import ToolBox from '../Toolbox';
 import {
     isABlockNode,
-    addBlock
+    addBlock,
+    getParentBlockNode,
+    assertTextNodeOrBreakLine,
 } from './Block';
 import {
     getAllTextNodes,
     insertString,
-    optimizeNodes
+    optimizeNodes,
+    applyInlineTemp
 } from './Inline';
 
+import {
+    handleKeyboardDownEvent,
+    handleKeyboardUpEvent
+} from './Event';
+
+// Incomplete: pasted text should have all block/list nodes in one level.
+const clearNode = (node) => {
+    if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
+        if (isAnInlineNode(node) && node.innerText.length === "") {
+            node.parentNode && node.parentNode.removeChild(node);
+            return;
+        }
+        const newNode = document.createElement('P');
+        if (node.nodeName.match(/^H[1-6]$/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
+            if (node.nodeName == 'LI' && (node.parentNode && node.parentNode.nodeName != 'OL' && node.parentNode.nodeName != 'UL')) {
+                newNode = document.createElement('P');
+            } else {
+                newNode = document.createElement(node.nodeName);
+            }
+        } else if (node.nodeName == 'DIV' || node.nodeName == 'P') {
+            newNode = document.createElement('P');
+        }
+        let toChange;
+        if (PasteFormattingOptions[node.nodeName]) {
+            toChange = PasteFormattingOptions[node.nodeName](node, newNode);
+        }         
+        for (let child of node.children) {
+            this.clearNode(child);
+        }
+        if (toChange === undefined) {
+            newNode.innerHTML = node.innerHTML;
+        }
+        if (node.parentNode) {
+            node.parentNode.replaceChild(newNode, node);
+        }
+        return newNode;
+    }
+}
+
 export default class Editor {
+    /**
+     * Constructor node for Editor.
+     * @param {HTMLElement} Node main editor node.
+     */
     constructor(Node) {
         this.editorNode = Node;
-        this.Body = Node.querySelector('.bodyeditable');
-        this.Body.innerHTML = "";
+        this.editor = Node.querySelector('.bodyeditable');
+        console.log(this.editor);
+        this.editor.innerHTML = '<p><br /></p>';
         const Toolbox = new ToolBox(Node, this);
         const image = new Image(Node);
-        
-        this.Body.onpaste = event => {
-            this.ifBodyIsEmpty();
+
+        this.editor.onpaste = event => {
             event.preventDefault();
             console.log('No paste implemetation yet!');
         }
 
-        this.Body.onmouseup = event => {
+        this.editor.onmouseup = event => {
+            selection.ensureCaretSelection();
             Toolbox.formatsOnCurrentCaret();
         }
 
-        this.Body.onkeydown = event => {
-            this.ifBodyIsEmpty();
-            switch(event.key) {
-                case 'Tab':
-                    event.preventDefault();
-                    insertString(this.Body, '\xA0\xA0\xA0\xA0');
-                    break;
-                case 'Enter':
-                    this.checkIfDiv();
-                    break;
+        this.editor.onkeydown = event => {
+            // const parentBlockNode = getParentBlockNode();
+            const { editor: editor } = this;
+            const handle = handleKeyboardDownEvent(editor, event);
+            if (handle) {
+                event.preventDefault();
+                event.stopPropagation();
             }
         }
 
-        this.Body.onkeyup = event => {
-            this.ifBodyIsEmpty();
+        this.editor.onkeyup = event => {
             Toolbox.formatsOnCurrentCaret();
+            const { editor: editor } = this;
+            handleKeyboardUpEvent(editor, event);
         };
-    }
-    // Incomplete, add better inline.
-    addInline (details) {
-        const { cmd, valArg } = details;
-        document.execCommand(cmd, false, valArg);
-    }
-
-    checkIfDiv () {
-        const {
-            startNode
-        } = selection.getSelectionInfo();
-        let node = startNode;
-        while (node.parentNode !== this.Body) {
-            node = node.parentNode;
-        } 
-        if (node.parentNode !== this.Body) {
-            if (node.nodeName === 'DIV') {
-                const blockElement = document.createElement('P');
-                for (const childNode of node.childNodes) {
-                    blockElement.appendChild(childNode);
-                }
-                Node.parentNode.replaceChild(blockElement, node);
-                selection.setSelectionAt(selection);
-            }
-        }
-    }
-
-    // Incomplete: pasted text should have all block/list nodes in one level.
-    clearNode (node) {
-        if ((node.childNodes && node.innerText && node.innerText.length > 0) || typeof (node) === 'object') {
-            if (isAnInlineNode(node) && node.innerText == "") {
-                node.parentNode && node.parentNode.removeChild(node);
-                return;
-            }
-            const newNode = document.createElement('P');
-            if (node.nodeName.match(/^H[1-6]$/) || node.nodeName.match(/^(BLOCKQUOTE|SUB|SUP|B|I|U|EM|STRONG|HR|LI|OL|UL|SPAN|A|IMG|PRE|CODE|BR|TABLE|TD|TR|TH|THEAD|TBODY)$/)) {
-                if (node.nodeName == 'LI' && (node.parentNode && node.parentNode.nodeName != 'OL' && node.parentNode.nodeName != 'UL')) {
-                    newNode = document.createElement('P');
-                } else {
-                    newNode = document.createElement(node.nodeName);
-                }
-            } else if (node.nodeName == 'DIV' || node.nodeName == 'P') {
-                newNode = document.createElement('P');
-            }
-            let toChange;
-            if (PasteFormattingOptions[node.nodeName]) {
-                toChange = PasteFormattingOptions[node.nodeName](node, newNode);
-            }         
-            for (let child of node.children) {
-                this.clearNode(child);
-            }
-            if (toChange === undefined) {
-                newNode.innerHTML = node.innerHTML;
-            }
-            if (node.parentNode) {
-                node.parentNode.replaceChild(newNode, node);
-            }
-            return newNode;
-        }
-    }
-
-    applyBlocks(details) {
-        addBlock(this.Body, details);
-    }
-
-    insertString(str) {
-        insertString(this.Body, str);
-    }
-
-    getAllTextNodeInsideSelection() {
-        const { startNode, endNode } = selection.getSelectionInfo();
-        return getAllTextNodes(this.Body, startNode, endNode);
-    }
-
-    focusOnBody() {
-        this.Body.focus();
-        const selectionInfo = selection.getSelectionInfo()
-        if (!selectionInfo) {
-            selection.setSelectionAt({
-                startNode: this.Body.children[0],
-                startOffset: 0,
-                endNode: this.Body.children[0],
-                endOffset: 0,
-            });
-        }
     }
 
     /**
-     * @details Perform list operation in a different file.
-     * @param details 
+     * @brief Apply inline styling to elements
+     * @memberof Editor
+     * @param {Object} details details related to inline
+     * @returns void
      */
-    addList(details) {
-        this.ifBodyIsEmpty();
-        const type = details.nodeName;
-        let Node = selection.getCurrentNodeFromCaretPosition();
-        if (Node) {
-            while (!isABlockNode(this.Body, Node) && Node.parentNode != this.Body) {
-                Node = Node.parentNode;
-            }
-            if (Node !== this.Body) {
-                const element = document.createElement(type), list = document.createElement('li');
-                list.innerHTML = Node.innerHTML;
-                element.append(list);
-                if (Node.nodeName !== 'LI') {
-                    Node.parentNode.replaceChild(element, Node);
-                } else {
-                    Node.innerHTML = element.outerHTML;
-                }
-            }
-        }
+    addInline (details) {
+        applyInlineTemp(this.editor, details);
     }
 
-    ifBodyIsEmpty() {
-        if (this.Body.innerHTML == '' || this.Body.innerHTML == '<br>') {
-            this.Body.innerHTML = '<P><br /></P>';
-        }
-        this.focusOnBody();
+    /**
+     * @brief apply block stylign to selected elements
+     * @memberof Editor
+     * @param {Object} details 
+     * @returns void
+     */
+    applyBlocks(details) {
+        addBlock(this.editor, details);
     }
 
+    /**
+     * @brief insert string at current caret selection
+     * @param {String} str string to insert
+     * @returns void.
+     */
+    insertString(str) {
+        insertString(this.editor, str);
+    }
+
+    /**
+     * @brief Returns all text nodes which are selected
+     * @returns {Array<HTMLElement>} Array of text elements that are under current
+     * selection
+     */
+    getAllTextNodeInsideSelection() {
+        const { 
+            startNode,
+            endNode 
+        } = selection.getSelectionInfo();
+        return getAllTextNodes(this.editor, startNode, endNode);
+    }
+
+    /**
+     * @brief Returns the HTML content
+     * @returns {String} HTMLContent
+     */
     getHTMLContent() {
-        return this.Body.innerHTML;
+        return this.editor.innerHTML;
     }
 
+    /**
+     * @brief returns plain text of the editor content
+     * @returns {String} innerText
+     */
     getTextContent() {
-        return this.Body.innerText;
+        return this.editor.innerText;
     }
 };

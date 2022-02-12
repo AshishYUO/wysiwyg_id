@@ -2,17 +2,15 @@ import selection from '../Selection';
 import { getAppliedStyles, getIntersectingFormattingOptions } from '../Formatting';
 import { getParentBlockNode } from './Block';
 
-const getAllInlineNodes = (node) => {
-    return node.nodeName.match(/^(SPAN|B|STRONG|I|EM|U|SUB|SUP|CODE)$/i);
-}
-
 const getAllInlineNodesInCurrentSelection = () => {
     const currentSelection = selection.getSelectionInfo();
 }
 
 /**
  * @details Insert string in a text node.
- * @param str string to insert.
+ * @param {HTMLElement} editor main editor element
+ * @param {String} str string to insert.
+ * @returns void
  */
 const insertString = (editor, str) => {
     const selections = selection.getSelection();
@@ -20,13 +18,33 @@ const insertString = (editor, str) => {
     if (selections.toString().length) {
         selections.deleteFromDocument();
     }
-    if (startNode.nodeName === '#text') {
-        startNode.insertData(startOffset, str);
+    const [ selectedNode, selectedOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
+    if (selectedNode.nodeType === 1) {
+        const textNode = document.createTextNode(str),
+              textOffset = str.length;
+        if (selectedOffset === 1) {
+            if (selectedNode.nextSibling) {
+                selectedNode.parentNode.insertBefore(textNode, selecetedNode.nextSibling);
+            } else {
+                selectedNode.parentNode.appendChild(textNode);
+            }
+        } else {
+            selectedNode.parentNode.insertBefore(textNode, selectedNode);
+        }
         selection.setSelectionAt({
-            startNode: startNode,
-            startOffset: startOffset + str.length,
-            endNode: startNode,
-            endOffset: startOffset + str.length
+            startNode: textNode,
+            startOffset: textOffset,
+            endNode: textNode,
+            endOffset: textOffset
+        });
+        console.log('Sel node', textNode, str);
+    } else {
+        selectedNode.insertData(selectedOffset, str);
+        selection.setSelectionAt({
+            startNode: selectedNode,
+            startOffset: selectedOffset + str.length,
+            endNode: selectedNode,
+            endOffset: selectedOffset + str.length
         });
     }
 }
@@ -62,9 +80,9 @@ const getAllTextNodes = (editor, startNode, endNode) => {
 
 /**
  * 
- * @param {*} editor 
- * @param {*} startNode 
- * @param {*} endNode 
+ * @param {HTMLElement} editor 
+ * @param {HTMLElement} startNode 
+ * @param {HTMLElement} endNode 
  */
 const applyInline = (editor, newStyle) => {
     const {
@@ -78,10 +96,12 @@ const applyInline = (editor, newStyle) => {
     console.log(intersectingNodes);
     const styleNodes = optimizeNodes(editor, allNodes);
     // Different logic for start and endNode, but apply all styles to remaining nodes.
-    for (let i = 0; i < styleNodes.length; ++i) {
-        const node = styleNodes[i];
-        applyStyles(editor, node, newStyle, intersectingNodes);
-    }
+    styleNodes.forEach(node => applyStyles(editor, node, newStyle, intersectingNodes));
+}
+
+const applyInlineTemp = (editor, details) => {
+    const { cmd, valArg } = details;
+    document.execCommand(cmd, false, valArg);
 }
 
 const applyStyles = (editor, element, newStyle, intersectingNodes) => {
@@ -98,7 +118,6 @@ const applyStyles = (editor, element, newStyle, intersectingNodes) => {
         node.parentNode.replaceChild(elem, node);
         elem.appendChild(node);
     }
-    // parentNode.replaceChild(node, );
 }
 
 /**
@@ -116,4 +135,19 @@ const optimizeNodes = (editor, allNodes) => {
     return styles;
 }
 
-export { optimizeNodes, insertString, getAllTextNodes, getAllInlineNodesInCurrentSelection, applyInline };
+const getAllTextNodesInsideBlockNode = (editor, blockNode) => {
+    let startNode = blockNode;
+    while (startNode.childNodes || startNode.childNodes.length) {
+        startNode = startNode.childNodes[0];
+    }
+    
+}
+
+export {
+    optimizeNodes,
+    insertString,
+    getAllTextNodes,
+    getAllInlineNodesInCurrentSelection,
+    applyInline,
+    applyInlineTemp
+};

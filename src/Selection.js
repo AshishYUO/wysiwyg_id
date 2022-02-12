@@ -1,3 +1,4 @@
+
 /**
  * @details class for selection
  */
@@ -35,7 +36,47 @@ const selection = {
         NewRange.setStart(newNode, offset);
         selection.addRange(NewRange);
     },
-    
+
+    /**
+     * 
+     * @param {HTMLElement} node node element to find it's adjacent element
+     * @param {Number} offset Offset between start element and caret position
+     * @returns {[HTMLElement, Number]} a new set of TextElement and offset.
+     */
+    forceTextNodeSelection: (node, offset) => {
+        if (node.nodeType === 3 || node.nodeName === 'BR') {
+            return [ node, offset ];
+        }
+        let traverseNode = node;
+        while (traverseNode.nodeType !== 3 && traverseNode.nodeName !== 'BR') {
+            traverseNode = offset === 1 ? traverseNode.childNodes[traverseNode.childNodes.length - 1] : traverseNode.childNodes[0];
+        }
+        return [ traverseNode, (traverseNode.nodeType === 3 ? (traverse.textContent.length * offset) : offset) ];
+    },
+
+    /**
+     * @brief ensure that selection to be text nodes or break lines.
+     * @param void
+     * @returns None
+     */
+    ensureCaretSelection: () => {
+        const currSelection = selection.getSelectionInfo();
+        const {
+            startNode,
+            endNode,
+            startOffset,
+            endOffset
+        } = currSelection;
+        const [ newStartNode, newStartOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
+        const [ newEndNode, newEndOffset ] = selection.forceTextNodeSelection(endNode, endOffset);
+        selection.setSelectionAt({
+            startNode: newStartNode,
+            endNode: newEndNode,
+            startOffset: newStartOffset,
+            endOffset: newEndOffset
+        });
+    },
+
     /**
      * @details Sets the selection as defined in selectionInfo
      * @param {Object} selectionInfo with start node and offset,
@@ -43,12 +84,20 @@ const selection = {
      * @returns {void}
      */
     setSelectionAt: selectionInfo => {
-        const selection = getSelection();
-        selection.removeAllRanges();
-        const NewRange = document.createRange();
-        NewRange.setStart(selectionInfo.startNode, selectionInfo.startOffset);
-        NewRange.setEnd(selectionInfo.endNode, selectionInfo.endOffset);
-        selection.addRange(NewRange);
+        const currSelection = getSelection();
+        currSelection.removeAllRanges();
+        const newRange = document.createRange();
+        let {
+            startNode,
+            endNode,
+            startOffset,
+            endOffset
+        } = selectionInfo;
+        [ startNode, startOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
+        [ endNode, endOffset ] = selection.forceTextNodeSelection(endNode, endOffset);
+        newRange.setStart(startNode, startOffset);
+        newRange.setEnd(endNode, endOffset);
+        currSelection.addRange(newRange);
     },
 
     /**
@@ -79,13 +128,13 @@ const selection = {
      * end node with it's offset
      */
     getSelectionInfo: () => {
-        const selection = getSelection();
-        if (selection) {
+        const currentSelection = getSelection();
+        if (currentSelection) {
             return {
-                startNode: selection.getRangeAt(0).startContainer,
-                startOffset: selection.getRangeAt(0).startOffset,
-                endNode: selection.getRangeAt(0).endContainer,
-                endOffset: selection.getRangeAt(0).endOffset
+                startNode: currentSelection.getRangeAt(0).startContainer,
+                startOffset: currentSelection.getRangeAt(0).startOffset,
+                endNode: currentSelection.getRangeAt(0).endContainer,
+                endOffset: currentSelection.getRangeAt(0).endOffset
             };
         }
     }

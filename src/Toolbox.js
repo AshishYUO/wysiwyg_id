@@ -178,13 +178,14 @@ export default class ToolBox {
             H2: this.header2, 
             UL : this.unorderedList, 
             OL: this.orderedList
-        }
+        };
+
         this.alignment = {
             left: this.Alignleft,
             right: this.Alignright,
             center: this.Aligncenter,
             justify: this.Alignjustify
-        }
+        };
     }
     /**
      * @details Execute command on editor based on mentioned details
@@ -245,23 +246,15 @@ export default class ToolBox {
         table.classList.add('symbol-table')
         table.classList.add('hide');
         for (let i = start; i <= end; ++i) {
-            const symbolblock = document.createElement('BUTTON');
-            symbolblock.classList.add('symbol-blocks');
-            symbolblock.title = `&#${i};`;
-            symbolblock.innerHTML = `&#${i};`;
+            const symbolButtons = document.createElement('BUTTON');
+            symbolButtons.classList.add('symbol-blocks');
+            symbolButtons.title = symbolButtons.innerHTML = `&#${i};`;
             table.appendChild(symbolblock);
-        }
-        editor.appendChild(table);
-        const symbol = table;
-        this.symbolTable = table;
-        if (symbol) {
-            this.symbolTable = symbol;
-            for (const symbolButtons of symbol.querySelectorAll('.symbol-blocks')) {
-                symbolButtons.onclick = event => {
-                    this.Editor.insertString(symbolButtons.innerHTML);
-                }
+            symbolButtons.onclick = event => {
+                this.Editor.insertString(`&#${i};`);
             }
         }
+        editor.appendChild(table);
     }
 
     /**
@@ -271,15 +264,14 @@ export default class ToolBox {
      * @param callData 
      */
     applyTools(call, callData) {
-        this.Editor.ifBodyIsEmpty();
         if (typeof call !== 'function') {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
             let { startNode } = selection.getSelectionInfo();
-            while (startNode.parentNode && startNode !== this.Editor.Body) {
+            while (startNode.parentNode && startNode !== this.Editor.editor) {
                 startNode = startNode.parentNode;
             }
-            if (this.Editor.Body === startNode) {
+            if (this.Editor.editor === startNode) {
                 call(callData);
             }
         }
@@ -308,7 +300,7 @@ export default class ToolBox {
     formatsOnCurrentCaret() {
         const nodeArray = this.Editor.getAllTextNodeInsideSelection();
         this.clearAllFormats();
-        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.Editor.Body, nodeArray);
+        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.Editor.editor, nodeArray);
         if (formatApplied.size) {
             formatApplied.forEach(tagName => {
                 const elementReference = this.elementReferences[tagName];

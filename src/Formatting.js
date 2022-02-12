@@ -1,3 +1,8 @@
+import {
+    getParentBlockNode,
+    isABlockNode
+} from "./Editor/Block";
+import selection from "./Selection";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
 
@@ -14,6 +19,16 @@ const intersection = (setA, setB) => {
         }
     })
     toRemove.forEach(element => setA.delete(element));
+}
+
+const removeSelectedText = (editor) => {
+    const currSelection = selection.getSelection();
+    if (currSelection) {
+        const str = currSelection.toString();
+        if (str && str.length) {
+            currSelection.deleteFromDocument();
+        }
+    }
 }
 
 /**
@@ -60,4 +75,146 @@ const getIntersectingFormattingOptions = (body, allTextNodes) => {
     return styles;
 }
 
-export { getIntersectingFormattingOptions, getAppliedStyles };
+
+/**
+ * @details Apply node element to selected block elements.
+ * @param blockNodes list of all block nodes.
+ * @param nodeName node to apply.
+ * @returns void, but applies node changes to all selected
+ * elements.
+ */
+ const applyBlockNodes = (blockNodes, nodeName) => {
+    blockNodes.forEach((node, index, blockNodes) => {
+        if (node.nodeName !== nodeName) {
+            const blockElement = document.createElement(nodeName);
+            while (node.childNodes.length) {
+                blockElement.appendChild(node.childNodes[0]);
+            }
+            node.parentNode.replaceChild(blockElement, node);
+            blockNodes[index] = blockElement;
+        }
+    });
+}
+
+/**
+ * 
+ * @param {HTMLElement} editor 
+ */
+const selectAll = (editor) => {;
+    let startNode = editor.childNodes[0], endNode = editor.childNodes[editor.childNodes.length - 1];
+    while (startNode.childNodes && startNode.childNodes.length) {
+        startNode = startNode.childNodes[0];
+    }
+    while (endNode.childNodes && endNode.childNodes.length) {
+        endNode = endNode.childNodes[endNode.childNodes.length - 1];
+    }
+    selection.setSelectionAt({
+        startNode: startNode,
+        endNode: endNode,
+        startOffset: 0,
+        endOffset: endNode.textContent.length
+    });
+}
+
+const assertBrOnEmptyBlockNode = (editor, removeOnCall) => {
+    let {
+        startNode,
+        endNode,
+        startOffset,
+        endOffset
+    } = selection.getSelectionInfo();
+    const parentBlockNode = getParentBlockNode(editor, startNode, startOffset);
+    if (!parentBlockNode.childNodes.length && parentBlockNode.nodeType === 1) {
+        if (parentBlockNode.nodeName === 'BR') {
+            const par = document.createElement('P');
+            const breakNode = document.createElement('BR')
+            par.appendChild(breakNode);
+            parentBlockNode.parentNode.replaceChild(par, parentBlockNode);
+            selection.setSelectionAt({
+                startNode: breakNode,
+                endNode: breakNode,
+                startOffset: 0,
+                endOffset: 0
+            });
+        } else {
+            parentBlockNode.appendChild(document.createElement('BR'));
+        }
+    } else {
+        const breakNodeCheck = parentBlockNode.childNodes[parentBlockNode.childNodes.length - 1];
+        if (removeOnCall && breakNodeCheck.nodeName === 'BR') {
+            breakNodeCheck.remove();
+        }
+    }
+}
+
+const onEnterPressed = editor => {
+    removeSelectedText(editor);
+    const currSelection = selection.getSelection();
+}
+
+/**
+ * @details Insert break line: A part of Shift + Enter key functionality.
+ * @param {HTMLElement} editor main editor node.
+ * @returns void.
+ */
+const breakLine = (editor) => {
+    removeSelectedText(editor);
+    // currSelection, startNode and endNode and their offsets are same
+    const currSelection = selection.getSelectionInfo();
+    if (currSelection) {
+        const [ startNode, startOffset ] = selection.forceTextNodeSelection(currSelection.startNode, currSelection.startOffset);
+        // ensure the selection is of type text node.
+        const breakLineElement = document.createElement('BR');
+        if (startNode.nodeType === 1) {
+            // perform some action
+            if (startOffset === 1) {
+                if (startNode.nextSibling) {
+                    startNode.parentNode.appendChild(breakLineElement);
+                } else {
+                    startNode.parentNode.insertBefore(breakLineElement, startNode);
+                }
+                // todo: To make selection just after the break line element.
+            }
+        } else {
+            if (startOffset > 0 && startOffset < startNode.textContent.length) {
+                const newNodeBeforeCaret = document.createTextNode(startNode.textContent.substr(0, startOffset)),
+                      newNodeAfterCaret = document.createTextNode(startNode.textContent.substr(startOffset));
+                startNode.parentNode.replaceChild(newNodeBeforeCaret, startNode);
+                if (newNodeBeforeCaret.nextSibling) {
+                    newNodeBeforeCaret.parentNode.insertBefore(breakLineElement, newNodeBeforeCaret.nextSibling);
+                    breakLineElement.parentNode.insertBefore(newNodeAfterCaret, breakLineElement.nextSibling);
+                } else {
+                    newNodeBeforeCaret.parentNode.appendChild(breakLineElement);
+                    newNodeBeforeCaret.parentNode.appendChild(newNodeAfterCaret);
+                }
+            } else {
+                if (!startOffset) {
+                    startNode.parentNode.insertBefore(breakLineElement, startNode);
+                } else {
+                    if (startNode.nextSibling) {
+                        startNode.parentNode.insertBefore(breakLineElement, startNode.nextSibling);
+                    } else {
+                        startNode.parentNode.appendChild(breakLineElement);
+                    }
+                }
+            }
+            if (breakLineElement.nextSibling) {
+                selection.setSelectionAt({
+                    startNode: breakLineElement.nextSibling,
+                    startOffset: 0,
+                    endNode: breakLineElement.nextSibling,
+                    endOffset: 0
+                });
+            }
+        }
+    }
+}
+
+export { 
+    getIntersectingFormattingOptions,
+    getAppliedStyles,
+    applyBlockNodes,
+    selectAll,
+    assertBrOnEmptyBlockNode,
+    breakLine
+};

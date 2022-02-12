@@ -6,12 +6,12 @@ import '../styles/theme.css';
 export const initEditor = enableTools => {
     const enablingTools = {
         bold: {
-            hint: "Bold text",
+            hint: 'Bold text',
             classname: 'bold',
-            display: "<b>B</b>"
+            display: '<b>B</b>'
         },
         italic: {
-            hint: "Italic text",
+            hint: 'Italic text',
             classname: 'italic',
             display: '<i>I</i>'
         },
@@ -86,14 +86,14 @@ export const initEditor = enableTools => {
             display: '<i class="fa fa-align-justify" aria-hidden="true"></i>'
         },
         math: {
-            hint: "Math Symbol",
-            classname: "math",
-            display: "<span style='font-family: Cambria'>&pi;</span>"
+            hint: 'Math Symbol',
+            classname: 'math',
+            display: '<span style="font-family: Cambria">&pi;</span>'
         },
         currency: {
-            hint: "Currency Symbol",
-            classname: "currency",
-            display: "<span style='font-family: Cambria'>$</span>"
+            hint: 'Currency Symbol',
+            classname: 'currency',
+            display: '<span style="font-family: Cambria">$</span>'
         },
         image: {
             hint: 'Insert Image',
