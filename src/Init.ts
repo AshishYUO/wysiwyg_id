@@ -3,7 +3,7 @@ import { initUIMode } from './Mode';
 import '../styles/style.css';
 import '../styles/theme.css';
 
-export const initEditor = enableTools => {
+export const initEditor = (enableTools=undefined) => {
     const enablingTools = {
         bold: {
             hint: 'Bold text',
@@ -129,7 +129,7 @@ export const initEditor = enableTools => {
     }
 
     const allEditorDOM = document.querySelectorAll('.editor');
-    allEditorDOM.forEach(editor => {
+    allEditorDOM.forEach((editor: HTMLElement) => {
         const options = document.createElement('DIV');
         options.classList.add('options');
         const toolbar = document.createElement('span');
