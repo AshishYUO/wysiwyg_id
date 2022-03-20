@@ -2,14 +2,20 @@ import selection from './Selection';
 import { isABlockNode } from './Editor/Block';
 
 export default class Image {
+    mainBody: HTMLElement = null;
+    imageButton: HTMLElement = null;
+    fileElement: HTMLElement = null;
+    fileReader: FileReader = null;
+    selection: Selection = null;
+
     constructor (Node) {
-        this.MainBody = Node;
-        this.ImageButton = Node.querySelector('.image');
+        this.mainBody = Node;
+        this.imageButton = Node.querySelector('.image');
         this.fileElement = document.createElement('input');
         this.fileElement.setAttribute('type', 'file');
-        this.FileRead = new FileReader();
+        this.fileReader = new FileReader();
         this.selection = undefined;
-        this.ImageButton.onclick = event => {
+        this.imageButton.onclick = event => {
             this.selection = selection.getSelection();
             const URL = this.selection.toString().trim();
             if (URL.length) 
@@ -24,27 +30,30 @@ export default class Image {
             }
         };
 
-        this.FileRead.onload = event => {
+        this.fileReader.onload = (event: any) => {
             if (this.selection) {
                 this.loadImage(event.target.result);
             }
         }
 
-        this.fileElement.onchange = event => {
+        this.fileElement.onchange = (event: any) => {
             const image = event.target.files[0];
-            this.FileRead.readAsDataURL(image);
+            this.fileReader.readAsDataURL(image);
         }
     }
 
     /**
      * @details Setting up image events
      * @param {HTMLElement} imageElement Image elements for resizing events.
+     * @return void
      */
-    setImageEvents(imageElement) {
+    setImageEvents(imageElement: HTMLImageElement): void {
         const mousemoveOnResizingEvent = event => {
-            event.preventDefault(), this.executeResizingEvent(event);
+            event.preventDefault();
+            this.executeResizingEvent(event);
         }
         const mouseupEvent = event => {
+            imageElement.removeEventListener('mouseup', mouseupEvent);
             this.setImageEvents(imageElement);
         }
 
@@ -61,6 +70,7 @@ export default class Image {
             if (imageElement.style.cursor !== 'default') {
                 imageElement.onmousemove = mousemoveOnResizingEvent;
                 imageElement.onmouseup = mouseupEvent;
+                imageElement.onmouseout = mouseupEvent;
             }
         }
 
@@ -69,19 +79,13 @@ export default class Image {
         imageElement.onmousedown = imageClickHold;
     }
 
-    executeResizingEvent(event) {
+    executeResizingEvent (event: any): void {
         const imageElement = event.target;
         const cursor = imageElement.style.cursor.split('-')[0];
         switch(cursor) {
-            case 's':
-                imageElement.setAttribute('height', event.offsetY + 20);
-                break;
             case 'e':
-                imageElement.setAttribute('width', event.offsetX + 20);
-                break;
             case 'se':
-                imageElement.setAttribute('height', event.offsetY + 20);
-                imageElement.setAttribute('width', event.offsetX + 20);
+                imageElement.setAttribute('width', event.offsetX + 5);
                 break;
         }
     }
@@ -89,15 +93,17 @@ export default class Image {
     loadImage(urlStr) {
         const imageNode = document.createElement('img');
         imageNode.setAttribute('src', urlStr);
-        const Node = selection.getCurrentNodeFromCaretPosition(this.selection);
-        while (!isABlockNode(Node.parentNode)) {
-            Node = Node.parentNode;
+        let node = selection.getCurrentNodeFromCaretPosition(this.selection);
+        while (!isABlockNode(node)) {
+            node = node.parentNode;
         }
         this.setImageEvents(imageNode);
         imageNode.setAttribute('width', '1000');
         imageNode.setAttribute('tabindex', '0');
-        Node.innerHTML = '';
-        Node.appendChild(imageNode);
+        const element = node as HTMLElement;
+        element.innerHTML = '';
+        node = element as Node;
+        node.appendChild(imageNode);
     }
 
     matchesWithExtURL(str){

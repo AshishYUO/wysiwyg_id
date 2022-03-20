@@ -1,19 +1,44 @@
 import selection from './Selection';
 import { getIntersectingFormattingOptions } from './Formatting';
+import Editor from './Editor/Editor';
 
 export default class ToolBox {
+    editorHandler: Editor = null;
+    mainNode: HTMLDivElement = null;
+    symbolTable: HTMLElement = null;
+    toolbox: HTMLElement = null;
+    bodyNode: HTMLElement = null;
+    bold: HTMLButtonElement = null;
+    italic: HTMLButtonElement = null;
+    underline: HTMLButtonElement = null;
+    subs: HTMLButtonElement = null;
+    sups: HTMLButtonElement = null;
+    quote: HTMLButtonElement = null;
+    anchor: HTMLButtonElement = null;
+    hr: HTMLButtonElement = null;
+    header1: HTMLButtonElement = null;
+    header2: HTMLButtonElement = null;
+    Alignleft: HTMLButtonElement = null;
+    Alignright: HTMLButtonElement = null;
+    Aligncenter: HTMLButtonElement = null;
+    Alignjustify: HTMLButtonElement = null;
+    unorderedList: HTMLButtonElement = null;
+    orderedList: HTMLButtonElement = null;
+    math: HTMLButtonElement = null;
+    currency: HTMLButtonElement = null;
+    elementReferences: any = null;
+    alignment: any = null
+
     /**
      * @details Constructor
      * @param  Node 
      * @param  mainEditor 
      */
     constructor(Node, mainEditor) {
-        this.Editor = mainEditor;
+        this.editorHandler = mainEditor;
         this.mainNode = Node;
         this.toolbox = Node.querySelector('.options');
         this.bodyNode = Node.querySelector('.bodyeditable');
-        this.linkContainer = document.createElement('div');
-        this.linkContainer.classList.add('link-container', 'hide');
 
         this.bold = Node.querySelector('.bold');
         if (this.bold) {
@@ -65,7 +90,7 @@ export default class ToolBox {
         
         this.hr = Node.querySelector('.hr');
         this.hr && (this.hr.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
+            this.editorHandler.addInline({
                 cmd: 'insertHTML',
                 valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
             });
@@ -75,7 +100,7 @@ export default class ToolBox {
         this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
             const parent = selection.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
-                this.Editor.addInline({
+                this.editorHandler.addInline({
                     cmd: 'unlink',
                     showDef: false,
                 });
@@ -83,7 +108,7 @@ export default class ToolBox {
                 const url = prompt('Enter the URL');
                 console.log(url);
                 if (url) {
-                    this.Editor.addInline({
+                    this.editorHandler.addInline({
                         cmd: 'createLink',
                         showDef: false,
                         valArg: url
@@ -113,7 +138,7 @@ export default class ToolBox {
 
         this.Alignleft = Node.querySelector('.align-left');
         this.Alignleft && (this.Alignleft.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
+            this.editorHandler.addInline({
                 cmd: 'justifyLeft'
             });
             this.formatsOnCurrentCaret();
@@ -121,7 +146,7 @@ export default class ToolBox {
 
         this.Alignright = Node.querySelector('.align-right');
         this.Alignright && (this.Alignright.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
+            this.editorHandler.addInline({
                 cmd: 'justifyRight'
             });
             this.formatsOnCurrentCaret();
@@ -129,7 +154,7 @@ export default class ToolBox {
 
         this.Aligncenter = Node.querySelector('.align-center');
         this.Aligncenter && (this.Aligncenter.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
+            this.editorHandler.addInline({
                 cmd: 'justifyCenter'
             });
             this.formatsOnCurrentCaret();
@@ -137,7 +162,7 @@ export default class ToolBox {
 
         this.Alignjustify = Node.querySelector('.align-justify');
         this.Alignjustify && (this.Alignjustify.onclick = event => this.applyTools(event => {
-            this.Editor.addInline({
+            this.editorHandler.addInline({
                 cmd: 'justifyFull'
             });
             this.formatsOnCurrentCaret();
@@ -145,12 +170,12 @@ export default class ToolBox {
 
         this.unorderedList = Node.querySelector('.ulist');
         this.unorderedList && (this.unorderedList.onclick = event => this.applyTools(event => {
-            this.Editor.addList({ nodeName: 'UL' });
+            // this.editorHandler.addList({ nodeName: 'UL' });
         }, event));
 
         this.orderedList = Node.querySelector('.olist');
         this.orderedList && (this.orderedList.onclick = event => this.applyTools(event => {
-            this.Editor.addList({ nodeName: 'OL' });
+            // this.editorHandler.addList({ nodeName: 'OL' });
         }, event));
 
         // Handle math symbols
@@ -196,12 +221,12 @@ export default class ToolBox {
         this.applyTools(event => {
             switch(details.type) {
                 case 'inline':
-                    this.Editor.addInline({
+                    this.editorHandler.addInline({
                         cmd: details.command
                     });
                     break;
                 case 'block':
-                    this.Editor.applyBlocks({
+                    this.editorHandler.applyBlocks({
                         nodeName: details.command
                     });
                     break;
@@ -223,15 +248,12 @@ export default class ToolBox {
         this.applyTools(event => {
             if (this.symbolTable) {
                 this.symbolTable.remove();
+                this.symbolTable = null;
+            } else {
+                this.constructSymbolTable(editorNode, startRange, endRange);
+                this.symbolTable.style.top = `${event.target.offsetTop + 50}px`;
+                this.symbolTable.style.left = `${event.target.offsetLeft - this.symbolTable.offsetWidth / 2}px`;
             }
-            this.constructSymbolTable(editorNode, startRange, endRange);
-            if (this.symbolTable && !this.symbolTable.classList.contains('hide')) {
-                this.symbolTable.classList.add('hide');
-            }
-            if (this.symbolTable.classList)
-            this.symbolTable.classList.toggle('hide');
-            this.symbolTable.style.top = `${event.target.offsetTop + 50}px`;
-            this.symbolTable.style.left = `${event.target.offsetLeft - this.symbolTable.offsetWidth / 2}px`;
         }, event);
     }
 
@@ -244,17 +266,17 @@ export default class ToolBox {
     constructSymbolTable (editor, start, end) {
         const table = document.createElement('DIV');
         table.classList.add('symbol-table')
-        table.classList.add('hide');
         for (let i = start; i <= end; ++i) {
             const symbolButtons = document.createElement('BUTTON');
             symbolButtons.classList.add('symbol-blocks');
             symbolButtons.title = symbolButtons.innerHTML = `&#${i};`;
-            table.appendChild(symbolblock);
+            table.appendChild(symbolButtons);
             symbolButtons.onclick = event => {
-                this.Editor.insertString(`&#${i};`);
+                this.editorHandler.insertString(`&#${i};`);
             }
         }
         editor.appendChild(table);
+        this.symbolTable = table;
     }
 
     /**
@@ -268,10 +290,10 @@ export default class ToolBox {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
             let { startNode } = selection.getSelectionInfo();
-            while (startNode.parentNode && startNode !== this.Editor.editor) {
+            while (startNode.parentNode && startNode !== this.editorHandler.editor) {
                 startNode = startNode.parentNode;
             }
-            if (this.Editor.editor === startNode) {
+            if (this.editorHandler.editor === startNode) {
                 call(callData);
             }
         }
@@ -283,7 +305,7 @@ export default class ToolBox {
      */
     clearAllFormats() {
         [this.elementReferences, this.alignment].forEach(elementReferences => {
-            Object.entries(elementReferences).forEach(referenceKey => {
+            Object.entries(elementReferences).forEach((referenceKey: any) => {
                 const [ tagName, reference ] = referenceKey;
                 if (reference && reference.classList) {
                     reference.classList.add('no-highlight');
@@ -297,10 +319,10 @@ export default class ToolBox {
      * in the current selection. Highlights the format by evaluating
      * intersection of all styles from a given caret selection.
      */
-    formatsOnCurrentCaret() {
-        const nodeArray = this.Editor.getAllTextNodeInsideSelection();
+    formatsOnCurrentCaret(): void {
+        const nodeArray = this.editorHandler.getAllTextNodeInsideSelection();
         this.clearAllFormats();
-        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.Editor.editor, nodeArray);
+        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.editorHandler.editor, nodeArray);
         if (formatApplied.size) {
             formatApplied.forEach(tagName => {
                 const elementReference = this.elementReferences[tagName];

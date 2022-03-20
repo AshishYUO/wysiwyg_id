@@ -2,17 +2,13 @@ import selection from '../Selection';
 import { getAppliedStyles, getIntersectingFormattingOptions } from '../Formatting';
 import { getParentBlockNode } from './Block';
 
-const getAllInlineNodesInCurrentSelection = () => {
-    const currentSelection = selection.getSelectionInfo();
-}
-
 /**
  * @details Insert string in a text node.
  * @param {HTMLElement} editor main editor element
  * @param {String} str string to insert.
  * @returns void
  */
-const insertString = (editor, str) => {
+const insertString = (editor: HTMLElement, str: string) => {
     const selections = selection.getSelection();
     const startNode = selections.getRangeAt(0).startContainer, startOffset = selections.getRangeAt(0).startOffset;
     if (selections.toString().length) {
@@ -24,7 +20,7 @@ const insertString = (editor, str) => {
               textOffset = str.length;
         if (selectedOffset === 1) {
             if (selectedNode.nextSibling) {
-                selectedNode.parentNode.insertBefore(textNode, selecetedNode.nextSibling);
+                selectedNode.parentNode.insertBefore(textNode, selectedNode.nextSibling);
             } else {
                 selectedNode.parentNode.appendChild(textNode);
             }
@@ -37,7 +33,6 @@ const insertString = (editor, str) => {
             endNode: textNode,
             endOffset: textOffset
         });
-        console.log('Sel node', textNode, str);
     } else {
         selectedNode.insertData(selectedOffset, str);
         selection.setSelectionAt({
@@ -147,7 +142,6 @@ export {
     optimizeNodes,
     insertString,
     getAllTextNodes,
-    getAllInlineNodesInCurrentSelection,
     applyInline,
     applyInlineTemp
 };

@@ -1,11 +1,11 @@
 const path = require('path');
 
 module.exports = {
-    entry: path.resolve(__dirname, './src/index.js'),
+    entry: path.resolve(__dirname, './src/index.ts'),
     module: {
         rules: [
             {
-                test: /\.(js)$/,
+                test: /\.js$/,
                 exclude: /node_modules/,
                 use: ['babel-loader']
             },
@@ -14,10 +14,23 @@ module.exports = {
                 exclude: /node_modules/,
                 use: ["style-loader", "css-loader"],
             },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        presets: [
+                            '@babel/preset-env',
+                            '@babel/preset-typescript'
+                        ]
+                    },
+                }
+            },
         ]
     },
     resolve: {
-        extensions: ['*', '.js']
+        extensions: ['*', '.ts']
     },
     output: {
         path: path.resolve(__dirname, './dist'),

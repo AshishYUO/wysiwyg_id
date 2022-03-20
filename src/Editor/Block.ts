@@ -1,14 +1,14 @@
-import selection from '../Selection';
+import selection, { SelectionInfo } from '../Selection';
 import { applyBlockNodes } from '../Formatting';
 
-const blockSet = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "DIV", "PRE", "P", "DL", "ADDRESS", "IMG", "LI", "TABLE", "TR"]);
+const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'DIV', 'PRE', 'P', 'DL', 'ADDRESS', 'IMG', 'LI', 'TABLE', 'TR']);
 
 /**
  * @details Check to see if a node is a block node or not.
  * @param node node to check
  * @returns true if it's a block node else false
  */
-const isABlockNode = node => {
+const isABlockNode = (node: Node): boolean => {
     return blockSet.has(node.nodeName);
 }
 
@@ -17,7 +17,7 @@ const isABlockNode = node => {
  * @param node the node to evaluate it's parent.
  * @returns block node that is just below main text editor.
  */
-const getParentBlockNode = (editor, node, offset) => {
+const getParentBlockNode = (editor: HTMLElement, node: Node, offset: number) => {
     if (node === editor) {
         return node.childNodes[offset];
     }
@@ -31,7 +31,7 @@ const getParentBlockNode = (editor, node, offset) => {
  * @details Get block node that are selected.
  * @returns start node and endNode.
  */
-const getSelectedBlockNode = editor => {
+const getSelectedBlockNode = (editor: HTMLElement): [ Node, Node ] => {
     const {
         startNode,
         endNode,
@@ -47,7 +47,7 @@ const getSelectedBlockNode = editor => {
  * @details Get all block nodes in the current selection.
  * @returns List of all selected block nodes.
  */
-const getAllBlockNodesInCurrentSelection = editor => {
+const getAllBlockNodesInCurrentSelection = (editor: HTMLElement): Array<HTMLElement> => {
     const [startBlockNode, endBlockNode] = getSelectedBlockNode(editor);
     // Assumption that the nodes are at a same level, and lists are not included.
     let nodeTraversal = startBlockNode;
@@ -68,7 +68,7 @@ const getAllBlockNodesInCurrentSelection = editor => {
  * @param nodeName name of node to check
  * @returns true if all blockNodes has the same name
  */
-const isEachNodeSame = (blockNodes, nodeName) => {
+const isEachNodeSame = (blockNodes: Array<HTMLElement>, nodeName: string): boolean => {
     return blockNodes.every(node => node.nodeName === nodeName);
 }
 
@@ -79,7 +79,7 @@ const isEachNodeSame = (blockNodes, nodeName) => {
  * @param offset offset of the selected node.
  * @returns The selection of the node and it's offset.
  */
-const setNodes = (editor, blockNode, node, offset) => {
+const setNodes = (editor: HTMLElement, blockNode: Node, node: Node, offset: number): [ Node, number ] => {
     if (node === editor) {
         if (offset < editor.childNodes.length) {
             return [ editor.childNodes[offset], 0 ];
@@ -99,7 +99,7 @@ const setNodes = (editor, blockNode, node, offset) => {
  * @param selectionInfo caret selection
  * @return new selection based on applied block information.
  */
-const setCaretSelection = (editor, blockNodes, selectionInfo) => {
+const setCaretSelection = (editor: HTMLElement, blockNodes: Array<HTMLElement>, selectionInfo: SelectionInfo): SelectionInfo => {
     const { startNode, startOffset, endNode, endOffset } = selectionInfo;
     const [ newStNode, newStOffset ] = setNodes(editor, blockNodes[0], startNode, startOffset);
     const [ newEndNode, newEndOffset ] = setNodes(editor, blockNodes[blockNodes.length - 1], endNode, endOffset);
@@ -116,7 +116,7 @@ const setCaretSelection = (editor, blockNodes, selectionInfo) => {
  * @param details containing node name.
  * @returns void but applies the node to selected block nodes.
  */
-const addBlock = (editor, details) => {
+const addBlock = (editor: HTMLElement, details: any): void => {
     const nodeType = details.nodeName;
     const Info = selection.getSelectionInfo();
     const parentStart = Info.startNode, parentEnd = Info.endNode;
@@ -128,4 +128,9 @@ const addBlock = (editor, details) => {
     }
 }
 
-export { addBlock, isABlockNode, getSelectedBlockNode, getParentBlockNode };
+export {
+    addBlock,
+    isABlockNode,
+    getSelectedBlockNode,
+    getParentBlockNode,
+};

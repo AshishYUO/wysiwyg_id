@@ -2,24 +2,33 @@ import { insertString, applyInlineTemp } from "./Inline"
 import { selectAll, assertBrOnEmptyBlockNode, breakLine } from '../Formatting';
 import selection from "../Selection";
 
-const assertSelectionOnEmpty = editor => {
+/**
+ * 
+ * @param {HTMLDivElement} editor 
+ */
+const assertSelectionOnEmpty = (editor: HTMLDivElement): void => {
     let {
-        startNode
+        startNode,
+        endNode,
+        startOffset,
+        endOffset
     } = selection.getSelectionInfo();
-    while (startNode.childNodes.length && startNode.nodeName !== 'BR') {
-        startNode = startNode.childNodes[0];
-    }
-    if (startNode.nodeType === 1) {
-        if (startNode.nodeName !== 'BR' && !startNode.childNodes.length) {
-            startNode.appendChild(document.createElement('BR'));
+    if (startNode === endNode && startOffset === endOffset) {
+        while (startNode.childNodes.length && startNode.nodeName !== 'BR') {
             startNode = startNode.childNodes[0];
         }
-        selection.setSelectionAt({
-            startNode: startNode,
-            endNode: startNode,
-            startOffset: 0,
-            endOffset: 0
-        });
+        if (startNode.nodeType === 1) {
+            if (startNode.nodeName !== 'BR' && !startNode.childNodes.length) {
+                startNode.appendChild(document.createElement('BR'));
+                startNode = startNode.childNodes[0];
+            }
+            selection.setSelectionAt({
+                startNode: startNode,
+                endNode: startNode,
+                startOffset: 0,
+                endOffset: 0
+            });
+        }
     }
 }
 
@@ -87,7 +96,10 @@ const eventKeys = {
 }
 
 var keyPressed = eventKeys;
-const parent = [];
+const parent: Array<{
+    key: string,
+    pos: any
+}> = [];
 
 /**
  * @details Handle delete/backspace button event
@@ -109,14 +121,14 @@ const handleDelete = (editor, event) => {
  * @param {Event} event 
  * @returns boolean if preventDefault
  */
-const handleKeyboardDownEvent = (editor, event) => {
+const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent): boolean => {
     if (keyPressed.hasOwnProperty(event.key)) {
         if (typeof keyPressed[event.key] === 'function') {
             return keyPressed[event.key](editor, event);
         } else if (typeof keyPressed[event.key] === 'object') {
             parent.push({
                 key: event.key,
-                obj: keyPressed
+                pos: keyPressed
             });
             keyPressed = keyPressed[event.key];
         }
@@ -130,7 +142,7 @@ const handleKeyboardUpEvent = (editor, event) => {
         while (parent.length && keyEvent.key !== event.key) {
             keyEvent = parent.pop();
         }
-        keyPressed = keyEvent.obj;
+        keyPressed = keyEvent.pos;
     }
     assertBrOnEmptyBlockNode(editor, event.key !== 'Backspace');
     assertSelectionOnEmpty(editor);

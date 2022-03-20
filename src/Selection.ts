@@ -51,7 +51,7 @@ const selection = {
         while (traverseNode.nodeType !== 3 && traverseNode.nodeName !== 'BR') {
             traverseNode = offset === 1 ? traverseNode.childNodes[traverseNode.childNodes.length - 1] : traverseNode.childNodes[0];
         }
-        return [ traverseNode, (traverseNode.nodeType === 3 ? (traverse.textContent.length * offset) : offset) ];
+        return [ traverseNode, (traverseNode.nodeType === 3 ? (traverseNode.textContent.length * offset) : offset) ];
     },
 
     /**
@@ -59,7 +59,7 @@ const selection = {
      * @param void
      * @returns None
      */
-    ensureCaretSelection: () => {
+    ensureCaretSelection: (): void => {
         const currSelection = selection.getSelectionInfo();
         const {
             startNode,
@@ -83,7 +83,7 @@ const selection = {
      * endnode and it's offset
      * @returns {void}
      */
-    setSelectionAt: selectionInfo => {
+    setSelectionAt: (selectionInfo): void => {
         const currSelection = getSelection();
         currSelection.removeAllRanges();
         const newRange = document.createRange();
@@ -105,7 +105,7 @@ const selection = {
      * @param {*} selectionObj 
      * @returns 
      */
-    getCurrentNodeFromCaretPosition: selectionObj => {
+    getCurrentNodeFromCaretPosition: (selectionObj=undefined): Node => {
         const selection = selectionObj || getSelection();
         if (selection.anchorNode && selection.anchorNode.nodeName === '#text') {
             return selection.anchorNode.parentNode;
@@ -114,7 +114,7 @@ const selection = {
         }
     },
 
-    getCommonParentFromCurrentSelection: () => {
+    getCommonParentFromCurrentSelection: (): Node => {
         const currentSelection = getSelection();
         if (currentSelection) {
             const range = currentSelection.getRangeAt(0);
@@ -127,7 +127,7 @@ const selection = {
      * @returns {Object} Caret selection: Start node with it's offset,
      * end node with it's offset
      */
-    getSelectionInfo: () => {
+    getSelectionInfo: (): SelectionInfo => {
         const currentSelection = getSelection();
         if (currentSelection) {
             return {
@@ -138,6 +138,13 @@ const selection = {
             };
         }
     }
+};
+
+export interface SelectionInfo {
+    startNode: Node;
+    endNode: Node;
+    startOffset: number;
+    endOffset: number;
 };
 
 export default selection;
