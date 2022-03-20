@@ -272,7 +272,7 @@ export default class ToolBox {
             symbolButtons.title = symbolButtons.innerHTML = `&#${i};`;
             table.appendChild(symbolButtons);
             symbolButtons.onclick = event => {
-                this.editorHandler.insertString(`&#${i};`);
+                this.editorHandler.insertString(symbolButtons.innerHTML);
             }
         }
         editor.appendChild(table);
