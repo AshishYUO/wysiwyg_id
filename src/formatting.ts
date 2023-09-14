@@ -1,10 +1,13 @@
+import { DOM } from "./element/element";
 import {
     getParentBlockNode,
     isABlockNode
-} from "./Editor/Block";
-import selection from "./Selection";
+} from "./editor/block";
+import selection from "./selection";
+import { el } from "element/helper";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
+const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
 
 /**
  * @details Get intersection of setA and setB
@@ -25,7 +28,7 @@ const intersection = (setA, setB) => {
  * Remove selected elements/text from editor.
  * @param {HTMLElement} editor current editor
  */
-const removeSelectedText = (editor) => {
+const removeSelectedText = (editor: HTMLElement): void => {
     const currSelection = selection.getSelection();
     if (currSelection) {
         const str = currSelection.toString();
@@ -79,6 +82,21 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
     return styles;
 }
 
+/**
+ * @details Get applied inline style on a particular text node.
+ * @param editor main editor node to work on.
+ * @param node Node element to evaluate it's style.
+ */
+ const getAppliedInlineStyles = (editor, node) => {
+    const styles = [];
+    while (node !== editor) {
+        if (availableFormats.has(node.nodeName)) {
+            styles.push(node.nodeName);
+        }
+        node = node.parentNode;
+    }
+    return styles;
+}
 
 /**
  * @details Apply node element to selected block elements.
@@ -87,14 +105,12 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
  * @returns void, but applies node changes to all selected
  * elements.
  */
- const applyBlockNodes = (blockNodes, nodeName) => {
+ const applyBlockNodes = (blockNodes: Array<HTMLElement | Node>, nodeName: string): void => {
     blockNodes.forEach((node, index, blockNodes) => {
         if (node.nodeName !== nodeName) {
-            const blockElement = document.createElement(nodeName);
-            while (node.childNodes.length) {
-                blockElement.appendChild(node.childNodes[0]);
-            }
-            node.parentNode.replaceChild(blockElement, node);
+            /// Move all children to the new node
+            /// and replace with the node.
+            const blockElement = el(nodeName).inner([...node.childNodes]).replaceWith(node).get();
             blockNodes[index] = blockElement;
         }
     });
@@ -104,7 +120,7 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
  * @brief Set the caret to select the entire text entered in here.
  * @param {HTMLElement} editor 
  */
-const selectAll = (editor) => {;
+const selectAll = (editor: HTMLElement | Node): void => {;
     let startNode = editor.childNodes[0], endNode = editor.childNodes[editor.childNodes.length - 1];
     while (startNode.childNodes && startNode.childNodes.length) {
         startNode = startNode.childNodes[0];
@@ -126,19 +142,20 @@ const selectAll = (editor) => {;
  * @param {HTMLElement} editor main editor DOM
  * @param {boolean} removeOnCall call whether to remove the break line element
  */
-const assertBrOnEmptyBlockNode = (editor, removeOnCall) => {
+const assertBrOnEmptyBlockNode = (editor: HTMLElement | Node, removeOnCall: boolean) => {
     const {
         startNode,
         endNode,
         startOffset,
         endOffset
     } = selection.getSelectionInfo();
+    /// If text is not selected.
     if (startNode === endNode && startOffset === endOffset) {
         const parentBlockNode = getParentBlockNode(editor, startNode, startOffset);
         if (!parentBlockNode.childNodes.length && parentBlockNode.nodeType === 1) {
             if (parentBlockNode.nodeName === 'BR') {
-                const par = document.createElement('P');
-                const breakNode = document.createElement('BR');
+                const par = DOM.createElement('DIV');
+                const breakNode = DOM.createElement('BR');
                 par.appendChild(breakNode);
                 parentBlockNode.parentNode.replaceChild(par, parentBlockNode);
                 selection.setSelectionAt({
@@ -148,11 +165,12 @@ const assertBrOnEmptyBlockNode = (editor, removeOnCall) => {
                     endOffset: 0
                 });
             } else {
-                parentBlockNode.appendChild(document.createElement('BR'));
+                parentBlockNode.appendChild(DOM.createElement('BR'));
             }
         } else {
             const breakNodeCheck = parentBlockNode.childNodes[parentBlockNode.childNodes.length - 1];
-            if (removeOnCall && breakNodeCheck.nodeName === 'BR') {
+            const len = parentBlockNode.childNodes.length;
+            if (removeOnCall && breakNodeCheck.nodeName === 'BR' && len > 2 && parentBlockNode.childNodes[len - 2].nodeType === 3) {
                 breakNodeCheck.remove();
             }
         }
@@ -170,60 +188,36 @@ const onEnterPressed = editor => {
  * @returns void.
  */
 const breakLine = (editor) => {
-    removeSelectedText(editor);
-    // currSelection, startNode and endNode and their offsets are same
-    const currSelection = selection.getSelectionInfo();
-    if (currSelection) {
-        const [ startNode, startOffset ] = selection.forceTextNodeSelection(currSelection.startNode, currSelection.startOffset);
-        // ensure the selection is of type text node.
-        const breakLineElement = document.createElement('BR');
-        if (startNode.nodeType === 1) {
-            // perform some action
-            if (startOffset === 1) {
-                if (startNode.nextSibling) {
-                    startNode.parentNode.appendChild(breakLineElement);
-                } else {
-                    startNode.parentNode.insertBefore(breakLineElement, startNode);
-                }
-                // todo: To make selection just after the break line element.
-            }
-        } else {
-            // Condition: if the break line needs to be done when it's between texts,
-            // then break the text node into two and add <br /> between these two text
-            // nodes.
-            if (startOffset > 0 && startOffset < startNode.textContent.length) {
-                const newNodeBeforeCaret = document.createTextNode(startNode.textContent.substr(0, startOffset));
-                const newNodeAfterCaret  = document.createTextNode(startNode.textContent.substr(startOffset));
-                startNode.parentNode.replaceChild(newNodeBeforeCaret, startNode);
-                if (newNodeBeforeCaret.nextSibling) {
-                    newNodeBeforeCaret.parentNode.insertBefore(breakLineElement, newNodeBeforeCaret.nextSibling);
-                    breakLineElement.parentNode.insertBefore(newNodeAfterCaret, breakLineElement.nextSibling);
-                } else {
-                    newNodeBeforeCaret.parentNode.appendChild(breakLineElement);
-                    newNodeBeforeCaret.parentNode.appendChild(newNodeAfterCaret);
-                }
-            } else {
-                if (!startOffset) {
-                    startNode.parentNode.insertBefore(breakLineElement, startNode);
-                } else {
-                    if (startNode.nextSibling) {
-                        startNode.parentNode.insertBefore(breakLineElement, startNode.nextSibling);
-                    } else {
-                        startNode.parentNode.appendChild(breakLineElement);
-                    }
-                }
-            }
-            if (breakLineElement.nextSibling) {
-                selection.setSelectionAt({
-                    startNode: breakLineElement.nextSibling,
-                    startOffset: 0,
-                    endNode: breakLineElement.nextSibling,
-                    endOffset: 0
-                });
-            }
-        }
-    }
+    
 }
+
+const splitBlockNodeOnSelection = (blockNode) => {
+    const {
+        startNode,
+        endNode,
+        startOffset,
+        endOffset
+    } = selection.getSelectionInfo();
+
+}
+
+const splitTextNodesOnSelection = (textNode) => {
+    const {
+        startNode,
+        endNode,
+        startOffset,
+        endOffset
+    } = selection.getSelectionInfo();
+    if (startOffset > 0 && startOffset < textNode.textContent.length) {
+        return [
+            DOM.createTextNode(textNode.textContent.substr(0, startOffset)),
+            DOM.createTextNode(textNode.textContent.substr(startOffset))
+        ];
+    }
+    else {
+        return [textNode];
+    }
+} 
 
 export { 
     getIntersectingFormattingOptions,

@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    entry: path.resolve(__dirname, './src/index.ts'),
+    entry: path.resolve(dirname, './src/index.ts'),
     module: {
         rules: [
             {
@@ -33,11 +33,11 @@ module.exports = {
         extensions: ['*', '.ts']
     },
     output: {
-        path: path.resolve(__dirname, './dist'),
+        path: path.resolve(dirname, './dist'),
         filename: 'main.js',
     },
     devServer: {
-        contentBase: path.resolve(__dirname, './dist'),
+        contentBase: path.resolve(dirname, './dist'),
     },
     watch: true
 };

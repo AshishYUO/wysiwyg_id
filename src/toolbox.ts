@@ -1,6 +1,7 @@
-import selection from './Selection';
-import { getIntersectingFormattingOptions } from './Formatting';
-import Editor from './Editor/Editor';
+import selection from './selection';
+import { getIntersectingFormattingOptions } from './formatting';
+import Editor from './editor/editor';
+import { DOM } from './element/element';
 
 export default class ToolBox {
     editorHandler: Editor = null;
@@ -18,10 +19,10 @@ export default class ToolBox {
     hr: HTMLButtonElement = null;
     header1: HTMLButtonElement = null;
     header2: HTMLButtonElement = null;
-    Alignleft: HTMLButtonElement = null;
-    Alignright: HTMLButtonElement = null;
-    Aligncenter: HTMLButtonElement = null;
-    Alignjustify: HTMLButtonElement = null;
+    alignLeft: HTMLButtonElement = null;
+    alignRight: HTMLButtonElement = null;
+    alignCenter: HTMLButtonElement = null;
+    alignJustify: HTMLButtonElement = null;
     unorderedList: HTMLButtonElement = null;
     orderedList: HTMLButtonElement = null;
     math: HTMLButtonElement = null;
@@ -136,32 +137,32 @@ export default class ToolBox {
             });
         }
 
-        this.Alignleft = Node.querySelector('.align-left');
-        this.Alignleft && (this.Alignleft.onclick = event => this.applyTools(event => {
+        this.alignLeft = Node.querySelector('.align-left');
+        this.alignLeft && (this.alignLeft.onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyLeft'
             });
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.Alignright = Node.querySelector('.align-right');
-        this.Alignright && (this.Alignright.onclick = event => this.applyTools(event => {
+        this.alignRight = Node.querySelector('.align-right');
+        this.alignRight && (this.alignRight.onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyRight'
             });
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.Aligncenter = Node.querySelector('.align-center');
-        this.Aligncenter && (this.Aligncenter.onclick = event => this.applyTools(event => {
+        this.alignCenter = Node.querySelector('.align-center');
+        this.alignCenter && (this.alignCenter.onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyCenter'
             });
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.Alignjustify = Node.querySelector('.align-justify');
-        this.Alignjustify && (this.Alignjustify.onclick = event => this.applyTools(event => {
+        this.alignJustify = Node.querySelector('.align-justify');
+        this.alignJustify && (this.alignJustify.onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyFull'
             });
@@ -206,10 +207,10 @@ export default class ToolBox {
         };
 
         this.alignment = {
-            left: this.Alignleft,
-            right: this.Alignright,
-            center: this.Aligncenter,
-            justify: this.Alignjustify
+            left: this.alignLeft,
+            right: this.alignRight,
+            center: this.alignCenter,
+            justify: this.alignJustify
         };
     }
     /**
@@ -264,10 +265,10 @@ export default class ToolBox {
      * @param end end value of unicode character.
      */
     constructSymbolTable (editor, start, end) {
-        const table = document.createElement('DIV');
+        const table = DOM.createElement('DIV');
         table.classList.add('symbol-table')
         for (let i = start; i <= end; ++i) {
-            const symbolButtons = document.createElement('BUTTON');
+            const symbolButtons = DOM.createElement('BUTTON');
             symbolButtons.classList.add('symbol-blocks');
             symbolButtons.title = symbolButtons.innerHTML = `&#${i};`;
             table.appendChild(symbolButtons);

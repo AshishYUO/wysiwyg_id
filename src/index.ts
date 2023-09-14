@@ -1,4 +1,4 @@
-import { initEditor } from './Init';
+import { initEditor } from './init';
 
 window.onload = () => {
     initEditor();

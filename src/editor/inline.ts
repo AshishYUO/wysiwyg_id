@@ -1,6 +1,6 @@
-import selection from '../Selection';
-import { getAppliedStyles, getIntersectingFormattingOptions } from '../Formatting';
-import { getParentBlockNode } from './Block';
+import selection from '../selection';
+import { getAppliedStyles, getIntersectingFormattingOptions } from '../formatting';
+import { getParentBlockNode } from './block';
 
 /**
  * @details Insert string in a text node.
@@ -8,13 +8,13 @@ import { getParentBlockNode } from './Block';
  * @param {String} str string to insert.
  * @returns void
  */
-const insertString = (editor: HTMLElement, str: string) => {
+function insertString(editor: HTMLElement, str: string) {
     const selections = selection.getSelection();
     const startNode = selections.getRangeAt(0).startContainer, startOffset = selections.getRangeAt(0).startOffset;
     if (selections.toString().length) {
         selections.deleteFromDocument();
     }
-    const [ selectedNode, selectedOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
+    const [selectedNode, selectedOffset] = selection.forceTextNodeSelection(startNode, startOffset);
     if (selectedNode.nodeType === 1) {
         const textNode = document.createTextNode(str),
               textOffset = str.length;
@@ -34,7 +34,7 @@ const insertString = (editor: HTMLElement, str: string) => {
             endOffset: textOffset
         });
     } else {
-        selectedNode.insertData(selectedOffset, str);
+        // selectedNode.insertData(selectedOffset, str);
         selection.setSelectionAt({
             startNode: selectedNode,
             startOffset: selectedOffset + str.length,
@@ -50,8 +50,9 @@ const insertString = (editor: HTMLElement, str: string) => {
  * @param endNode ending node of selection
  * @returns all text nodes that are currently selected
  */
-const getAllTextNodes = (editor, startNode, endNode) => {
+function getAllTextNodes(editor: Node, startNode: Node, endNode: Node) {
     const textNodes = startNode === endNode ? [startNode] : [];
+
     while (startNode !== endNode && startNode !== editor) {
         // Get leaf node (text node)
         while (startNode.nodeName !== '#text' && startNode.nodeName !== 'BR') {
@@ -59,7 +60,7 @@ const getAllTextNodes = (editor, startNode, endNode) => {
         }
         textNodes.push(startNode);
         // Get parent node till there is no next sibling.
-        while (startNode !== endNode && startNode !== editor && !startNode.nextSibling) {
+        while (startNode && startNode !== endNode && startNode !== editor && !startNode.nextSibling) {
             startNode = startNode.parentNode;
         }
         if (startNode === endNode || startNode === editor) {
@@ -79,7 +80,7 @@ const getAllTextNodes = (editor, startNode, endNode) => {
  * @param {HTMLElement} startNode 
  * @param {HTMLElement} endNode 
  */
-const applyInline = (editor, newStyle) => {
+function applyInline(editor: Node, newStyle: string) {
     const {
         startNode,
         endNode,
@@ -87,14 +88,15 @@ const applyInline = (editor, newStyle) => {
         endOffset
     } = selection.getSelectionInfo();
     const allNodes = getAllTextNodes(editor, startNode, endNode);
-    const [ intersectingNodes, align ] = getIntersectingFormattingOptions(editor, allNodes);
-    console.log(intersectingNodes);
+    const [intersectingNodes, align] = getIntersectingFormattingOptions(editor, allNodes);
+    // console.log('Common styles', intersectingNodes);
     const styleNodes = optimizeNodes(editor, allNodes);
+    console.log('All Nodes selected: ', styleNodes);
     // Different logic for start and endNode, but apply all styles to remaining nodes.
-    styleNodes.forEach(node => applyStyles(editor, node, newStyle, intersectingNodes));
+    // styleNodes.forEach(node => applyStyles(editor, node, newStyle, intersectingNodes));
 }
 
-const applyInlineTemp = (editor, details) => {
+const applyInlineTemp = (editor: Node, details: any) => {
     const { cmd, valArg } = details;
     document.execCommand(cmd, false, valArg);
 }

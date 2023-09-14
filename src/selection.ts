@@ -16,7 +16,7 @@ const selection = {
      * @param {Element} newNode node at which the caret is to be positioned
      * @returns undefined
      */
-    setCaretPositionAtNode: function(newNode) {
+    setCaretPositionAtNode: function(newNode: Node) {
         const selection = getSelection();
         const NewRange = document.createRange();
         selection.removeAllRanges();
@@ -29,7 +29,10 @@ const selection = {
      * @param {Element} newNode given node
      * @param {Number} offset offset
      */
-    setCaretPositionAtNodeWithOffset: (newNode, offset) => {
+    setCaretPositionAtNodeWithOffset: (
+        newNode: Node,
+        offset: number
+    ) => {
         const selection = getSelection();
         selection.removeAllRanges();
         const NewRange = document.createRange();
@@ -43,7 +46,10 @@ const selection = {
      * @param {Number} offset Offset between start element and caret position
      * @returns {[HTMLElement, Number]} a new set of TextElement and offset.
      */
-    forceTextNodeSelection: (node, offset) => {
+    forceTextNodeSelection: (
+        node: Node, 
+        offset: number
+    ): [Node, number] => {
         if (node.nodeType === 3 || node.nodeName === 'BR') {
             return [ node, offset ];
         }
@@ -51,7 +57,10 @@ const selection = {
         while (traverseNode.nodeType !== 3 && traverseNode.nodeName !== 'BR') {
             traverseNode = offset === 1 ? traverseNode.childNodes[traverseNode.childNodes.length - 1] : traverseNode.childNodes[0];
         }
-        return [ traverseNode, (traverseNode.nodeType === 3 ? (traverseNode.textContent.length * offset) : offset) ];
+        return [
+            traverseNode,
+            (traverseNode.nodeType === 3 ? (traverseNode.textContent.length * offset) : offset)
+        ];
     },
 
     /**
@@ -83,8 +92,8 @@ const selection = {
      * endnode and it's offset
      * @returns {void}
      */
-    setSelectionAt: (selectionInfo): void => {
-        const currSelection = getSelection();
+    setSelectionAt: (selectionInfo: SelectionInfo): void => {
+        const currSelection = selection.getSelection();
         currSelection.removeAllRanges();
         const newRange = document.createRange();
         let {
@@ -106,11 +115,11 @@ const selection = {
      * @returns 
      */
     getCurrentNodeFromCaretPosition: (selectionObj=undefined): Node => {
-        const selection = selectionObj || getSelection();
-        if (selection.anchorNode && selection.anchorNode.nodeName === '#text') {
-            return selection.anchorNode.parentNode;
+        const currSelection = selectionObj || selection.getSelection();
+        if (currSelection.anchorNode && currSelection.anchorNode.nodeName === '#text') {
+            return currSelection.anchorNode.parentNode;
         } else {
-            return selection.anchorNode;
+            return currSelection.anchorNode;
         }
     },
 

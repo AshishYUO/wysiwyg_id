@@ -1,5 +1,5 @@
-import selection from "../Selection";
-import { isABlockNode } from "./Block";
+import selection from "../selection";
+import { isABlockNode } from "./block";
 /**
  * @details Perform list operation in a different file.
  * @param details 

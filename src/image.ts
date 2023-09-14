@@ -1,20 +1,29 @@
-import selection from './Selection';
-import { isABlockNode } from './Editor/Block';
+import selection from './selection';
+import { isABlockNode } from './editor/block';
+import { el, elquery } from 'element/helper';
 
 export default class Image {
-    mainBody: HTMLElement = null;
-    imageButton: HTMLElement = null;
-    fileElement: HTMLElement = null;
-    fileReader: FileReader = null;
-    selection: Selection = null;
+    mainBody: HTMLElement;
+    imageButton: HTMLElement;
+    fileElement: HTMLElement;
+    fileReader: FileReader;
+    selection: Selection;
 
-    constructor (Node) {
+    constructor (Node: HTMLElement) {
         this.mainBody = Node;
-        this.imageButton = Node.querySelector('.image');
-        this.fileElement = document.createElement('input');
-        this.fileElement.setAttribute('type', 'file');
+        this.imageButton = elquery<HTMLImageElement>('.image');
+
+        this.fileElement = el('input')
+            .attr('type', 'file')
+            .evt('change', (e: any) => {
+                const image = e.target.files[0];
+                this.fileReader.readAsDataURL(image);
+            })
+            .get<HTMLImageElement>();
+
         this.fileReader = new FileReader();
-        this.selection = undefined;
+        this.selection = null;
+
         this.imageButton.onclick = event => {
             this.selection = selection.getSelection();
             const URL = this.selection.toString().trim();
@@ -35,11 +44,6 @@ export default class Image {
                 this.loadImage(event.target.result);
             }
         }
-
-        this.fileElement.onchange = (event: any) => {
-            const image = event.target.files[0];
-            this.fileReader.readAsDataURL(image);
-        }
     }
 
     /**
@@ -48,25 +52,25 @@ export default class Image {
      * @return void
      */
     setImageEvents(imageElement: HTMLImageElement): void {
-        const mousemoveOnResizingEvent = event => {
+        const mousemoveOnResizingEvent = (event: Event) => {
             event.preventDefault();
             this.executeResizingEvent(event);
         }
-        const mouseupEvent = event => {
+        const mouseupEvent = (event: Event) => {
             imageElement.removeEventListener('mouseup', mouseupEvent);
             this.setImageEvents(imageElement);
         }
 
-        const setupResizingEvents = event => {
+        const setupResizingEvents = (event: MouseEvent) => {
             imageElement.focus();
-            const inRange = (value, check) => check >= value - 5 && check <= value + 5;
+            const inRange = (value: number, check: number) => check >= value - 5 && check <= value + 5;
             const resizeType = (inRange(event.offsetY, imageElement.height) ? 's' : '') + 
                             (inRange(event.offsetX, imageElement.width) ? 'e' : '');
 
             imageElement.style.cursor = resizeType.length ? `${resizeType}-resize` : 'default';
         }
 
-        const imageClickHold = event => {
+        const imageClickHold = (event: MouseEvent) => {
             if (imageElement.style.cursor !== 'default') {
                 imageElement.onmousemove = mousemoveOnResizingEvent;
                 imageElement.onmouseup = mouseupEvent;
@@ -90,23 +94,23 @@ export default class Image {
         }
     }
 
-    loadImage(urlStr) {
-        const imageNode = document.createElement('img');
-        imageNode.setAttribute('src', urlStr);
+    loadImage(urlStr: string) {
+        const imageNode = el('img').attrs([
+            ['src', urlStr],
+            ['width', '1000'],
+            ['tabindex', '0']
+        ]).get<HTMLImageElement>();//('img');
+
         let node = selection.getCurrentNodeFromCaretPosition(this.selection);
         while (!isABlockNode(node)) {
             node = node.parentNode;
         }
         this.setImageEvents(imageNode);
-        imageNode.setAttribute('width', '1000');
-        imageNode.setAttribute('tabindex', '0');
-        const element = node as HTMLElement;
-        element.innerHTML = '';
-        node = element as Node;
-        node.appendChild(imageNode);
+        
+        el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);
     }
 
-    matchesWithExtURL(str){
+    matchesWithExtURL(str: string){
         return str.match(/https?:\/\/.*/);
     }
 }

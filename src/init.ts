@@ -1,7 +1,9 @@
-import Editor from './Editor/Editor';
-import { initUIMode } from './Mode';
+import Editor from './editor/editor';
+import { initUIMode } from './mode';
 import '../styles/style.css';
 import '../styles/theme.css';
+import { DOM } from './element/element';
+import { el } from 'element/helper';
 
 export const initEditor = (enableTools=undefined) => {
     const enablingTools = {
@@ -102,10 +104,9 @@ export const initEditor = (enableTools=undefined) => {
         }
     }
 
-    const cssLink = document.createElement('LINK');
-    cssLink.setAttribute('rel', 'stylesheet');
-    cssLink.setAttribute('href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css');
-    document.head.appendChild(cssLink);
+    el<HTMLLinkElement>('link')
+        .attrs([['rel', 'stylesheet'], ['href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css']])
+        .appendTo(document.head);
 
     if (!Array.isArray(enableTools)) {
         enableTools = [['bold', 'italic', 'underline', 'subscript', 'superscript'], 
@@ -128,39 +129,48 @@ export const initEditor = (enableTools=undefined) => {
         }
     }
 
-    const allEditorDOM = document.querySelectorAll('.editor');
+    const allEditorDOM = DOM.querySelectorAll('.editor');
     allEditorDOM.forEach((editor: HTMLElement) => {
-        const options = document.createElement('DIV');
-        options.classList.add('options');
-        const toolbar = document.createElement('span');
+        /// Create options
+        const options = el('div').cls('options').get<HTMLDivElement>();
+        const toolbar = el('span').get();
 
         enableTools.forEach(toolBatch => {
             toolBatch.forEach(toolInfo => {
                 const { hint, classname, display } = enablingTools[toolInfo];
-                const toolContainer = document.createElement('span');
-                const tool = document.createElement('button');
+                toolbar.appendChild(el('span')
+                    .cls('tool')
+                    .inner([el('button')
+                        .bcls(['no-highlight', classname])
+                        .attr('title', hint)
+                        .innerHtml(display)
+                    ])
+                    .get()
+                );
 
-                toolContainer.classList.add('tool');
-                tool.classList.add(classname);
-                tool.title = hint;
-                tool.classList.add('no-highlight');
-                tool.innerHTML = display;
-                toolContainer.innerHTML = `${tool.outerHTML}`;
-                toolbar.appendChild(toolContainer);
+                // const tool = DOM.createElement('button');
+                // toolContainer.classList.add('tool');
+                // tool.classList.add(classname);
+                // tool.title = hint;
+                // tool.classList.add('no-highlight');
+                // tool.innerHTML = display;
+                // toolContainer.innerHTML = `${tool.outerHTML}`;
+                // toolbar.appendChild(toolContainer);
             });
             if (toolBatch !== enableTools[enableTools.length - 1]) {
-                const vertical = document.createElement('SPAN');
-                vertical.classList.add('separator');
-                toolbar.appendChild(vertical);
+                toolbar.appendChild(
+                    el('span').cls('separator').get()
+                );
             }
         });
 
         options.appendChild(toolbar);
         editor.appendChild(options);
-        const body = document.createElement('DIV');
-        body.setAttribute('contenteditable', 'true');
-        body.classList.add('bodyeditable');
-        editor.appendChild(body);
+        editor.appendChild(el('div').attr('contenteditable', 'true').cls('bodyeditable').get());
+        // const body = ;
+        // body.setAttribute('contenteditable', 'true');
+        // body.classList.add('bodyeditable');
+        // editor.appendChild(body);
         
         new Editor(editor);
     });
