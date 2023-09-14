@@ -1,13 +1,9 @@
-import { DOM } from "./element/element";
-import {
-    getParentBlockNode,
-    isABlockNode
-} from "./editor/block";
+import { blockInEditor } from "./editor/block";
 import selection from "./selection";
-import { el } from "element/helper";
+import { _, des, el, txt } from "element/helper";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
-const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
+// const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
 
 /**
  * @details Get intersection of setA and setB
@@ -22,20 +18,6 @@ const intersection = (setA, setB) => {
         }
     })
     toRemove.forEach(element => setA.delete(element));
-}
-
-/**
- * Remove selected elements/text from editor.
- * @param {HTMLElement} editor current editor
- */
-const removeSelectedText = (editor: HTMLElement): void => {
-    const currSelection = selection.getSelection();
-    if (currSelection) {
-        const str = currSelection.toString();
-        if (str && str.length) {
-            currSelection.deleteFromDocument();
-        }
-    }
 }
 
 /**
@@ -83,29 +65,16 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
 }
 
 /**
- * @details Get applied inline style on a particular text node.
- * @param editor main editor node to work on.
- * @param node Node element to evaluate it's style.
- */
- const getAppliedInlineStyles = (editor, node) => {
-    const styles = [];
-    while (node !== editor) {
-        if (availableFormats.has(node.nodeName)) {
-            styles.push(node.nodeName);
-        }
-        node = node.parentNode;
-    }
-    return styles;
-}
-
-/**
  * @details Apply node element to selected block elements.
  * @param blockNodes list of all block nodes.
  * @param nodeName node to apply.
  * @returns void, but applies node changes to all selected
  * elements.
  */
- const applyBlockNodes = (blockNodes: Array<HTMLElement | Node>, nodeName: string): void => {
+ function applyBlockNodes(
+    blockNodes: Array<HTMLElement | Node>,
+    nodeName: string
+): void {
     blockNodes.forEach((node, index, blockNodes) => {
         if (node.nodeName !== nodeName) {
             /// Move all children to the new node
@@ -148,24 +117,25 @@ const assertBrOnEmptyBlockNode = (editor: HTMLElement | Node, removeOnCall: bool
         endNode,
         startOffset,
         endOffset
-    } = selection.getSelectionInfo();
+    } = selection.getSelectionInfo().get();
     /// If text is not selected.
     if (startNode === endNode && startOffset === endOffset) {
-        const parentBlockNode = getParentBlockNode(editor, startNode, startOffset);
+        const parentBlockNode = blockInEditor(editor, startNode);
         if (!parentBlockNode.childNodes.length && parentBlockNode.nodeType === 1) {
             if (parentBlockNode.nodeName === 'BR') {
-                const par = DOM.createElement('DIV');
-                const breakNode = DOM.createElement('BR');
-                par.appendChild(breakNode);
-                parentBlockNode.parentNode.replaceChild(par, parentBlockNode);
+                const par = el('div').inner([el('br')]).replaceWith(parentBlockNode).get();
+                const [br] = des<[HTMLElement]>(par, [_]);
+                // const breakNode = DOM.createElement('BR');
+                // par.appendChild(breakNode);
+                // parentBlockNode.parentNode.replaceChild(par, parentBlockNode);
                 selection.setSelectionAt({
-                    startNode: breakNode,
-                    endNode: breakNode,
+                    startNode: br,
+                    endNode: br,
                     startOffset: 0,
                     endOffset: 0
                 });
             } else {
-                parentBlockNode.appendChild(DOM.createElement('BR'));
+                parentBlockNode.appendChild(el('br').get());
             }
         } else {
             const breakNodeCheck = parentBlockNode.childNodes[parentBlockNode.childNodes.length - 1];
@@ -177,53 +147,10 @@ const assertBrOnEmptyBlockNode = (editor: HTMLElement | Node, removeOnCall: bool
     }
 }
 
-const onEnterPressed = editor => {
-    removeSelectedText(editor);
-    const currSelection = selection.getSelection();
-}
-
-/**
- * @details Insert break line: A part of Shift + Enter key functionality.
- * @param {HTMLElement} editor main editor node.
- * @returns void.
- */
-const breakLine = (editor) => {
-    
-}
-
-const splitBlockNodeOnSelection = (blockNode) => {
-    const {
-        startNode,
-        endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo();
-
-}
-
-const splitTextNodesOnSelection = (textNode) => {
-    const {
-        startNode,
-        endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo();
-    if (startOffset > 0 && startOffset < textNode.textContent.length) {
-        return [
-            DOM.createTextNode(textNode.textContent.substr(0, startOffset)),
-            DOM.createTextNode(textNode.textContent.substr(startOffset))
-        ];
-    }
-    else {
-        return [textNode];
-    }
-} 
-
 export { 
     getIntersectingFormattingOptions,
     getAppliedStyles,
     applyBlockNodes,
     selectAll,
     assertBrOnEmptyBlockNode,
-    breakLine
 };

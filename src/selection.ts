@@ -1,14 +1,15 @@
+import { Opt, Some } from "utils/option";
 
 /**
  * @details class for selection
  */
 const selection = {
     /**
-     * @brief returns the current selection in the document, restricted to editor
+     * @brief Returns the current selection in the document, restricted to editor
      * @returns Selection object
      */
-    getSelection: function() {
-        return document.getSelection();
+    sel: function() {
+        return Some(document.getSelection());
     },
     
     /**
@@ -51,7 +52,7 @@ const selection = {
         offset: number
     ): [Node, number] => {
         if (node.nodeType === 3 || node.nodeName === 'BR') {
-            return [ node, offset ];
+            return [node, offset];
         }
         let traverseNode = node;
         while (traverseNode.nodeType !== 3 && traverseNode.nodeName !== 'BR') {
@@ -69,15 +70,16 @@ const selection = {
      * @returns None
      */
     ensureCaretSelection: (): void => {
-        const currSelection = selection.getSelectionInfo();
+        const currSelection = selection.getSelectionInfo().get();
         const {
             startNode,
             endNode,
             startOffset,
             endOffset
         } = currSelection;
-        const [ newStartNode, newStartOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
-        const [ newEndNode, newEndOffset ] = selection.forceTextNodeSelection(endNode, endOffset);
+        const [newStartNode, newStartOffset] = selection.forceTextNodeSelection(startNode, startOffset);
+        const [newEndNode, newEndOffset] = selection.forceTextNodeSelection(endNode, endOffset);
+
         selection.setSelectionAt({
             startNode: newStartNode,
             endNode: newEndNode,
@@ -93,20 +95,24 @@ const selection = {
      * @returns {void}
      */
     setSelectionAt: (selectionInfo: SelectionInfo): void => {
-        const currSelection = selection.getSelection();
-        currSelection.removeAllRanges();
-        const newRange = document.createRange();
-        let {
-            startNode,
-            endNode,
-            startOffset,
-            endOffset
-        } = selectionInfo;
-        [ startNode, startOffset ] = selection.forceTextNodeSelection(startNode, startOffset);
-        [ endNode, endOffset ] = selection.forceTextNodeSelection(endNode, endOffset);
-        newRange.setStart(startNode, startOffset);
-        newRange.setEnd(endNode, endOffset);
-        currSelection.addRange(newRange);
+        selection.sel().doGet(currSel => {
+            currSel.removeAllRanges();
+            const newRange = document.createRange();
+
+            let {
+                startNode,
+                endNode,
+                startOffset,
+                endOffset
+            } = selectionInfo;
+
+            [startNode, startOffset] = selection.forceTextNodeSelection(startNode, startOffset);
+            [endNode, endOffset] = selection.forceTextNodeSelection(endNode, endOffset);
+
+            newRange.setStart(startNode, startOffset);
+            newRange.setEnd(endNode, endOffset);
+            currSel.addRange(newRange);
+        });
     },
 
     /**
@@ -115,7 +121,7 @@ const selection = {
      * @returns 
      */
     getCurrentNodeFromCaretPosition: (selectionObj=undefined): Node => {
-        const currSelection = selectionObj || selection.getSelection();
+        const currSelection = selectionObj || selection.sel().get();
         if (currSelection.anchorNode && currSelection.anchorNode.nodeName === '#text') {
             return currSelection.anchorNode.parentNode;
         } else {
@@ -123,12 +129,10 @@ const selection = {
         }
     },
 
-    getCommonParentFromCurrentSelection: (): Node => {
-        const currentSelection = getSelection();
-        if (currentSelection) {
-            const range = currentSelection.getRangeAt(0);
-            return range.commonAncestorContainer;
-        }
+    getCommonParentFromCurrentSelection: (): Opt<Node> => {
+        return selection.sel().map(curSel => (
+            curSel.getRangeAt(0).commonAncestorContainer
+        ))
     },
 
     /**
@@ -136,16 +140,13 @@ const selection = {
      * @returns {Object} Caret selection: Start node with it's offset,
      * end node with it's offset
      */
-    getSelectionInfo: (): SelectionInfo => {
-        const currentSelection = getSelection();
-        if (currentSelection) {
-            return {
-                startNode: currentSelection.getRangeAt(0).startContainer,
-                startOffset: currentSelection.getRangeAt(0).startOffset,
-                endNode: currentSelection.getRangeAt(0).endContainer,
-                endOffset: currentSelection.getRangeAt(0).endOffset
-            };
-        }
+    getSelectionInfo: (): Opt<SelectionInfo> => {
+        return selection.sel().map(currSel => ({
+            startNode: currSel.getRangeAt(0).startContainer,
+            startOffset: currSel.getRangeAt(0).startOffset,
+            endNode: currSel.getRangeAt(0).endContainer,
+            endOffset: currSel.getRangeAt(0).endOffset
+        }));
     }
 };
 

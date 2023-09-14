@@ -1,32 +1,33 @@
 import selection from './selection';
 import { getIntersectingFormattingOptions } from './formatting';
 import Editor from './editor/editor';
-import { DOM } from './element/element';
+import { el, elquery } from 'element/helper';
+import { iter_to_par, iter_to_par_incl } from 'utils/iter';
 
 export default class ToolBox {
-    editorHandler: Editor = null;
-    mainNode: HTMLDivElement = null;
-    symbolTable: HTMLElement = null;
-    toolbox: HTMLElement = null;
-    bodyNode: HTMLElement = null;
-    bold: HTMLButtonElement = null;
-    italic: HTMLButtonElement = null;
-    underline: HTMLButtonElement = null;
-    subs: HTMLButtonElement = null;
-    sups: HTMLButtonElement = null;
-    quote: HTMLButtonElement = null;
-    anchor: HTMLButtonElement = null;
-    hr: HTMLButtonElement = null;
-    header1: HTMLButtonElement = null;
-    header2: HTMLButtonElement = null;
-    alignLeft: HTMLButtonElement = null;
-    alignRight: HTMLButtonElement = null;
-    alignCenter: HTMLButtonElement = null;
-    alignJustify: HTMLButtonElement = null;
-    unorderedList: HTMLButtonElement = null;
-    orderedList: HTMLButtonElement = null;
-    math: HTMLButtonElement = null;
-    currency: HTMLButtonElement = null;
+    editorHandler: Editor;
+    mainNode: HTMLDivElement;
+    symbolTable: HTMLElement;
+    toolbox: HTMLElement;
+    bodyNode: HTMLElement;
+    bold: HTMLButtonElement;
+    italic: HTMLButtonElement;
+    underline: HTMLButtonElement;
+    subs: HTMLButtonElement;
+    sups: HTMLButtonElement;
+    quote: HTMLButtonElement;
+    anchor: HTMLButtonElement;
+    hr: HTMLButtonElement;
+    header1: HTMLButtonElement;
+    header2: HTMLButtonElement;
+    alignLeft: HTMLButtonElement;
+    alignRight: HTMLButtonElement;
+    alignCenter: HTMLButtonElement;
+    alignJustify: HTMLButtonElement;
+    unorderedList: HTMLButtonElement;
+    orderedList: HTMLButtonElement;
+    math: HTMLButtonElement;
+    currency: HTMLButtonElement;
     elementReferences: any = null;
     alignment: any = null
 
@@ -35,67 +36,45 @@ export default class ToolBox {
      * @param  Node 
      * @param  mainEditor 
      */
-    constructor(Node, mainEditor) {
+    constructor(Node: HTMLElement, mainEditor) {
         this.editorHandler = mainEditor;
-        this.mainNode = Node;
+        this.mainNode = Node as HTMLDivElement;
         this.toolbox = Node.querySelector('.options');
         this.bodyNode = Node.querySelector('.bodyeditable');
 
-        this.bold = Node.querySelector('.bold');
-        if (this.bold) {
-            this.bold.onclick = event => this.executeCommand({
-                command: 'bold',
-                type: 'inline'
-            });
-        }
+        this.bold = elquery<HTMLButtonElement>('.bold', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'bold', type: 'inline' })
+        ));
 
-        this.italic = Node.querySelector('.italic');
-        if (this.italic) {
-            this.italic.onclick = event => this.executeCommand({
-                command: 'italic',
-                type: 'inline'
-            });
-        }
+        this.italic = elquery<HTMLButtonElement>('.italic', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'italic', type: 'inline' })
+        ));
 
-        this.underline = Node.querySelector('.underline');
-        if (this.underline) {
-            this.underline.onclick = event => this.executeCommand({
-                command: 'underline',
-                type: 'inline'
-            });
-        }
+        this.underline = elquery<HTMLButtonElement>('.underline', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'underline', type: 'inline' })
+        ));
 
-        this.subs = Node.querySelector('.subscript');
-        if (this.subs) {
-            this.subs.onclick = event => this.executeCommand({
-                command: 'subscript',
-                type: 'inline'
-            });
-        }
+        this.subs = elquery<HTMLButtonElement>('.subscript', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'subscript', type: 'inline' })
+        ));
 
-        this.sups = Node.querySelector('.superscript');
-        if (this.sups) {
-            this.sups.onclick = event => this.executeCommand({
-                command: 'superscript',
-                type: 'inline'
-            });
-        }
+        this.sups = elquery<HTMLButtonElement>('.superscript', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'superscript', type: 'inline' })
+        ));
 
-        this.quote = Node.querySelector('.blockquote');
-        if (this.quote) {
-            this.quote.onclick = event => this.executeCommand({
-                command: 'BLOCKQUOTE',
-                type: 'block'
-            });
-        }
-        
-        this.hr = Node.querySelector('.hr');
-        this.hr && (this.hr.onclick = event => this.applyTools(event => {
-            this.editorHandler.addInline({
-                cmd: 'insertHTML',
-                valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
-            });
-        }, event));
+        this.quote = elquery<HTMLButtonElement>('.blockquote', Node).doGet(btn => (
+            btn.onclick = evt => this.executeCommand({ command: 'BLOCKQUOTE', type: 'block' })
+        ));
+
+        this.hr = elquery<HTMLButtonElement>('.hr', Node)
+            .doGet(btn => (
+                btn.onclick = evt => (this.applyTools(event => {
+                    this.editorHandler.addInline({
+                        cmd: 'insertHTML',
+                        valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
+                    })
+                }, evt)
+            )));
 
         this.anchor = Node.querySelector('.link');
         this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
@@ -121,21 +100,19 @@ export default class ToolBox {
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.header1 = Node.querySelector('.header-1');
-        if (this.header1) {
-            this.header1.onclick = event => this.executeCommand({
+        this.header1 = elquery<HTMLButtonElement>('.header-1', Node).doGet(btn => {
+            btn.onclick = event => this.executeCommand({
                 command: 'H1',
                 type: 'block'
             });
-        }
+        });
 
-        this.header2 = Node.querySelector('.header-2');
-        if (this.header2) {
-            this.header2.onclick = event => this.executeCommand({
+        this.header2 = elquery<HTMLButtonElement>('.header-2', Node).doGet(btn => {
+            btn.onclick = event => this.executeCommand({
                 command: 'H2',
                 type: 'block'
             });
-        }
+        });
 
         this.alignLeft = Node.querySelector('.align-left');
         this.alignLeft && (this.alignLeft.onclick = event => this.applyTools(event => {
@@ -180,10 +157,9 @@ export default class ToolBox {
         }, event));
 
         // Handle math symbols
-        this.math = Node.querySelector('.math');
-        if (this.math) {
-            this.math.onclick = event => this.enableBox(Node, 0x2200, 0x22FF, event);
-        }
+        this.math = elquery<HTMLButtonElement>('.math').doGet(btn => {
+            btn.onclick = event => this.enableBox(Node, 0x2200, 0x22FF, event);
+        });
         // Handling currency 
         this.currency = Node.querySelector('.currency');
         if (this.currency) {
@@ -265,16 +241,17 @@ export default class ToolBox {
      * @param end end value of unicode character.
      */
     constructSymbolTable (editor, start, end) {
-        const table = DOM.createElement('DIV');
-        table.classList.add('symbol-table')
+        const table = el('div').cls('symbol-table').get();
+
         for (let i = start; i <= end; ++i) {
-            const symbolButtons = DOM.createElement('BUTTON');
-            symbolButtons.classList.add('symbol-blocks');
-            symbolButtons.title = symbolButtons.innerHTML = `&#${i};`;
+            const symbolButtons = el('button')
+                .cls('symbol-blocks')
+                .attr('title', `&#${i};`)
+                .innerHtml(`&#${i};`)
+                .evt('click', (e, curr) => this.editorHandler.insertString(`&#${i};`))
+                .get();
+            
             table.appendChild(symbolButtons);
-            symbolButtons.onclick = event => {
-                this.editorHandler.insertString(symbolButtons.innerHTML);
-            }
         }
         editor.appendChild(table);
         this.symbolTable = table;
@@ -290,11 +267,12 @@ export default class ToolBox {
         if (typeof call !== 'function') {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
-            let { startNode } = selection.getSelectionInfo();
-            while (startNode.parentNode && startNode !== this.editorHandler.editor) {
-                startNode = startNode.parentNode;
-            }
-            if (this.editorHandler.editor === startNode) {
+            let { startNode } = selection.getSelectionInfo().get();
+            let par = iter_to_par_incl(startNode)
+                .till(n => n.parentNode && n !== this.editorHandler.editor)
+                .last();
+
+            if (this.editorHandler.editor === par) {
                 call(callData);
             }
         }
@@ -307,7 +285,7 @@ export default class ToolBox {
     clearAllFormats() {
         [this.elementReferences, this.alignment].forEach(elementReferences => {
             Object.entries(elementReferences).forEach((referenceKey: any) => {
-                const [ tagName, reference ] = referenceKey;
+                const [tagName, reference] = referenceKey;
                 if (reference && reference.classList) {
                     reference.classList.add('no-highlight');
                 }
@@ -323,7 +301,7 @@ export default class ToolBox {
     formatsOnCurrentCaret(): void {
         const nodeArray = this.editorHandler.getAllTextNodeInsideSelection();
         this.clearAllFormats();
-        const [ formatApplied, align ] = getIntersectingFormattingOptions(this.editorHandler.editor, nodeArray);
+        const [formatApplied, align] = getIntersectingFormattingOptions(this.editorHandler.editor, nodeArray);
         if (formatApplied.size) {
             formatApplied.forEach(tagName => {
                 const elementReference = this.elementReferences[tagName];

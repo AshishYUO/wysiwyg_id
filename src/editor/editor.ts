@@ -1,23 +1,15 @@
 import selection from '../selection';
 import Image from '../image';
 import ToolBox from '../toolbox';
-import {
-    isABlockNode,
-    addBlock,
-    getParentBlockNode,
-} from './block';
+import { addBlock } from './block';
 import {
     getAllTextNodes,
     insertString,
-    optimizeNodes,
     applyInlineTemp,
-    applyInline
 } from './inline';
 
-import {
-    handleKeyboardDownEvent,
-    handleKeyboardUpEvent
-} from './event';
+import { handleKeyboardDownEvent, handleKeyboardUpEvent } from './event';
+import { el, elquery } from 'element/helper';
 
 
 export default class Editor {
@@ -29,34 +21,24 @@ export default class Editor {
      */
     constructor(Node: HTMLElement) {
         this.editorNode = Node;
-        this.editor = Node.querySelector('.bodyeditable');
-        this.editor.innerHTML = '<div><br /></div>';
-        const Toolbox = new ToolBox(Node, this);
+        const toolbox = new ToolBox(Node, this);
         const image = new Image(Node);
 
-        this.editor.onpaste = (event: Event) => {
-            event.preventDefault();
-            console.log('No paste implemetation yet!');
-        }
-
-        this.editor.onmouseup = (event: MouseEvent) => {
-            Toolbox.formatsOnCurrentCaret();
-        }
-
-        this.editor.onkeydown = (event: KeyboardEvent) => {
-            const { editor } = this;
-            const handle = handleKeyboardDownEvent(editor, event);
-            if (handle) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-        }
-
-        this.editor.onkeyup = (event: KeyboardEvent) => {
-            Toolbox.formatsOnCurrentCaret();
-            const { editor } = this;
-            handleKeyboardUpEvent(editor, event);
-        };
+        this.editor = elquery('.bodyeditable').doGet((elem) => (
+            el(elem)
+                .innerHtml('<div><br /></div>')
+                .evt('paste', (evt) => {
+                    evt.preventDefault(); console.log('No paste implementation');
+                })
+                .evt('mouseup', (evt) => toolbox.formatsOnCurrentCaret())
+                .evt('keydown', (evt: KeyboardEvent) => {
+                    handleKeyboardDownEvent(this.editor, evt);
+                })
+                .evt('keyup', (event: KeyboardEvent) => {
+                    toolbox.formatsOnCurrentCaret();
+                    handleKeyboardUpEvent(this.editor, event);
+                })
+            ));
     }
 
     /**
@@ -66,7 +48,6 @@ export default class Editor {
      * @returns void
      */
     addInline(details: any) {
-        applyInline(this.editor, 'B');
         applyInlineTemp(this.editor, details);
     }
 
@@ -95,10 +76,7 @@ export default class Editor {
      * selection
      */
     getAllTextNodeInsideSelection(): any {
-        const { 
-            startNode,
-            endNode 
-        } = selection.getSelectionInfo();
+        const { startNode, endNode } = selection.getSelectionInfo().get();
         return getAllTextNodes(this.editor, startNode, endNode);
     }
 

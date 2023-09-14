@@ -1,6 +1,7 @@
 import selection from './selection';
 import { isABlockNode } from './editor/block';
 import { el, elquery } from 'element/helper';
+import { iter_to_par_incl } from 'utils/iter';
 
 export default class Image {
     mainBody: HTMLElement;
@@ -11,7 +12,23 @@ export default class Image {
 
     constructor (Node: HTMLElement) {
         this.mainBody = Node;
-        this.imageButton = elquery<HTMLImageElement>('.image');
+        
+        this.imageButton = elquery<HTMLImageElement>('.image').doGet(imgBtn => {
+            imgBtn.onclick = event => {
+                this.selection = selection.sel().get();
+                const URL = this.selection.toString().trim();
+                if (URL.length) 
+                    if (this.matchesWithExtURL(URL)) {
+                        this.loadImage(URL);
+                    }
+                    else {
+                        alert('Invalid URL');
+                    }
+                else {
+                    this.fileElement.click();
+                }
+            };
+        });
 
         this.fileElement = el('input')
             .attr('type', 'file')
@@ -23,21 +40,6 @@ export default class Image {
 
         this.fileReader = new FileReader();
         this.selection = null;
-
-        this.imageButton.onclick = event => {
-            this.selection = selection.getSelection();
-            const URL = this.selection.toString().trim();
-            if (URL.length) 
-                if (this.matchesWithExtURL(URL)) {
-                    this.loadImage(URL);
-                }
-                else {
-                    alert('Invalid URL');
-                }
-            else {
-                this.fileElement.click();
-            }
-        };
 
         this.fileReader.onload = (event: any) => {
             if (this.selection) {
@@ -99,12 +101,11 @@ export default class Image {
             ['src', urlStr],
             ['width', '1000'],
             ['tabindex', '0']
-        ]).get<HTMLImageElement>();//('img');
+        ]).get<HTMLImageElement>();
 
         let node = selection.getCurrentNodeFromCaretPosition(this.selection);
-        while (!isABlockNode(node)) {
-            node = node.parentNode;
-        }
+
+        node = iter_to_par_incl(node).till(n => !isABlockNode(node)).last();        
         this.setImageEvents(imageNode);
         
         el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);

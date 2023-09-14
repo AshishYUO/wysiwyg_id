@@ -1,8 +1,6 @@
-import { insertString, applyInlineTemp } from "./inline"
-import { selectAll, assertBrOnEmptyBlockNode, breakLine } from '../formatting';
+import { assertBrOnEmptyBlockNode } from '../formatting';
 import selection from "../selection";
-import { getParentBlockNode } from "./block";
-import { DOM } from "../element/element";
+import { el } from "element/helper";
 
 /**
  * 
@@ -14,14 +12,14 @@ const assertSelectionOnEmpty = (editor: HTMLElement | Node): void => {
         endNode,
         startOffset,
         endOffset
-    } = selection.getSelectionInfo();
+    } = selection.getSelectionInfo().get();
     if (startNode === endNode && startOffset === endOffset) {
         while (startNode.childNodes.length && startNode.nodeName !== 'BR') {
             startNode = startNode.childNodes[0];
         }
         if (startNode.nodeType === 1) {
             if (startNode.nodeName !== 'BR' && !startNode.childNodes.length) {
-                startNode.appendChild(DOM.createElement('BR'));
+                startNode.appendChild(el('br').get());
                 startNode = startNode.childNodes[0];
                 selection.setSelectionAt({
                     startNode: startNode,
@@ -93,7 +91,7 @@ const eventKeys = {
     // },
     Shift: {
         Enter: (editor: any, event: Event) => {
-            breakLine(editor);
+            // breakLine(editor);
             return true;
         }
     }
@@ -129,7 +127,7 @@ const handleDelete = (editor: HTMLElement, event: KeyboardEvent) => {
  * @param {Event} event 
  * @returns boolean if preventDefault
  */
-const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent): boolean => {
+const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent) => {
     if (keyPressed.hasOwnProperty(event.key)) {
         parent.push({
             key: event.key,
@@ -140,7 +138,6 @@ const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent): boo
         }
         keyPressed = keyPressed[event.key];
     }
-    return false;
 }
 
 /**
@@ -148,7 +145,10 @@ const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent): boo
  * @param {HTMLElement} editor 
  * @param {KeyboardEvent} event 
  */
-const handleKeyboardUpEvent = (editor: HTMLElement | Node, event: KeyboardEvent): void => {
+function handleKeyboardUpEvent(
+    editor: HTMLElement | Node, 
+    event: KeyboardEvent
+): void {
     if (parent.length) {
         let keyEvent = parent[parent.length - 1];
         if (!keyEvent.pos.hasOwnProperty(event.key)) {

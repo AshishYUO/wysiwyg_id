@@ -2,8 +2,7 @@ import Editor from './editor/editor';
 import { initUIMode } from './mode';
 import '../styles/style.css';
 import '../styles/theme.css';
-import { DOM } from './element/element';
-import { el } from 'element/helper';
+import { el, elqueryAll } from 'element/helper';
 
 export const initEditor = (enableTools=undefined) => {
     const enablingTools = {
@@ -129,50 +128,37 @@ export const initEditor = (enableTools=undefined) => {
         }
     }
 
-    const allEditorDOM = DOM.querySelectorAll('.editor');
-    allEditorDOM.forEach((editor: HTMLElement) => {
-        /// Create options
-        const options = el('div').cls('options').get<HTMLDivElement>();
-        const toolbar = el('span').get();
+    elqueryAll('.editor').do(allEditorDom => {
+        allEditorDom.forEach((editor: HTMLElement) => {
+            /// Create options
+            const options = el('div').cls('options').get<HTMLDivElement>();
+            const toolbar = el('span').get();
 
-        enableTools.forEach(toolBatch => {
-            toolBatch.forEach(toolInfo => {
-                const { hint, classname, display } = enablingTools[toolInfo];
-                toolbar.appendChild(el('span')
-                    .cls('tool')
-                    .inner([el('button')
-                        .bcls(['no-highlight', classname])
-                        .attr('title', hint)
-                        .innerHtml(display)
-                    ])
-                    .get()
-                );
-
-                // const tool = DOM.createElement('button');
-                // toolContainer.classList.add('tool');
-                // tool.classList.add(classname);
-                // tool.title = hint;
-                // tool.classList.add('no-highlight');
-                // tool.innerHTML = display;
-                // toolContainer.innerHTML = `${tool.outerHTML}`;
-                // toolbar.appendChild(toolContainer);
+            enableTools.forEach(toolBatch => {
+                /// Append all the values to toolbar
+                el(toolbar).extd(
+                    toolBatch.map(toolInfo => {
+                        const { hint, classname, display } = enablingTools[toolInfo];
+                        return el('span')
+                            .cls('tool')
+                            .inner([el('button')
+                                .bcls(['no-highlight', classname])
+                                .attr('title', hint)
+                                .innerHtml(display)
+                            ])
+                }));
+    
+                
+                if (toolBatch !== enableTools[enableTools.length - 1]) {
+                    el(toolbar).extd([el('span').cls('separator')]);
+                }
             });
-            if (toolBatch !== enableTools[enableTools.length - 1]) {
-                toolbar.appendChild(
-                    el('span').cls('separator').get()
-                );
-            }
-        });
 
-        options.appendChild(toolbar);
-        editor.appendChild(options);
-        editor.appendChild(el('div').attr('contenteditable', 'true').cls('bodyeditable').get());
-        // const body = ;
-        // body.setAttribute('contenteditable', 'true');
-        // body.classList.add('bodyeditable');
-        // editor.appendChild(body);
-        
-        new Editor(editor);
+            el(editor).extd([el(options).append(toolbar), el('div').attr('contenteditable').cls('bodyeditable')]);            
+            new Editor(editor);
+        });
     });
+
+    
     initUIMode();
 };

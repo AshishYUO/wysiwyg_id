@@ -1,5 +1,6 @@
 import selection, { SelectionInfo } from '../selection';
 import { applyBlockNodes } from '../formatting';
+import { iter_to_par } from 'utils/iter';
 
 const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'DIV', 'PRE', 'P', 'DL', 'ADDRESS', 'IMG', 'LI', 'TABLE', 'TR']);
 
@@ -17,18 +18,13 @@ const isABlockNode = (node: HTMLElement | Node): boolean => {
  * @param node the node to evaluate it's parent.
  * @returns block node that is just below main text editor.
  */
-const getParentBlockNode = (
+const blockInEditor = (
     editor: HTMLElement | Node,
     node: Node,
-    offset: number
 ): Node => {
-    if (node === editor) {
-        return node.childNodes[offset];
-    }
-    while (node !== editor && node.parentNode !== editor) {
-        node = node.parentNode;
-    }
-    return node;
+    return iter_to_par(node)
+        .till(n => n !== editor)
+        .last();
 }
 
 /**
@@ -39,12 +35,11 @@ const getSelectedBlockNode = (editor: HTMLElement): [Node, Node] => {
     const {
         startNode,
         endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo();
-    const stNode = getParentBlockNode(editor, startNode, startOffset);
-    const edNode = getParentBlockNode(editor, endNode, endOffset);
-    return [stNode, edNode];
+    } = selection.getSelectionInfo().get();
+    return [
+        blockInEditor(editor, startNode),
+        blockInEditor(editor, endNode)
+    ];
 }
 
 /**
@@ -91,17 +86,17 @@ const setNodes = (
     blockNode: Node,
     node: Node,
     offset: number
-): [ Node, number ] => {
+): [Node, number] => {
     if (node === editor) {
         if (offset < editor.childNodes.length) {
-            return [ editor.childNodes[offset], 0 ];
+            return [editor.childNodes[offset], 0];
         } else {
-            return [ editor.childNodes[editor.childNodes.length - 1], 1 ];
+            return [editor.childNodes[editor.childNodes.length - 1], 1];
         }
     } else if(!node.parentNode) {
-        return [ blockNode, offset ];
+        return [blockNode, offset];
     } else {
-        return [ node, offset ];
+        return [node, offset];
     }
 }
 
@@ -117,8 +112,8 @@ const setCaretSelection = (
     selectionInfo: SelectionInfo
 ): SelectionInfo => {
     const { startNode, startOffset, endNode, endOffset } = selectionInfo;
-    const [ newStNode, newStOffset ] = setNodes(editor, blockNodes[0], startNode, startOffset);
-    const [ newEndNode, newEndOffset ] = setNodes(editor, blockNodes[blockNodes.length - 1], endNode, endOffset);
+    const [newStNode, newStOffset] = setNodes(editor, blockNodes[0], startNode, startOffset);
+    const [newEndNode, newEndOffset] = setNodes(editor, blockNodes[blockNodes.length - 1], endNode, endOffset);
     return {
         startNode: newStNode,
         endNode: newEndNode,
@@ -134,19 +129,20 @@ const setCaretSelection = (
  */
 const addBlock = (editor: HTMLElement, details: any): void => {
     const nodeType = details.nodeName;
-    const Info = selection.getSelectionInfo();
-    const parentStart = Info.startNode, parentEnd = Info.endNode;
-    if (parentStart && parentEnd) {
+    
+    selection.getSelectionInfo().doGet((sel) => {
         const blockNodes = getAllBlockNodesInCurrentSelection(editor);
         const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'DIV' : nodeType;
+
         applyBlockNodes(blockNodes, nodeName);
-        selection.setSelectionAt(setCaretSelection(editor, blockNodes, Info));
-    }
+        
+        selection.setSelectionAt(setCaretSelection(editor, blockNodes, sel));
+    });
 }
 
 export {
     addBlock,
     isABlockNode,
     getSelectedBlockNode,
-    getParentBlockNode,
+    blockInEditor,
 };

@@ -1,6 +1,4 @@
 import selection from '../selection';
-import { getAppliedStyles, getIntersectingFormattingOptions } from '../formatting';
-import { getParentBlockNode } from './block';
 
 /**
  * @details Insert string in a text node.
@@ -9,7 +7,7 @@ import { getParentBlockNode } from './block';
  * @returns void
  */
 function insertString(editor: HTMLElement, str: string) {
-    const selections = selection.getSelection();
+    const selections = selection.sel().get();
     const startNode = selections.getRangeAt(0).startContainer, startOffset = selections.getRangeAt(0).startOffset;
     if (selections.toString().length) {
         selections.deleteFromDocument();
@@ -74,76 +72,13 @@ function getAllTextNodes(editor: Node, startNode: Node, endNode: Node) {
     return textNodes;
 }
 
-/**
- * 
- * @param {HTMLElement} editor 
- * @param {HTMLElement} startNode 
- * @param {HTMLElement} endNode 
- */
-function applyInline(editor: Node, newStyle: string) {
-    const {
-        startNode,
-        endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo();
-    const allNodes = getAllTextNodes(editor, startNode, endNode);
-    const [intersectingNodes, align] = getIntersectingFormattingOptions(editor, allNodes);
-    // console.log('Common styles', intersectingNodes);
-    const styleNodes = optimizeNodes(editor, allNodes);
-    console.log('All Nodes selected: ', styleNodes);
-    // Different logic for start and endNode, but apply all styles to remaining nodes.
-    // styleNodes.forEach(node => applyStyles(editor, node, newStyle, intersectingNodes));
-}
-
 const applyInlineTemp = (editor: Node, details: any) => {
     const { cmd, valArg } = details;
     document.execCommand(cmd, false, valArg);
 }
 
-const applyStyles = (editor, element, newStyle, intersectingNodes) => {
-    const { styles, node } = element;
-    styles.forEach(style => {
-        if (style !== newStyle) {
-            const elem = document.createElement(style);
-            node.parentNode.replaceChild(elem, node);
-            elem.appendChild(node);
-        }
-    });
-    if (!intersectingNodes.has(newStyle)) {
-        const elem = document.createElement(newStyle);
-        node.parentNode.replaceChild(elem, node);
-        elem.appendChild(node);
-    }
-}
-
-/**
- * @todo Merge two or more consecutive text nodes into one based on styling.
- * @param startNode 
- * @param endNode 
- */
-const optimizeNodes = (editor, allNodes) => {
-    const styles = allNodes.map(node => {
-        return {
-            node: node,
-            styles: getAppliedStyles(editor, node)
-        }
-    })
-    return styles;
-}
-
-const getAllTextNodesInsideBlockNode = (editor, blockNode) => {
-    let startNode = blockNode;
-    while (startNode.childNodes || startNode.childNodes.length) {
-        startNode = startNode.childNodes[0];
-    }
-    
-}
-
 export {
-    optimizeNodes,
     insertString,
     getAllTextNodes,
-    applyInline,
     applyInlineTemp
 };

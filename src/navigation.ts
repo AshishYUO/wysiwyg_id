@@ -1,19 +1,21 @@
-class Navigation {
-    navigation: HTMLElement | null = null;
-    navigationButton: HTMLElement | null = null;
-    navigationClose: HTMLElement | null = null;
-    constructor () {
-        this.navigation = document.getElementById("navigation-bar");
-        this.navigationButton = document.getElementById("navigation-button");
-        this.navigationClose = document.getElementById("navigation-close");
-        this.navigation.style.marginLeft = "-20.3%";
-        
-        this.navigationButton.addEventListener("mousedown", (event) => {
-            this.navigation.style.marginLeft = "0";
-        });
+import { el, id } from "element/helper";
 
-        this.navigationClose.addEventListener("mousedown", (event) => {
-            this.navigation.style.marginLeft = "-20.3%";
+class Navigation {
+    navigation: HTMLElement;
+    navigationButton: HTMLElement;
+    navigationClose: HTMLElement;
+
+    constructor () {
+        this.navigation = id('navigation-bar').get();
+        this.navigationButton = id('navigation-button').doGet(nv => {
+            el(nv).evt('mousedown', (e) => this.navigation.style.marginLeft = '0');
+        });;
+        this.navigationClose = id('navigation-close').get()
+
+        this.navigation.style.marginLeft = '-20.3%';
+
+        this.navigationClose.addEventListener('mousedown', (event) => {
+            this.navigation.style.marginLeft = '-20.3%';
         });
     }
 }

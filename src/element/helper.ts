@@ -1,3 +1,5 @@
+import { Opt, Some } from "utils/option";
+
 interface IElem {
     get: () => Node,
     id: (_: string) => this,
@@ -11,7 +13,6 @@ interface IElem {
     cls: (className: string) => this,
     innerText: (text: string) => this,
     innerHtml: (text: string) => this,
-    classes: (classNames: string[]) => this,
     childNodes: (elems: (Node | IElem)[]) => this,
     inner: (elems: (HTMLElement | IElem)[]) => this,
     style: (styleStr: string) => this,
@@ -64,8 +65,8 @@ type Pat = NodePat[] | Pat[];
  * @param pattern Array like structure as a hint for destructuring
  * @returns Array with hierarchy to children of `node` 
  */
-export function des(node: HTMLElement, nodeChildrenPatter: Pat): any {
-    const pat = [];
+export function des<Pattern>(node: HTMLElement, nodeChildrenPatter: Pat): Pattern {
+    const pat: any = [];
     nodeChildrenPatter.forEach((placeholder, index: number) => {
         if (node.children.item(index) && placeholder) {
             pat.push(Array.isArray(placeholder) ? 
@@ -73,44 +74,69 @@ export function des(node: HTMLElement, nodeChildrenPatter: Pat): any {
                 node.children.item(index));
         }
     });
-    return pat;
+    return pat as Pattern;
 }
 
-export function id(node: HTMLElement, _id: string): HTMLElement | undefined {
+export function id(
+    _id: string,
+    node: HTMLElement | Document = document
+): Opt<HTMLElement>
+{
     for (const elem of [...node.children].map(elem => elem as HTMLElement)) {
         if (elem.id === _id) {
-            return elem;
+            return Some(elem);
         } else if (elem.children.length > 0) {
-            const innerElem = id(elem as HTMLElement, _id);
-            if (innerElem) {
+            const innerElem = id(_id, elem);
+            if (innerElem.isSome()) {
                 return innerElem;
             }
         }
     }
 }
 
+/**
+ * Convenience for running a querySelector
+ * @param query Selector
+ * @param node node to be considered parent
+ * @returns Cell containing either value or null
+ */
 export function elquery<
     Return extends HTMLElement,
-    T extends HTMLElement | Document = Document,
 >(
     query: string,
-    node = document, 
-): Return | null 
+    node: HTMLElement | Document = document, 
+): Opt<Return>
 {
-    return (node || document).querySelector(query) as Return;
+    return Some(node.querySelector(query) as Return);
 }
 
 
-export function elqueryAll<T extends HTMLElement | Document>(
+/**
+ * Convenience for running a querySelectorAll
+ * @param query Selector
+ * @param node node to be considered parent
+ * @returns Multiple cells either value or null
+ */
+export function elqueryAll(
     query: string,
-    node: T, 
-): NodeListOf<HTMLElement> | null 
+    node: HTMLElement | Document = document
+): Opt<NodeListOf<HTMLElement>> 
 {
-    return node.querySelectorAll(query);
+    return Some(node.querySelectorAll(query));
 }
 
-export function ids(node: HTMLElement, ..._ids: string[]): (HTMLElement | undefined)[] {
-    return _ids.map(_id => id(node, _id));
+export function ids(
+    node: HTMLElement | Document = document,
+    ..._ids: string[]
+): (Opt<HTMLElement>)[] 
+{
+    return _ids.map(_id => id(_id, node));
+}
+
+export function txt(
+    text: string
+): Text {
+    return document.createTextNode(text);
 }
 
 /**
@@ -118,7 +144,9 @@ export function ids(node: HTMLElement, ..._ids: string[]): (HTMLElement | undefi
  * @param tag 
  */
 export function el<T extends HTMLElement>(tag: string | T) { 
-    const currentWorkingElement = typeof tag === 'string' ? document.createElement(tag) : tag
+    const currentWorkingElement = typeof tag === 'string' ?
+        document.createElement(tag) : 
+        tag;
 
     const helper = {
         cls (cls: string) {
@@ -131,7 +159,7 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
-        attr (attributeKey: string, attributeValue: string) {
+        attr (attributeKey: string, attributeValue: string = 'true') {
             currentWorkingElement.setAttribute(attributeKey, attributeValue);
             return this;
         },
@@ -141,12 +169,29 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
-        evt(
+        evtrm<T extends Event>(
             eventName: string,
-            fn: (_: Event, _1?: HTMLElement) => void,
+            fn: (_: T, _1?: HTMLElement) => void,
             options?: boolean | AddEventListenerOptions
         ) {
-            currentWorkingElement.addEventListener(eventName, fn, options);
+            currentWorkingElement.removeEventListener(
+                eventName,
+                fn as (_: Event, _1?: HTMLElement) => void,
+                options
+            );
+            return this;
+        },
+
+        evt<T extends Event>(
+            eventName: string,
+            fn: (_: T, _1?: HTMLElement) => void,
+            options?: boolean | AddEventListenerOptions
+        ) {
+            currentWorkingElement.addEventListener(
+                eventName,
+                fn as (_: Event, _1?: HTMLElement) => void,
+                options
+            );
             return this;
         },
 
@@ -167,23 +212,26 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
-        classes(classNames: string[]) {
-            classNames.forEach((className: string) => currentWorkingElement.classList.add(className));
-            return this;
-        },
-
         childNodes(elems: (Node | IElem)[]) {
             elems.forEach((elem: Node | IElem) => (
-                elem instanceof Node ? currentWorkingElement.append(elem) : currentWorkingElement.append(elem.get())
+                (elem instanceof HTMLElement || elem instanceof Node) ? 
+                    currentWorkingElement.append(elem) : 
+                    currentWorkingElement.append(elem.get())
             ));
             return this;
         },
 
         inner(elems: (Node | IElem)[]) {
             elems.forEach((elem: any) => (
-                (elem instanceof HTMLElement || elem instanceof Node) ? currentWorkingElement.append(elem) : currentWorkingElement.append(elem.get())
+                (elem instanceof HTMLElement || elem instanceof Node) ? 
+                    currentWorkingElement.append(elem) : 
+                    currentWorkingElement.append(elem.get())
             ));
             return this;
+        },
+
+        extd(elems: (Node | IElem)[]) {
+            return this.inner(elems)
         },
 
         children(elems: (Node | IElem)[]) {
