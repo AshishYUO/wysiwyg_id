@@ -1,8 +1,8 @@
 import selection from './selection';
 import { getIntersectingFormattingOptions } from './formatting';
 import Editor from './editor/editor';
-import { el, elquery } from 'element/helper';
-import { iter_to_par, iter_to_par_incl } from 'utils/iter';
+import { el, elQuery } from 'element/helper';
+import { iterToParIncl } from 'utils/iter';
 
 export default class ToolBox {
     editorHandler: Editor;
@@ -39,42 +39,41 @@ export default class ToolBox {
     constructor(Node: HTMLElement, mainEditor) {
         this.editorHandler = mainEditor;
         this.mainNode = Node as HTMLDivElement;
-        this.toolbox = Node.querySelector('.options');
-        this.bodyNode = Node.querySelector('.bodyeditable');
+        this.toolbox = elQuery('.options').get();
+        this.bodyNode = elQuery('.bodyeditable').get();
 
-        this.bold = elquery<HTMLButtonElement>('.bold', Node).doGet(btn => (
+        this.bold = elQuery<HTMLButtonElement>('.bold', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'bold', type: 'inline' })
         ));
 
-        this.italic = elquery<HTMLButtonElement>('.italic', Node).doGet(btn => (
+        this.italic = elQuery<HTMLButtonElement>('.italic', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'italic', type: 'inline' })
         ));
 
-        this.underline = elquery<HTMLButtonElement>('.underline', Node).doGet(btn => (
+        this.underline = elQuery<HTMLButtonElement>('.underline', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'underline', type: 'inline' })
         ));
 
-        this.subs = elquery<HTMLButtonElement>('.subscript', Node).doGet(btn => (
+        this.subs = elQuery<HTMLButtonElement>('.subscript', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'subscript', type: 'inline' })
         ));
 
-        this.sups = elquery<HTMLButtonElement>('.superscript', Node).doGet(btn => (
+        this.sups = elQuery<HTMLButtonElement>('.superscript', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'superscript', type: 'inline' })
         ));
 
-        this.quote = elquery<HTMLButtonElement>('.blockquote', Node).doGet(btn => (
+        this.quote = elQuery<HTMLButtonElement>('.blockquote', Node).doGet(btn => (
             btn.onclick = evt => this.executeCommand({ command: 'BLOCKQUOTE', type: 'block' })
         ));
 
-        this.hr = elquery<HTMLButtonElement>('.hr', Node)
-            .doGet(btn => (
-                btn.onclick = evt => (this.applyTools(event => {
-                    this.editorHandler.addInline({
-                        cmd: 'insertHTML',
-                        valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
-                    })
-                }, evt)
-            )));
+        this.hr = elQuery<HTMLButtonElement>('.hr', Node).doGet(btn => (
+            btn.onclick = evt => (this.applyTools(event => {
+                this.editorHandler.addInline({
+                    cmd: 'insertHTML',
+                    valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
+                })
+            }, evt)
+        )));
 
         this.anchor = Node.querySelector('.link');
         this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
@@ -100,14 +99,14 @@ export default class ToolBox {
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.header1 = elquery<HTMLButtonElement>('.header-1', Node).doGet(btn => {
+        this.header1 = elQuery<HTMLButtonElement>('.header-1', Node).doGet(btn => {
             btn.onclick = event => this.executeCommand({
                 command: 'H1',
                 type: 'block'
             });
         });
 
-        this.header2 = elquery<HTMLButtonElement>('.header-2', Node).doGet(btn => {
+        this.header2 = elQuery<HTMLButtonElement>('.header-2', Node).doGet(btn => {
             btn.onclick = event => this.executeCommand({
                 command: 'H2',
                 type: 'block'
@@ -146,25 +145,22 @@ export default class ToolBox {
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.unorderedList = Node.querySelector('.ulist');
-        this.unorderedList && (this.unorderedList.onclick = event => this.applyTools(event => {
-            // this.editorHandler.addList({ nodeName: 'UL' });
-        }, event));
+        this.unorderedList = elQuery<HTMLButtonElement>('.ulist').doGet(btn => {
+            btn.onclick = event => this.applyTools(event => {}, event);
+        });
 
-        this.orderedList = Node.querySelector('.olist');
-        this.orderedList && (this.orderedList.onclick = event => this.applyTools(event => {
-            // this.editorHandler.addList({ nodeName: 'OL' });
-        }, event));
+        this.orderedList = elQuery<HTMLButtonElement>('.olist').doGet(btn => {
+            btn.onclick = event => this.applyTools(event => {}, event);
+        });
 
         // Handle math symbols
-        this.math = elquery<HTMLButtonElement>('.math').doGet(btn => {
+        this.math = elQuery<HTMLButtonElement>('.math').doGet(btn => {
             btn.onclick = event => this.enableBox(Node, 0x2200, 0x22FF, event);
         });
         // Handling currency 
-        this.currency = Node.querySelector('.currency');
-        if (this.currency) {
-            this.currency.onclick = event => this.enableBox(Node, 0x20A0, 0x20BF, event);
-        }
+        this.currency = elQuery<HTMLButtonElement>('.currency').doGet(btn => {
+            btn.onclick = event => this.enableBox(Node, 0x20A0, 0x20BF, event);
+        });
 
         this.elementReferences = {
             B: this.bold, 
@@ -268,7 +264,7 @@ export default class ToolBox {
             throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
         } else {
             let { startNode } = selection.getSelectionInfo().get();
-            let par = iter_to_par_incl(startNode)
+            let par = iterToParIncl(startNode)
                 .till(n => n.parentNode && n !== this.editorHandler.editor)
                 .last();
 

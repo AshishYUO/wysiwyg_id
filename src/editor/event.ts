@@ -1,4 +1,3 @@
-import { assertBrOnEmptyBlockNode } from '../formatting';
 import selection from "../selection";
 import { el } from "element/helper";
 
@@ -158,7 +157,9 @@ function handleKeyboardUpEvent(
             keyPressed = keyEvent.pos;
         }
     }
-    assertBrOnEmptyBlockNode(editor, event.key !== 'Backspace');
+    if (editor.textContent.length === 0) {
+        el(editor as HTMLElement).innerHtml('<div><br /></div>');
+    }
     assertSelectionOnEmpty(editor);
 }
 

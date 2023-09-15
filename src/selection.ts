@@ -106,9 +106,6 @@ const selection = {
                 endOffset
             } = selectionInfo;
 
-            [startNode, startOffset] = selection.forceTextNodeSelection(startNode, startOffset);
-            [endNode, endOffset] = selection.forceTextNodeSelection(endNode, endOffset);
-
             newRange.setStart(startNode, startOffset);
             newRange.setEnd(endNode, endOffset);
             currSel.addRange(newRange);

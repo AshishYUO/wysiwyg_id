@@ -9,7 +9,7 @@ import {
 } from './inline';
 
 import { handleKeyboardDownEvent, handleKeyboardUpEvent } from './event';
-import { el, elquery } from 'element/helper';
+import { el, elQuery } from 'element/helper';
 
 
 export default class Editor {
@@ -22,9 +22,9 @@ export default class Editor {
     constructor(Node: HTMLElement) {
         this.editorNode = Node;
         const toolbox = new ToolBox(Node, this);
-        const image = new Image(Node);
+        new Image(Node);
 
-        this.editor = elquery('.bodyeditable').doGet((elem) => (
+        this.editor = elQuery('.bodyeditable').doGet((elem) => (
             el(elem)
                 .innerHtml('<div><br /></div>')
                 .evt('paste', (evt) => {

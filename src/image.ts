@@ -1,7 +1,7 @@
 import selection from './selection';
 import { isABlockNode } from './editor/block';
-import { el, elquery } from 'element/helper';
-import { iter_to_par_incl } from 'utils/iter';
+import { el, elQuery } from 'element/helper';
+import { iterToParIncl } from 'utils/iter';
 
 export default class Image {
     mainBody: HTMLElement;
@@ -13,7 +13,7 @@ export default class Image {
     constructor (Node: HTMLElement) {
         this.mainBody = Node;
         
-        this.imageButton = elquery<HTMLImageElement>('.image').doGet(imgBtn => {
+        this.imageButton = elQuery<HTMLImageElement>('.image').doGet(imgBtn => {
             imgBtn.onclick = event => {
                 this.selection = selection.sel().get();
                 const URL = this.selection.toString().trim();
@@ -105,7 +105,7 @@ export default class Image {
 
         let node = selection.getCurrentNodeFromCaretPosition(this.selection);
 
-        node = iter_to_par_incl(node).till(n => !isABlockNode(node)).last();        
+        node = iterToParIncl(node).till(n => !isABlockNode(node)).last();        
         this.setImageEvents(imageNode);
         
         el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);

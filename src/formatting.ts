@@ -105,52 +105,9 @@ const selectAll = (editor: HTMLElement | Node): void => {;
     });
 }
 
-/**
- * @brief Assert that there is a break node whenever the block element contains
- * nothing.
- * @param {HTMLElement} editor main editor DOM
- * @param {boolean} removeOnCall call whether to remove the break line element
- */
-const assertBrOnEmptyBlockNode = (editor: HTMLElement | Node, removeOnCall: boolean) => {
-    const {
-        startNode,
-        endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo().get();
-    /// If text is not selected.
-    if (startNode === endNode && startOffset === endOffset) {
-        const parentBlockNode = blockInEditor(editor, startNode);
-        if (!parentBlockNode.childNodes.length && parentBlockNode.nodeType === 1) {
-            if (parentBlockNode.nodeName === 'BR') {
-                const par = el('div').inner([el('br')]).replaceWith(parentBlockNode).get();
-                const [br] = des<[HTMLElement]>(par, [_]);
-                // const breakNode = DOM.createElement('BR');
-                // par.appendChild(breakNode);
-                // parentBlockNode.parentNode.replaceChild(par, parentBlockNode);
-                selection.setSelectionAt({
-                    startNode: br,
-                    endNode: br,
-                    startOffset: 0,
-                    endOffset: 0
-                });
-            } else {
-                parentBlockNode.appendChild(el('br').get());
-            }
-        } else {
-            const breakNodeCheck = parentBlockNode.childNodes[parentBlockNode.childNodes.length - 1];
-            const len = parentBlockNode.childNodes.length;
-            if (removeOnCall && breakNodeCheck.nodeName === 'BR' && len > 2 && parentBlockNode.childNodes[len - 2].nodeType === 3) {
-                breakNodeCheck.remove();
-            }
-        }
-    }
-}
-
 export { 
     getIntersectingFormattingOptions,
     getAppliedStyles,
     applyBlockNodes,
-    selectAll,
-    assertBrOnEmptyBlockNode,
+    selectAll
 };

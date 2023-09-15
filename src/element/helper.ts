@@ -77,21 +77,18 @@ export function des<Pattern>(node: HTMLElement, nodeChildrenPatter: Pat): Patter
     return pat as Pattern;
 }
 
-export function id(
+/**
+ * 
+ * @param _id ID to search
+ * @param node 
+ * @returns 
+ */
+export function elId(
     _id: string,
     node: HTMLElement | Document = document
 ): Opt<HTMLElement>
 {
-    for (const elem of [...node.children].map(elem => elem as HTMLElement)) {
-        if (elem.id === _id) {
-            return Some(elem);
-        } else if (elem.children.length > 0) {
-            const innerElem = id(_id, elem);
-            if (innerElem.isSome()) {
-                return innerElem;
-            }
-        }
-    }
+    return Some(document.getElementById(_id));
 }
 
 /**
@@ -100,7 +97,7 @@ export function id(
  * @param node node to be considered parent
  * @returns Cell containing either value or null
  */
-export function elquery<
+export function elQuery<
     Return extends HTMLElement,
 >(
     query: string,
@@ -117,7 +114,7 @@ export function elquery<
  * @param node node to be considered parent
  * @returns Multiple cells either value or null
  */
-export function elqueryAll(
+export function elQueryAll(
     query: string,
     node: HTMLElement | Document = document
 ): Opt<NodeListOf<HTMLElement>> 
@@ -125,12 +122,12 @@ export function elqueryAll(
     return Some(node.querySelectorAll(query));
 }
 
-export function ids(
+export function elIds(
     node: HTMLElement | Document = document,
     ..._ids: string[]
 ): (Opt<HTMLElement>)[] 
 {
-    return _ids.map(_id => id(_id, node));
+    return _ids.map(_id => elId(_id, node));
 }
 
 export function txt(
@@ -278,7 +275,7 @@ export function el<T extends HTMLElement>(tag: string | T) {
         },
 
         spellcheck(set: boolean) {
-            (currentWorkingElement as HTMLInputElement).spellcheck = set;
+            currentWorkingElement.spellcheck = set;
             return this;
         },
 
@@ -358,6 +355,101 @@ export function el<T extends HTMLElement>(tag: string | T) {
         },
 
         before (someSibling: Node) {
+            if (someSibling.parentNode) {
+                someSibling.parentNode.insertBefore(
+                    currentWorkingElement,
+                    someSibling
+                );
+            }
+            return this;
+        },
+    }
+
+    return helper;
+}
+
+/**
+ * Element generator, and helper
+ * @param tag 
+ */
+export function eltxt<T extends Text>(tag: string | T) { 
+    const currentWorkingElement = typeof tag === 'string' ?
+        document.createElement(tag) : 
+        tag;
+
+    const helper = {
+        innerText(text: string) {
+            currentWorkingElement.textContent = text;
+            return this;
+        },
+
+        childNodes(elems: (Text | IElem)[]) {
+            elems.forEach((elem: Text | IElem) => (
+                (elem instanceof Text) ? 
+                    currentWorkingElement.textContent += (elem) : 
+                    currentWorkingElement.textContent += elem.get()
+            ));
+            return this;
+        },
+
+        inner(elems: (Text | IElem)[]) {
+            elems.forEach((elem: any) => (
+                (elem instanceof Text) ? 
+                    currentWorkingElement.textContent += (elem) : 
+                    currentWorkingElement.textContent += elem.get()
+            ));
+            return this;
+        },
+
+        getnd (): Node {
+            return currentWorkingElement as Node;
+        },
+
+        getel (): Text {
+            return currentWorkingElement as Text;
+        },
+
+        get<T extends HTMLElement>(): T {
+            return currentWorkingElement as T;
+        },
+
+        appendTo (someParent: Node) {
+            someParent.appendChild(currentWorkingElement);
+            return this;
+        },
+
+        append (el: Node) {
+            currentWorkingElement.textContent += el;
+            return this;
+        },
+
+        replaceWith(someChild: Node) {
+            if (someChild.parentNode) {
+                someChild.parentNode.replaceChild(
+                    currentWorkingElement,
+                    someChild
+                );
+            }
+            return this;
+        },
+
+        nextTo (someSibling: Node | Text) {
+            if (someSibling.parentNode) {
+                if (someSibling.nextSibling) {
+                    someSibling.parentNode.insertBefore(
+                        currentWorkingElement,
+                        someSibling.nextSibling
+                    );
+                } else {
+                    someSibling.parentNode.appendChild(
+                        currentWorkingElement
+                    );
+                }
+            }
+            return this;
+        },
+
+        before (someSibling: Node | Text) {
             if (someSibling.parentNode) {
                 someSibling.parentNode.insertBefore(
                     currentWorkingElement,

@@ -1,6 +1,6 @@
 import selection, { SelectionInfo } from '../selection';
 import { applyBlockNodes } from '../formatting';
-import { iter_to_par } from 'utils/iter';
+import { iterToPar } from 'utils/iter';
 
 const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'DIV', 'PRE', 'P', 'DL', 'ADDRESS', 'IMG', 'LI', 'TABLE', 'TR']);
 
@@ -22,7 +22,7 @@ const blockInEditor = (
     editor: HTMLElement | Node,
     node: Node,
 ): Node => {
-    return iter_to_par(node)
+    return iterToPar(node)
         .till(n => n !== editor)
         .last();
 }
@@ -135,7 +135,6 @@ const addBlock = (editor: HTMLElement, details: any): void => {
         const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'DIV' : nodeType;
 
         applyBlockNodes(blockNodes, nodeName);
-        
         selection.setSelectionAt(setCaretSelection(editor, blockNodes, sel));
     });
 }

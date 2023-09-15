@@ -2,7 +2,7 @@ import Editor from './editor/editor';
 import { initUIMode } from './mode';
 import '../styles/style.css';
 import '../styles/theme.css';
-import { el, elqueryAll } from 'element/helper';
+import { el, elQueryAll } from 'element/helper';
 
 export const initEditor = (enableTools=undefined) => {
     const enablingTools = {
@@ -128,7 +128,7 @@ export const initEditor = (enableTools=undefined) => {
         }
     }
 
-    elqueryAll('.editor').do(allEditorDom => {
+    elQueryAll('.editor').do(allEditorDom => {
         allEditorDom.forEach((editor: HTMLElement) => {
             /// Create options
             const options = el('div').cls('options').get<HTMLDivElement>();

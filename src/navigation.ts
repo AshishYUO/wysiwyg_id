@@ -1,4 +1,4 @@
-import { el, id } from "element/helper";
+import { el, elId } from "element/helper";
 
 class Navigation {
     navigation: HTMLElement;
@@ -6,11 +6,11 @@ class Navigation {
     navigationClose: HTMLElement;
 
     constructor () {
-        this.navigation = id('navigation-bar').get();
-        this.navigationButton = id('navigation-button').doGet(nv => {
+        this.navigation = elId('navigation-bar').get();
+        this.navigationButton = elId('navigation-button').doGet(nv => {
             el(nv).evt('mousedown', (e) => this.navigation.style.marginLeft = '0');
         });;
-        this.navigationClose = id('navigation-close').get()
+        this.navigationClose = elId('navigation-close').get()
 
         this.navigation.style.marginLeft = '-20.3%';
 

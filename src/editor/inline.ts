@@ -1,3 +1,4 @@
+import { el, eltxt } from 'element/helper';
 import selection from '../selection';
 
 /**
@@ -7,23 +8,21 @@ import selection from '../selection';
  * @returns void
  */
 function insertString(editor: HTMLElement, str: string) {
-    const selections = selection.sel().get();
-    const startNode = selections.getRangeAt(0).startContainer, startOffset = selections.getRangeAt(0).startOffset;
-    if (selections.toString().length) {
-        selections.deleteFromDocument();
+    const { startNode, startOffset } = selection.getSelectionInfo().get();
+    const sel = selection.sel().get();
+
+    if (sel.toString().length) {
+        sel.deleteFromDocument();
     }
     const [selectedNode, selectedOffset] = selection.forceTextNodeSelection(startNode, startOffset);
     if (selectedNode.nodeType === 1) {
         const textNode = document.createTextNode(str),
               textOffset = str.length;
         if (selectedOffset === 1) {
-            if (selectedNode.nextSibling) {
-                selectedNode.parentNode.insertBefore(textNode, selectedNode.nextSibling);
-            } else {
-                selectedNode.parentNode.appendChild(textNode);
-            }
+            eltxt(textNode).nextTo(selectedNode)
         } else {
-            selectedNode.parentNode.insertBefore(textNode, selectedNode);
+            // selectedNode.parentNode.insertBefore(textNode, selectedNode);
+            eltxt(textNode).before(selectedNode);
         }
         selection.setSelectionAt({
             startNode: textNode,
@@ -48,7 +47,11 @@ function insertString(editor: HTMLElement, str: string) {
  * @param endNode ending node of selection
  * @returns all text nodes that are currently selected
  */
-function getAllTextNodes(editor: Node, startNode: Node, endNode: Node) {
+function getAllTextNodes(
+    editor: Node, 
+    startNode: Node, 
+    endNode: Node
+) {
     const textNodes = startNode === endNode ? [startNode] : [];
 
     while (startNode !== endNode && startNode !== editor) {
