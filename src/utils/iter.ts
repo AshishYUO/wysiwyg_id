@@ -46,6 +46,10 @@ class IterWrapper<T> implements Iterable<T> {
             }
         }(this);
     }
+
+    collect(): Array<T> {
+        return [...this];
+    }
 }
 
 /**
@@ -85,7 +89,7 @@ class ParentIterWrapper extends IterWrapper<HTMLElement> {
         let value = null;
         for (const i of this) {
             value = i;
-        }this[Symbol.iterator]
+        }
         return value;
     }
 }
