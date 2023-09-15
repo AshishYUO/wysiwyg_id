@@ -57,7 +57,7 @@ export class Option<T> {
     }
 
     /**
-     * perform operation if value is valid
+     * Perform operation if there is a valid value
      * @param fn function to perform
      * @returns 
      */

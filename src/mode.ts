@@ -1,13 +1,13 @@
-export const initUIMode = function () {
-    const theme = "data-theme";
-    var AppliedTheme = ["light", "dark", "blue"];
-    var i = 0;
-    var main_body = document.getElementById("main-body");
-    main_body.setAttribute(theme, AppliedTheme[0]);
+import { el, elId } from "element/helper";
 
-    document.getElementById("mode").addEventListener("mousedown", function (event) {
-        i = (i + 1) % AppliedTheme.length;
-        var main_body = document.getElementById("main-body");
-        main_body.setAttribute(theme, AppliedTheme[i]);
-    });
+export const initUIMode = function () {
+    const theme = 'data-theme';
+    const allTheme = ['light', 'dark', 'blue'];
+    let i = 0;
+    elId('main-body').do(mainBody => el(mainBody).attr(theme, allTheme[0]));
+
+    elId('mode').do(modeElement => el(modeElement).evt("mousedown", function (event) {
+        i = (i + 1) % allTheme.length;
+        elId('main-body').do(mainBody => el(mainBody).attr(theme, allTheme[i]));
+    }));
 }

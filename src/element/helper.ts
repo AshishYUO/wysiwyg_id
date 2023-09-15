@@ -78,14 +78,13 @@ export function des<Pattern>(node: HTMLElement, nodeChildrenPatter: Pat): Patter
 }
 
 /**
- * 
+ * Search element by id
  * @param _id ID to search
  * @param node 
  * @returns 
  */
 export function elId(
     _id: string,
-    node: HTMLElement | Document = document
 ): Option<HTMLElement>
 {
     return Some(document.getElementById(_id));
@@ -123,11 +122,10 @@ export function elQueryAll(
 }
 
 export function elIds(
-    node: HTMLElement | Document = document,
     ..._ids: string[]
 ): (Option<HTMLElement>)[] 
 {
-    return _ids.map(_id => elId(_id, node));
+    return _ids.map(_id => elId(_id));
 }
 
 export function txt(

@@ -84,15 +84,17 @@ class ParentIncIterWrapper {
 
 
 /**
- * Iterate outwards to the parent of each node,
- * note that this is inclusive
+ * Convenient iterator for nodes.
  * @param value Value to iterate towards document
+ * @param fn the function that yields the next node based on current node
+ * @param incl Flag for inclusive, i.e., include value for which the generator does not
+ * yield value further.
  * @returns wrapper for the Iterator
  */
-export function nodeIterGen(
+export function nodeIter(
     value: HTMLElement | Node,
     fn: (_: Node) => Node = (_ => _.parentNode),
-    incl: boolean
+    incl: boolean = false
 ) {
     return new NodeIterWrapper(
         value,
@@ -105,7 +107,7 @@ export function nodeIterGen(
 class NodeIterWrapper {
     constructor(
         private currNode: HTMLElement | Node,
-        private stride: (_: Node) => Node,
+        private stride: (_: HTMLElement | Node) => Node,
         private inclusive: boolean = false,
         private until: (_: HTMLElement | Node) => boolean
     ) {} 

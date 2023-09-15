@@ -1,6 +1,6 @@
 import selection, { SelectionInfo } from '../selection';
 import { applyBlockNodes } from '../formatting';
-import { iterToPar } from 'utils/iter';
+import { iterToPar, nodeIter } from 'utils/iter';
 
 const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'DIV', 'PRE', 'P', 'DL', 'ADDRESS', 'IMG', 'LI', 'TABLE', 'TR']);
 
@@ -15,6 +15,7 @@ const isABlockNode = (node: HTMLElement | Node): boolean => {
 
 /**
  * @details Get parent block node that is just below the main parent node.
+ * @param editor The contenteditable node, i.e., main editor
  * @param node the node to evaluate it's parent.
  * @returns block node that is just below main text editor.
  */
@@ -50,15 +51,19 @@ const getAllBlockNodesInCurrentSelection = (editor: HTMLElement): Array<Node> =>
     const [startBlockNode, endBlockNode] = getSelectedBlockNode(editor);
     // Assumption that the nodes are at a same level, and lists are not included.
     let nodeTraversal = startBlockNode;
-    const blockNodes: Node[] = [];
-    while (nodeTraversal !== null && nodeTraversal !== endBlockNode) {
-        blockNodes.push(nodeTraversal);
-        nodeTraversal = nodeTraversal.nextSibling;
-    }
-    if (nodeTraversal) {
-        blockNodes.push(nodeTraversal);
-    }
-    return blockNodes;
+    // The equivalent operation is in the comment below the 
+    // return statement for reference
+    return [
+        ...nodeIter(nodeTraversal, (n) => n.nextSibling, true)
+            .till(n => n !== null && n !== endBlockNode)
+    ];
+    // while (nodeTraversal !== null && nodeTraversal !== endBlockNode) {
+    //     blockNodes.push(nodeTraversal);
+    //     nodeTraversal = nodeTraversal.nextSibling;
+    // }
+    // if (nodeTraversal) {
+    //     blockNodes.push(nodeTraversal);
+    // }
 }
 
 /**
