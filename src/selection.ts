@@ -1,4 +1,4 @@
-import { Opt, Some } from "utils/option";
+import { Option, Some } from "utils/option";
 
 /**
  * @details class for selection
@@ -126,7 +126,7 @@ const selection = {
         }
     },
 
-    getCommonParentFromCurrentSelection: (): Opt<Node> => {
+    getCommonParentFromCurrentSelection: (): Option<Node> => {
         return selection.sel().map(curSel => (
             curSel.getRangeAt(0).commonAncestorContainer
         ))
@@ -137,7 +137,7 @@ const selection = {
      * @returns {Object} Caret selection: Start node with it's offset,
      * end node with it's offset
      */
-    getSelectionInfo: (): Opt<SelectionInfo> => {
+    getSelectionInfo: (): Option<SelectionInfo> => {
         return selection.sel().map(currSel => ({
             startNode: currSel.getRangeAt(0).startContainer,
             startOffset: currSel.getRangeAt(0).startOffset,

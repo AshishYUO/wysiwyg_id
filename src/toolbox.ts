@@ -3,6 +3,7 @@ import { getIntersectingFormattingOptions } from './formatting';
 import Editor from './editor/editor';
 import { el, elQuery } from 'element/helper';
 import { iterToParIncl } from 'utils/iter';
+import { Option, Some } from 'utils/option';
 
 export default class ToolBox {
     editorHandler: Editor;
@@ -10,24 +11,24 @@ export default class ToolBox {
     symbolTable: HTMLElement;
     toolbox: HTMLElement;
     bodyNode: HTMLElement;
-    bold: HTMLButtonElement;
-    italic: HTMLButtonElement;
-    underline: HTMLButtonElement;
-    subs: HTMLButtonElement;
-    sups: HTMLButtonElement;
-    quote: HTMLButtonElement;
-    anchor: HTMLButtonElement;
-    hr: HTMLButtonElement;
-    header1: HTMLButtonElement;
-    header2: HTMLButtonElement;
-    alignLeft: HTMLButtonElement;
-    alignRight: HTMLButtonElement;
-    alignCenter: HTMLButtonElement;
-    alignJustify: HTMLButtonElement;
-    unorderedList: HTMLButtonElement;
-    orderedList: HTMLButtonElement;
-    math: HTMLButtonElement;
-    currency: HTMLButtonElement;
+    bold: Option<HTMLButtonElement>;
+    italic: Option<HTMLButtonElement>;
+    underline: Option<HTMLButtonElement>;
+    subs: Option<HTMLButtonElement>;
+    sups: Option<HTMLButtonElement>;
+    quote: Option<HTMLButtonElement>;
+    anchor: Option<HTMLButtonElement>;
+    hr: Option<HTMLButtonElement>;
+    header1: Option<HTMLButtonElement>;
+    header2: Option<HTMLButtonElement>;
+    alignLeft: Option<HTMLButtonElement>;
+    alignRight: Option<HTMLButtonElement>;
+    alignCenter: Option<HTMLButtonElement>;
+    alignJustify: Option<HTMLButtonElement>;
+    unorderedList: Option<HTMLButtonElement>;
+    orderedList: Option<HTMLButtonElement>;
+    math: Option<HTMLButtonElement>;
+    currency: Option<HTMLButtonElement>;
     elementReferences: any = null;
     alignment: any = null
 
@@ -42,41 +43,48 @@ export default class ToolBox {
         this.toolbox = elQuery('.options').get();
         this.bodyNode = elQuery('.bodyeditable').get();
 
-        this.bold = elQuery<HTMLButtonElement>('.bold', Node).doGet(btn => (
-            btn.onclick = evt => this.executeCommand({ command: 'bold', type: 'inline' })
-        ));
+        this.bold = elQuery<HTMLButtonElement>('.bold', Node).map(btn => {
+            btn.onclick = evt => this.executeCommand({ command: 'bold', type: 'inline' });
+            return btn;
+        });
 
-        this.italic = elQuery<HTMLButtonElement>('.italic', Node).doGet(btn => (
-            btn.onclick = evt => this.executeCommand({ command: 'italic', type: 'inline' })
-        ));
+        this.italic = elQuery<HTMLButtonElement>('.italic', Node).map(btn => {
+            btn.onclick = evt => this.executeCommand({ command: 'italic', type: 'inline' });
+            return btn
+        });
 
-        this.underline = elQuery<HTMLButtonElement>('.underline', Node).doGet(btn => (
+        this.underline = elQuery<HTMLButtonElement>('.underline', Node).map(btn => {
             btn.onclick = evt => this.executeCommand({ command: 'underline', type: 'inline' })
-        ));
+            return btn;
+        });
 
-        this.subs = elQuery<HTMLButtonElement>('.subscript', Node).doGet(btn => (
+        this.subs = elQuery<HTMLButtonElement>('.subscript', Node).map(btn => {
             btn.onclick = evt => this.executeCommand({ command: 'subscript', type: 'inline' })
-        ));
+            return btn;
+        });
 
-        this.sups = elQuery<HTMLButtonElement>('.superscript', Node).doGet(btn => (
+        this.sups = elQuery<HTMLButtonElement>('.superscript', Node).map(btn => {
             btn.onclick = evt => this.executeCommand({ command: 'superscript', type: 'inline' })
-        ));
+            return btn;
+        });
 
-        this.quote = elQuery<HTMLButtonElement>('.blockquote', Node).doGet(btn => (
+        this.quote = elQuery<HTMLButtonElement>('.blockquote', Node).map(btn => {
             btn.onclick = evt => this.executeCommand({ command: 'BLOCKQUOTE', type: 'block' })
-        ));
+            return btn;
+        });
 
-        this.hr = elQuery<HTMLButtonElement>('.hr', Node).doGet(btn => (
+        this.hr = elQuery<HTMLButtonElement>('.hr', Node).map(btn => {
             btn.onclick = evt => (this.applyTools(event => {
                 this.editorHandler.addInline({
                     cmd: 'insertHTML',
                     valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
                 })
-            }, evt)
-        )));
+            }, evt));
+            return btn;
+        });
 
-        this.anchor = Node.querySelector('.link');
-        this.anchor && (this.anchor.onclick = event => this.applyTools(event => {
+        this.anchor = Some(Node.querySelector('.link'));
+        (this.anchor.get().onclick = event => this.applyTools(event => {
             const parent = selection.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
                 this.editorHandler.addInline({
@@ -99,67 +107,73 @@ export default class ToolBox {
             this.formatsOnCurrentCaret();
         }, event));
 
-        this.header1 = elQuery<HTMLButtonElement>('.header-1', Node).doGet(btn => {
+        this.header1 = elQuery<HTMLButtonElement>('.header-1', Node).map(btn => {
             btn.onclick = event => this.executeCommand({
                 command: 'H1',
                 type: 'block'
             });
+            return btn;
         });
 
-        this.header2 = elQuery<HTMLButtonElement>('.header-2', Node).doGet(btn => {
+        this.header2 = elQuery<HTMLButtonElement>('.header-2', Node).map(btn => {
             btn.onclick = event => this.executeCommand({
                 command: 'H2',
                 type: 'block'
             });
+            return btn;
         });
 
-        this.alignLeft = Node.querySelector('.align-left');
-        this.alignLeft && (this.alignLeft.onclick = event => this.applyTools(event => {
+        this.alignLeft = elQuery('.align-left');
+        this.alignLeft.get().onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyLeft'
             });
             this.formatsOnCurrentCaret();
-        }, event));
+        }, event);
 
-        this.alignRight = Node.querySelector('.align-right');
-        this.alignRight && (this.alignRight.onclick = event => this.applyTools(event => {
+        this.alignRight = elQuery('.align-right');
+        this.alignRight.get().onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyRight'
             });
             this.formatsOnCurrentCaret();
-        }, event));
+        }, event);
 
-        this.alignCenter = Node.querySelector('.align-center');
-        this.alignCenter && (this.alignCenter.onclick = event => this.applyTools(event => {
+        this.alignCenter = elQuery('.align-center');
+        this.alignCenter.get().onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyCenter'
             });
             this.formatsOnCurrentCaret();
-        }, event));
+        }, event);
 
-        this.alignJustify = Node.querySelector('.align-justify');
-        this.alignJustify && (this.alignJustify.onclick = event => this.applyTools(event => {
+        this.alignJustify = elQuery('.align-justify');
+        this.alignJustify.get().onclick = event => this.applyTools(event => {
             this.editorHandler.addInline({
                 cmd: 'justifyFull'
             });
             this.formatsOnCurrentCaret();
-        }, event));
+        }, event);
 
-        this.unorderedList = elQuery<HTMLButtonElement>('.ulist').doGet(btn => {
+        this.unorderedList = elQuery<HTMLButtonElement>('.ulist').map(btn => {
             btn.onclick = event => this.applyTools(event => {}, event);
+            return btn;
         });
 
-        this.orderedList = elQuery<HTMLButtonElement>('.olist').doGet(btn => {
+        this.orderedList = elQuery<HTMLButtonElement>('.olist').map(btn => {
             btn.onclick = event => this.applyTools(event => {}, event);
+            return btn;
         });
 
         // Handle math symbols
-        this.math = elQuery<HTMLButtonElement>('.math').doGet(btn => {
+        this.math = elQuery<HTMLButtonElement>('.math').map(btn => {
             btn.onclick = event => this.enableBox(Node, 0x2200, 0x22FF, event);
+            return btn;
         });
         // Handling currency 
-        this.currency = elQuery<HTMLButtonElement>('.currency').doGet(btn => {
+        this.currency = elQuery<HTMLButtonElement>('.currency').map(btn => {
             btn.onclick = event => this.enableBox(Node, 0x20A0, 0x20BF, event);
+            return btn;
         });
 
         this.elementReferences = {
@@ -279,14 +293,11 @@ export default class ToolBox {
      * which styles/tags are applied.
      */
     clearAllFormats() {
-        [this.elementReferences, this.alignment].forEach(elementReferences => {
-            Object.entries(elementReferences).forEach((referenceKey: any) => {
-                const [tagName, reference] = referenceKey;
-                if (reference && reference.classList) {
-                    reference.classList.add('no-highlight');
-                }
+        Object.entries(this.elementReferences)
+            .concat(Object.entries(this.alignment))
+            .forEach(([_, references]: [string, any]) => {
+                references.do(value => el(value).cls('no-highlight'));
             });
-        })
     }
 
     /**
@@ -295,22 +306,20 @@ export default class ToolBox {
      * intersection of all styles from a given caret selection.
      */
     formatsOnCurrentCaret(): void {
-        const nodeArray = this.editorHandler.getAllTextNodeInsideSelection();
         this.clearAllFormats();
+        const nodeArray = this.editorHandler.getAllTextNodeInsideSelection();
         const [formatApplied, align] = getIntersectingFormattingOptions(this.editorHandler.editor, nodeArray);
-        if (formatApplied.size) {
-            formatApplied.forEach(tagName => {
-                const elementReference = this.elementReferences[tagName];
-                if (elementReference && elementReference.classList) {
-                    elementReference.classList.remove('no-highlight');
-                }
+
+        formatApplied.forEach(tagName => {
+            this.elementReferences[tagName].do(btn => {
+                el(btn).rcls('no-highlight');
             });
-        }
+        });
+
         if (align) {
-            const elementReference = this.alignment[align]; 
-            if (elementReference && elementReference.classList) {
-                elementReference.classList.remove('no-highlight');
-            }
+            this.alignment[align].do(btn => {
+                el(btn).rcls('no-highlight');
+            });
         }
     }
 };

@@ -1,11 +1,11 @@
 
 export type None = undefined | null;
 
-export function Some<T>(value: T): Opt<T> {
-    return new Opt(value);
+export function Some<T>(value: T): Option<T> {
+    return new Option(value);
 }
 
-export class Opt<T> {
+export class Option<T> {
     /// Holds some value or nothing.
     some: T | None;
 
@@ -37,23 +37,23 @@ export class Opt<T> {
     /**
      * Map from one value to another
      * @param fn function for mapping
-     * @returns Opt
+     * @returns Option
      */
-    map<U>(fn: (_: T) => U): Opt<U> {
+    map<U>(fn: (_: T) => U): Option<U> {
         if (this.isSome()) {
-            return new Opt<U>(fn(this.some));
+            return new Option<U>(fn(this.some));
         }
-        return new Opt<U>(undefined);
+        return new Option<U>(undefined);
     }
 
     /**
      * 
      */
-    mapOr<U>(fn: (_: T) => U, def: U): Opt<U> {
+    mapOr<U>(fn: (_: T) => U, def: U): Option<U> {
         if (this.isSome()) {
-            return new Opt<U>(fn(this.some));
+            return new Option<U>(fn(this.some));
         }
-        return new Opt<U>(def);
+        return new Option<U>(def);
     }
 
     /**

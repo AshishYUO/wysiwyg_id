@@ -1,4 +1,4 @@
-import { Opt, Some } from "utils/option";
+import { Option, Some } from "utils/option";
 
 interface IElem {
     get: () => Node,
@@ -86,7 +86,7 @@ export function des<Pattern>(node: HTMLElement, nodeChildrenPatter: Pat): Patter
 export function elId(
     _id: string,
     node: HTMLElement | Document = document
-): Opt<HTMLElement>
+): Option<HTMLElement>
 {
     return Some(document.getElementById(_id));
 }
@@ -102,7 +102,7 @@ export function elQuery<
 >(
     query: string,
     node: HTMLElement | Document = document, 
-): Opt<Return>
+): Option<Return>
 {
     return Some(node.querySelector(query) as Return);
 }
@@ -117,7 +117,7 @@ export function elQuery<
 export function elQueryAll(
     query: string,
     node: HTMLElement | Document = document
-): Opt<NodeListOf<HTMLElement>> 
+): Option<NodeListOf<HTMLElement>> 
 {
     return Some(node.querySelectorAll(query));
 }
@@ -125,7 +125,7 @@ export function elQueryAll(
 export function elIds(
     node: HTMLElement | Document = document,
     ..._ids: string[]
-): (Opt<HTMLElement>)[] 
+): (Option<HTMLElement>)[] 
 {
     return _ids.map(_id => elId(_id, node));
 }
@@ -146,16 +146,37 @@ export function el<T extends HTMLElement>(tag: string | T) {
         tag;
 
     const helper = {
+        /**
+         * Add class
+         * @returns Self for transformation
+         */
         cls (cls: string) {
             currentWorkingElement.classList.add(cls);
             return this;
         },
 
+        /**
+         * Remove class
+         * @returns Self for transformation
+         */
+        rcls (cls: string) {
+            currentWorkingElement.classList.remove(cls);
+            return this;
+        },
+
+        /**
+         * Set id of the element
+         * @returns Self for transformation
+         */
         id (id: string) {
             currentWorkingElement.id = id;
             return this;
         },
 
+        /**
+         * Add attribute
+         * @returns Self for transformation
+         */
         attr (attributeKey: string, attributeValue: string = 'true') {
             currentWorkingElement.setAttribute(attributeKey, attributeValue);
             return this;
@@ -166,6 +187,10 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Remove attached event to the element
+         * @returns Self for transformation
+         */
         evtrm<T extends Event>(
             eventName: string,
             fn: (_: T, _1?: HTMLElement) => void,
@@ -179,6 +204,10 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Attach event to the element
+         * @returns Self for transformation
+         */
         evt<T extends Event>(
             eventName: string,
             fn: (_: T, _1?: HTMLElement) => void,
@@ -192,6 +221,10 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Bulk add attributes
+         * @returns Self for transformation
+         */
         attrs(attrs: Array<[_attrkey: string, _attrvalue: string]>) {
             attrs.forEach(([attrKey, attrValue]: [string, string]) => {
                 currentWorkingElement.setAttribute(attrKey, attrValue);
@@ -199,25 +232,41 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Set innerText to node currently held
+         * @returns Self for transformation
+         */
         innerText(text: string) {
             currentWorkingElement.innerText = text;
             return this;
         },
 
+        /**
+         * Set innerHtml to node currently held
+         * @returns Self for transformation
+         */
         innerHtml(text: string) {
             currentWorkingElement.innerHTML = text;
             return this;
         },
 
-        childNodes(elems: (Node | IElem)[]) {
-            elems.forEach((elem: Node | IElem) => (
-                (elem instanceof HTMLElement || elem instanceof Node) ? 
+        /**
+         * Add childNodes to node that is held by current `el`
+         * @returns Self for transformation
+         */
+        childNodes(elems: (Node | Text | IElem)[]) {
+            elems.forEach((elem: Node | Text | IElem) => (
+                (elem instanceof HTMLElement || elem instanceof Node || elem instanceof Text) ? 
                     currentWorkingElement.append(elem) : 
                     currentWorkingElement.append(elem.get())
             ));
             return this;
         },
 
+        /**
+         * Add children to node that is held by current `el`
+         * @returns Self for transformation
+         */
         inner(elems: (Node | IElem)[]) {
             elems.forEach((elem: any) => (
                 (elem instanceof HTMLElement || elem instanceof Node) ? 
@@ -279,24 +328,44 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Add spellcheck
+         * @returns Self for transformation
+         */
         spellchk() {
             return this.spellcheck(true);
         },
 
+        /**
+         * Add no spellcheck
+         * @returns Self for transformation
+         */
         nospellchk() {
             return this.spellcheck(false);
         },
 
+        /**
+         * Set placeholder for Input Element
+         * @returns Self for transformation
+         */
         placeholder(set: string) {
             (currentWorkingElement as HTMLInputElement).placeholder = set;
             return this;
         },
 
+        /**
+         * Toggle class
+         * @returns Self for transformation
+         */
         tcls (cls: string) {
             currentWorkingElement.classList.toggle(cls);
             return this;
         },
 
+        /**
+         * Bulk add class
+         * @returns Self for transformation
+         */
         bcls (clsarr: string[]) {
             currentWorkingElement.classList.add(...clsarr);
             return this;
@@ -306,23 +375,43 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return currentWorkingElement as Node;
         },
 
+        /**
+         * Returns the value transformed by `el`
+         * @returns Current node that holds by `el` as` HTMLElement`
+         */
         getel (): HTMLElement {
             return currentWorkingElement as HTMLElement;
         },
 
+        /**
+         * Returns the value as specified `HTMLElement` transformed by `el`
+         * @returns Current node that holds by `el`
+         */
         get<T extends HTMLElement>(): T {
             return currentWorkingElement as T;
         },
 
+        /**
+         * Append currently held element to `someParent` passed to the function
+         * @returns Self for transformation
+         */
         appendTo (someParent: Node) {
             someParent.appendChild(currentWorkingElement);
             return this;
         },
 
+        /**
+         * Append some node to currently held Element
+         * @returns Self for transformation
+         */
         append (el: Node): IElem {
             return this.appendChild(el);
         },
 
+        /**
+         * Replace `someChild` passed to the function with currently held `Element` 
+         * @returns Self for transformation
+         */
         replaceWith(someChild: Node) {
             if (someChild.parentNode) {
                 someChild.parentNode.replaceChild(
@@ -333,11 +422,20 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Append some node to currently held Element
+         * @returns Self for transformation
+         */
         appendChild (el: Node): IElem {
             currentWorkingElement.appendChild(el);
             return this;
         },
-
+        
+        /**
+         * Attach currently held node next to `someNode`, turning into 
+         * `nextSibling` of `someSibling`.
+         * @returns Self for transformation
+         */
         nextTo (someSibling: Node) {
             if (someSibling.parentNode) {
                 if (someSibling.nextSibling) {
@@ -354,6 +452,11 @@ export function el<T extends HTMLElement>(tag: string | T) {
             return this;
         },
 
+        /**
+         * Attach currently held node previous to `someNode`, turning into 
+         * `previousSibling` of `someSibling`.
+         * @returns Self for transformation
+         */
         before (someSibling: Node) {
             if (someSibling.parentNode) {
                 someSibling.parentNode.insertBefore(

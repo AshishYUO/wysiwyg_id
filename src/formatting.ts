@@ -45,7 +45,7 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
             break;
         }
     }
-    return [ formatApplied, align ];
+    return [formatApplied, align];
 }
 
 /**
@@ -79,7 +79,10 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
         if (node.nodeName !== nodeName) {
             /// Move all children to the new node
             /// and replace with the node.
-            const blockElement = el(nodeName).inner([...node.childNodes]).replaceWith(node).get();
+            const blockElement = el(nodeName)
+                .inner([...node.childNodes])
+                .replaceWith(node)
+                .get();
             blockNodes[index] = blockElement;
         }
     });

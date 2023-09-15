@@ -137,6 +137,9 @@ const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent) => {
         }
         keyPressed = keyPressed[event.key];
     }
+    if (editor.textContent.length === 0) {
+        el(editor as HTMLElement).innerHtml('<div><br /></div>');
+    }
 }
 
 /**
