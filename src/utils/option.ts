@@ -82,13 +82,4 @@ export class Option<T> {
             return this.some;
         }
     }
-
-    run<U>(
-        fn: (_: T) => U
-    ): U | null {
-        if (this.isSome()) {
-            return fn(this.some);
-        }
-        return null;
-    }
 }

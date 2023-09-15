@@ -44,32 +44,32 @@ export default class ToolBox {
         this.bodyNode = elQuery('.bodyeditable').get();
 
         this.bold = elQuery<HTMLButtonElement>('.bold', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'bold', type: 'inline' });
+            btn.onclick = _ => this.executeCommand({ command: 'bold', type: 'inline' });
             return btn;
         });
 
         this.italic = elQuery<HTMLButtonElement>('.italic', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'italic', type: 'inline' });
+            btn.onclick = _ => this.executeCommand({ command: 'italic', type: 'inline' });
             return btn
         });
 
         this.underline = elQuery<HTMLButtonElement>('.underline', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'underline', type: 'inline' })
+            btn.onclick = _ => this.executeCommand({ command: 'underline', type: 'inline' })
             return btn;
         });
 
         this.subs = elQuery<HTMLButtonElement>('.subscript', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'subscript', type: 'inline' })
+            btn.onclick = _ => this.executeCommand({ command: 'subscript', type: 'inline' })
             return btn;
         });
 
         this.sups = elQuery<HTMLButtonElement>('.superscript', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'superscript', type: 'inline' })
+            btn.onclick = _ => this.executeCommand({ command: 'superscript', type: 'inline' })
             return btn;
         });
 
         this.quote = elQuery<HTMLButtonElement>('.blockquote', Node).map(btn => {
-            btn.onclick = evt => this.executeCommand({ command: 'BLOCKQUOTE', type: 'block' })
+            btn.onclick = _ => this.executeCommand({ command: 'BLOCKQUOTE', type: 'block' })
             return btn;
         });
 
@@ -83,7 +83,7 @@ export default class ToolBox {
             return btn;
         });
 
-        this.anchor = Some(Node.querySelector('.link'));
+        this.anchor = elQuery('.link');
         (this.anchor.get().onclick = event => this.applyTools(event => {
             const parent = selection.getCurrentNodeFromCaretPosition();
             if (parent && parent.nodeName === 'A') {
@@ -108,7 +108,7 @@ export default class ToolBox {
         }, event));
 
         this.header1 = elQuery<HTMLButtonElement>('.header-1', Node).map(btn => {
-            btn.onclick = event => this.executeCommand({
+            btn.onclick = _ => this.executeCommand({
                 command: 'H1',
                 type: 'block'
             });
@@ -116,20 +116,22 @@ export default class ToolBox {
         });
 
         this.header2 = elQuery<HTMLButtonElement>('.header-2', Node).map(btn => {
-            btn.onclick = event => this.executeCommand({
+            btn.onclick = _ => this.executeCommand({
                 command: 'H2',
                 type: 'block'
             });
             return btn;
         });
 
-        this.alignLeft = elQuery('.align-left');
-        this.alignLeft.get().onclick = event => this.applyTools(event => {
-            this.editorHandler.addInline({
-                cmd: 'justifyLeft'
-            });
-            this.formatsOnCurrentCaret();
-        }, event);
+        this.alignLeft = elQuery<HTMLButtonElement>('.align-left').map(btn => {
+            btn.onclick = event => this.applyTools(event => {
+                this.editorHandler.addInline({
+                    cmd: 'justifyLeft'
+                });
+                this.formatsOnCurrentCaret();
+            }, event);
+            return btn;
+        });
 
         this.alignRight = elQuery('.align-right');
         this.alignRight.get().onclick = event => this.applyTools(event => {
@@ -147,13 +149,15 @@ export default class ToolBox {
             this.formatsOnCurrentCaret();
         }, event);
 
-        this.alignJustify = elQuery('.align-justify');
-        this.alignJustify.get().onclick = event => this.applyTools(event => {
-            this.editorHandler.addInline({
-                cmd: 'justifyFull'
-            });
-            this.formatsOnCurrentCaret();
-        }, event);
+        this.alignJustify = elQuery<HTMLButtonElement>('.align-justify').map(btn => {;
+            btn.onclick = event => this.applyTools(event => {
+                this.editorHandler.addInline({
+                    cmd: 'justifyFull'
+                });
+                this.formatsOnCurrentCaret();
+            }, event);
+            return btn;
+        })
 
         this.unorderedList = elQuery<HTMLButtonElement>('.ulist').map(btn => {
             btn.onclick = event => this.applyTools(event => {}, event);

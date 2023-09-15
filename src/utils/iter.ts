@@ -1,3 +1,53 @@
+class IterWrapper<T> implements Iterable<T> {
+    [Symbol.iterator];
+    constructor(
+        private iterable?: Iterable<T>
+    ) {}
+
+    forEach(fn: (_: T, index?: number) => void) {
+        let index = 0;
+        for (const value of this) {
+            fn(value, index);
+            index += 1;
+        }
+    }
+
+    takeWhile(fn: (_: T, index?: number) => boolean) {
+        return function*(container) {
+            let index = 0;
+            for (const value of container) {
+                if (!fn(value, index)) {
+                    break;
+                }
+                index += 1;
+                yield value;
+            }
+        }(this);
+    }
+
+    map<U>(fn: (_: T, index?: number) => U) {
+        return function*(container) {
+            let index = 0;
+            for (const value of container) {
+                yield fn(value, index);
+                index += 1;
+            }
+        }(this);
+    }
+
+    filter(fn: (_: T, index?: number) => boolean) {
+        return function*(container) {
+            let index = 0;
+            for (const value of container) {
+                if (fn(value, index)) {
+                    yield value;
+                }
+                index += 1;
+            }
+        }(this);
+    }
+}
+
 /**
  * Iterate outwards to the parent of each node
  * @param value Value to iterate towards document
@@ -7,20 +57,19 @@ export function iterToPar(value: HTMLElement | Node) {
     return new ParentIterWrapper(value, (par) => par !== null);
 }
 
-class ParentIterWrapper {
+class ParentIterWrapper extends IterWrapper<HTMLElement> {
     constructor(
         private currNode: HTMLElement | Node,
         private until: (_: HTMLElement | Node) => boolean
-    ) {} 
-
-    [Symbol.iterator]() {
-        return function*(node: ParentIterWrapper) {
-            while (node.until(node.currNode)) {
-                const value = node.currNode
-                node.currNode = node.currNode.parentNode as HTMLElement;
+    ) { 
+        super();
+        this[Symbol.iterator] = function*() {
+            while (this.until(this.currNode)) {
+                const value = this.currNode;
+                this.currNode = this.currNode.parentNode as HTMLElement;
                 yield value;
-            }
-        }(this);
+            }(this)
+        }
     }
 
     till(fn: (_: HTMLElement | Node) => boolean) {
@@ -36,7 +85,7 @@ class ParentIterWrapper {
         let value = null;
         for (const i of this) {
             value = i;
-        }
+        }this[Symbol.iterator]
         return value;
     }
 }
@@ -71,7 +120,7 @@ class ParentIncIterWrapper {
     till(fn: (_: HTMLElement | Node) => boolean) {
         this.until = fn;
         return this;
-    }
+    }getCurrentNodeFromCaretPosition
 
     last(): HTMLElement {
         let value = null;
@@ -104,25 +153,24 @@ export function nodeIter(
     );
 }
 
-class NodeIterWrapper {
+class NodeIterWrapper extends IterWrapper<HTMLElement>  {
     constructor(
         private currNode: HTMLElement | Node,
         private stride: (_: HTMLElement | Node) => Node,
         private inclusive: boolean = false,
         private until: (_: HTMLElement | Node) => boolean
-    ) {} 
-
-    [Symbol.iterator]() {
-        return function*(node: NodeIterWrapper) {
-            while (node.until(node.currNode)) {
-                const value = node.currNode;
-                node.currNode = node.stride(node.currNode) as HTMLElement;
+    ) {
+        super();
+        this[Symbol.iterator] = function*() {
+            while (this.until(this.currNode)) {
+                const value = this.currNode;
+                this.currNode = this.stride(this.currNode) as HTMLElement;
                 yield value;
             }
-            if (node.inclusive) {
-                yield node.currNode;
+            if (this.inclusive) {
+                yield this.currNode;
             }
-        }(this);
+        };
     }
 
     till(fn: (_: HTMLElement | Node) => boolean) {

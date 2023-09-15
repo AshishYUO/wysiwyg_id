@@ -95,7 +95,7 @@ const selection = {
      * @returns {void}
      */
     setSelectionAt: (selectionInfo: SelectionInfo): void => {
-        selection.sel().doGet(currSel => {
+        selection.sel().do(currSel => {
             currSel.removeAllRanges();
             const newRange = document.createRange();
 
@@ -117,8 +117,8 @@ const selection = {
      * @param {*} selectionObj 
      * @returns 
      */
-    getCurrentNodeFromCaretPosition: (selectionObj=undefined): Node => {
-        const currSelection = selectionObj || selection.sel().get();
+    getCurrentNodeFromCaretPosition: (sel: Selection=undefined): Node => {
+        const currSelection = sel || selection.sel().get();
         if (currSelection.anchorNode && currSelection.anchorNode.nodeName === '#text') {
             return currSelection.anchorNode.parentNode;
         } else {

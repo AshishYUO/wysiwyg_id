@@ -2,31 +2,32 @@ import selection from './selection';
 import { isABlockNode } from './editor/block';
 import { el, elQuery } from 'element/helper';
 import { iterToParIncl } from 'utils/iter';
+import { Option } from 'utils/option';
 
 export default class Image {
     mainBody: HTMLElement;
     imageButton: HTMLElement;
     fileElement: HTMLElement;
     fileReader: FileReader;
-    selection: Selection;
 
     constructor (Node: HTMLElement) {
         this.mainBody = Node;
         
         this.imageButton = elQuery<HTMLImageElement>('.image').doGet(imgBtn => {
             imgBtn.onclick = event => {
-                this.selection = selection.sel().get();
-                const URL = this.selection.toString().trim();
-                if (URL.length) 
-                    if (this.matchesWithExtURL(URL)) {
-                        this.loadImage(URL);
-                    }
+                selection.sel().do(sel => {
+                    const url = sel.toString().trim();
+                    if (url.length) 
+                        if (this.matchesWithExtURL(url)) {
+                            this.loadImage(url);
+                        }
+                        else {
+                            alert('Invalid URL');
+                        }
                     else {
-                        alert('Invalid URL');
+                        this.fileElement.click();
                     }
-                else {
-                    this.fileElement.click();
-                }
+                });
             };
         });
 
@@ -39,12 +40,9 @@ export default class Image {
             .get<HTMLImageElement>();
 
         this.fileReader = new FileReader();
-        this.selection = null;
 
         this.fileReader.onload = (event: any) => {
-            if (this.selection) {
-                this.loadImage(event.target.result);
-            }
+            selection.sel().do(_ => this.loadImage(event.target.result)) 
         }
     }
 
@@ -54,7 +52,7 @@ export default class Image {
      * @return void
      */
     setImageEvents(imageElement: HTMLImageElement): void {
-        const mousemoveOnResizingEvent = (event: Event) => {
+        const mousemoveOnResizingEvent = (event: MouseEvent) => {
             event.preventDefault();
             this.executeResizingEvent(event);
         }
@@ -85,13 +83,13 @@ export default class Image {
         imageElement.onmousedown = imageClickHold;
     }
 
-    executeResizingEvent (event: any): void {
-        const imageElement = event.target;
+    executeResizingEvent (event: MouseEvent): void {
+        const imageElement = event.target as HTMLImageElement;
         const cursor = imageElement.style.cursor.split('-')[0];
         switch(cursor) {
             case 'e':
             case 'se':
-                imageElement.setAttribute('width', event.offsetX + 5);
+                el(imageElement).attr('width', `${event.offsetX + 5}`);
                 break;
         }
     }
@@ -103,9 +101,9 @@ export default class Image {
             ['tabindex', '0']
         ]).get<HTMLImageElement>();
 
-        let node = selection.getCurrentNodeFromCaretPosition(this.selection);
+        let node = selection.getCurrentNodeFromCaretPosition(selection.sel().get());
 
-        node = iterToParIncl(node).till(n => !isABlockNode(node)).last();        
+        node = iterToParIncl(node).till(n => !isABlockNode(n)).last();        
         this.setImageEvents(imageNode);
         
         el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);

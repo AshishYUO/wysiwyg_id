@@ -91,6 +91,32 @@ export function elId(
 }
 
 /**
+ * Search element by id
+ * @param _id ID to search
+ * @param node 
+ * @returns 
+ */
+export function elCls(
+    cls: string,
+): HTMLCollectionOf<Element>
+{
+    return document.getElementsByClassName(cls);
+}
+
+/**
+ * Search element by id
+ * @param _id ID to search
+ * @param node 
+ * @returns 
+ */
+export function elTags(
+    tag: string,
+): HTMLCollectionOf<Element>
+{
+    return document.getElementsByTagName(tag);
+}
+
+/**
  * Convenience for running a querySelector
  * @param query Selector
  * @param node node to be considered parent
@@ -421,10 +447,10 @@ export function el<T extends HTMLElement>(tag: string | T) {
         },
 
         /**
-         * Append some node to currently held Element
+         * Append node passed as parameter as a child to currently held `HTMLElement`
          * @returns Self for transformation
          */
-        appendChild (el: Node): IElem {
+        appendChild (el: Node) {
             currentWorkingElement.appendChild(el);
             return this;
         },
