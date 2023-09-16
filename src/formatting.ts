@@ -93,7 +93,8 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
  * @param {HTMLElement} editor 
  */
 const selectAll = (editor: HTMLElement | Node): void => {;
-    let startNode = editor.childNodes[0], endNode = editor.childNodes[editor.childNodes.length - 1];
+    let startNode = editor.childNodes[0], 
+        endNode = editor.childNodes[editor.childNodes.length - 1];
     while (startNode.childNodes && startNode.childNodes.length) {
         startNode = startNode.childNodes[0];
     }

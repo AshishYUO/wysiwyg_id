@@ -103,24 +103,6 @@ const parent: Array<{
 }> = [];
 
 /**
- * @details Handle delete/backspace button event
- * @param {HTMLElement | Node} editor 
- * @param {KeyboardEvent} event 
- * @returns 
- */
-const handleDelete = (editor: HTMLElement, event: KeyboardEvent) => {
-    // Check if the editor contains one Block element.
-    if (!editor.childNodes.length) {
-        // editor.innerHTML = '<div><br /></div>'
-    } else if (editor.childNodes.length === 1 &&
-        editor.childNodes[0].childNodes.length === 1 &&
-        editor.childNodes[0].childNodes[0].nodeName === 'BR') {
-        return true;
-    }
-    return false;
-}
-
-/**
  * @description handle keyboard down events
  * @param {HTMLElement} editor 
  * @param {Event} event 

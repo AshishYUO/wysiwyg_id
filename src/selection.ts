@@ -77,8 +77,15 @@ const selection = {
             startOffset,
             endOffset
         } = currSelection;
-        const [newStartNode, newStartOffset] = selection.forceTextNodeSelection(startNode, startOffset);
-        const [newEndNode, newEndOffset] = selection.forceTextNodeSelection(endNode, endOffset);
+        
+        const [
+            newStartNode, 
+            newStartOffset
+        ] = selection.forceTextNodeSelection(startNode, startOffset);
+        const [
+            newEndNode,
+            newEndOffset
+        ] = selection.forceTextNodeSelection(endNode, endOffset);
 
         selection.setSelectionAt({
             startNode: newStartNode,
@@ -117,9 +124,10 @@ const selection = {
      * @param {*} selectionObj 
      * @returns 
      */
-    getCurrentNodeFromCaretPosition: (sel: Selection=undefined): Node => {
+    getCurrentNodeFromCaretPosition: (sel: Selection = undefined): Node => {
         const currSelection = sel || selection.sel().get();
-        if (currSelection.anchorNode && currSelection.anchorNode.nodeName === '#text') {
+        if (currSelection.anchorNode && 
+                currSelection.anchorNode.nodeName === '#text') {
             return currSelection.anchorNode.parentNode;
         } else {
             return currSelection.anchorNode;

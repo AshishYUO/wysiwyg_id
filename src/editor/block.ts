@@ -135,7 +135,7 @@ const setCaretSelection = (
 const addBlock = (editor: HTMLElement, details: any): void => {
     const nodeType = details.nodeName;
     
-    selection.getSelectionInfo().doGet((sel) => {
+    selection.getSelectionInfo().do(sel => {
         const blockNodes = getAllBlockNodesInCurrentSelection(editor);
         const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'DIV' : nodeType;
 

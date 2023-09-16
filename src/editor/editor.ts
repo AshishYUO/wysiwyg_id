@@ -11,7 +11,6 @@ import {
 import { handleKeyboardDownEvent, handleKeyboardUpEvent } from './event';
 import { el, elQuery } from 'element/helper';
 
-
 export default class Editor {
     editor: HTMLElement = null;      /// Editor Div (Contains body as well as toolbox)
     editorNode: HTMLElement = null;  /// Main Div Element for editing
@@ -27,10 +26,10 @@ export default class Editor {
         this.editor = elQuery('.bodyeditable').doGet((elem) => (
             el(elem)
                 .innerHtml('<div><br /></div>')
-                .evt('paste', (evt) => {
+                .evt('paste', evt => {
                     evt.preventDefault(); console.log('No paste implementation');
                 })
-                .evt('mouseup', (evt) => toolbox.formatsOnCurrentCaret())
+                .evt('mouseup', evt => toolbox.formatsOnCurrentCaret())
                 .evt('keydown', (evt: KeyboardEvent) => {
                     handleKeyboardDownEvent(this.editor, evt);
                 })

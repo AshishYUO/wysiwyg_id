@@ -5,6 +5,10 @@ export function Some<T>(value: T): Option<T> {
     return new Option(value);
 }
 
+export function None<T>(): Option<T> {
+    return new Option(undefined);
+}
+
 export class Option<T> {
     /// Holds some value or nothing.
     some: T | None;
@@ -64,9 +68,7 @@ export class Option<T> {
     do<U>(
         fn: (_: T) => void
     ) {
-        if (this.isSome()) {
-            fn(this.some);
-        }
+        this.isSome() && fn(this.some);
     }
 
     /**

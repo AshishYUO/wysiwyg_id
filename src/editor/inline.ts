@@ -1,5 +1,7 @@
 import { el, eltxt } from 'element/helper';
 import selection from '../selection';
+import { nodeIter } from 'utils/iter';
+import { None, Option, Some } from 'utils/option';
 
 /**
  * @details Insert string in a text node.
@@ -41,6 +43,39 @@ function insertString(editor: HTMLElement, str: string) {
     }
 }
 
+function makeMove(
+    [prevNode, currNode]: [Option<Node>, Option<Node>]
+): [Option<Node>, Option<Node>]  {
+    if (prevNode.isSome() && currNode.isSome()) {
+        const [prev, curr] = [prevNode.get(), currNode.get()];
+        if (curr === prev.parentNode) {
+            if (curr.nextSibling) {
+                return [Some(curr), Some(curr.nextSibling)];
+            } 
+            return [Some(curr), Some(curr.parentNode)];
+        } else {
+            if (curr.childNodes && curr.childNodes.length >= 1) {
+                return [Some(curr), Some(curr.childNodes[0])];
+            }
+            if (curr.nextSibling) {
+                return [Some(curr), Some(curr.nextSibling)];
+            }
+
+            return [Some(curr), Some(curr.parentNode)];
+        }
+    } else if (prevNode.isNone()) {
+        const curr = currNode.get();
+        if (curr.childNodes && curr.childNodes.length >= 1) {
+            return [currNode, Some(curr.childNodes[0])]
+        } else if (curr.nextSibling) {
+            return [currNode, Some(curr.nextSibling)];
+        } else {
+            return [currNode, Some(curr.parentNode)];
+        }
+    }
+    return [None(), None()];
+}
+
 /**
  * Retrieve all the text nodes.
  * @param startNode starting node of selection
@@ -52,26 +87,16 @@ function getAllTextNodes(
     startNode: Node, 
     endNode: Node
 ) {
-    const textNodes = startNode === endNode ? [startNode] : [];
+    const initialState: [Option<Node>, Option<Node>] = [None<Node>(), Some(startNode)];
+    // const textNodes = startNode === endNode ? [startNode] : [];
+    const textNodes = [
+        ...nodeIter(initialState, makeMove, true)
+            .till(([_, curr]) => curr.isSomeAnd(n => n !== endNode && n !== null))
+            .filter(([_, curr]) => curr.get().nodeType === 3)
+            .map(([_, curr]) => curr.get())
+    ];
 
-    while (startNode !== endNode && startNode !== editor) {
-        // Get leaf node (text node)
-        while (startNode.nodeName !== '#text' && startNode.nodeName !== 'BR') {
-            startNode = startNode.childNodes[0];
-        }
-        textNodes.push(startNode);
-        // Get parent node till there is no next sibling.
-        while (startNode && startNode !== endNode && startNode !== editor && !startNode.nextSibling) {
-            startNode = startNode.parentNode;
-        }
-        if (startNode === endNode || startNode === editor) {
-            break;
-        }
-        startNode = startNode.nextSibling;
-    }
-    if (textNodes[textNodes.length - 1] !== endNode) {
-        textNodes.push(endNode);
-    }
+    console.log(textNodes);
     return textNodes;
 }
 
