@@ -2,7 +2,7 @@ import selection from './selection';
 import { getIntersectingFormattingOptions } from './formatting';
 import Editor from './editor/editor';
 import { el, elQuery } from 'element/helper';
-import { iterToParIncl } from 'utils/iter';
+import { nodeIter } from 'utils/iter';
 import { Option, Some } from 'utils/option';
 
 export default class ToolBox {
@@ -277,19 +277,16 @@ export default class ToolBox {
      * @param call 
      * @param callData 
      */
-    applyTools(call, callData) {
-        if (typeof call !== 'function') {
-            throw (`Wait, the call should be of type callable, not ${typeof (call)}`);
-        } else {
-            let { startNode } = selection.getSelectionInfo().get();
-            let par = iterToParIncl(startNode)
+    applyTools(call: (some: any) => void, callData) {
+        selection.getSelectionInfo().do(({ startNode }) => {
+            let par = nodeIter(startNode, n => n.parentNode, true)
                 .till(n => n.parentNode && n !== this.editorHandler.editor)
                 .last();
 
             if (this.editorHandler.editor === par) {
                 call(callData);
             }
-        }
+        });
     }
 
     /**

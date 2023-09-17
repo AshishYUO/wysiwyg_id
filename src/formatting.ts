@@ -1,6 +1,5 @@
-import { blockInEditor } from "./editor/block";
 import selection from "./selection";
-import { _, des, el, txt } from "element/helper";
+import { _, el } from "element/helper";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
 // const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
@@ -26,7 +25,7 @@ const intersection = (setA, setB) => {
  * @param body editor body.
  * @returns set of all styles applied.
  */
-const getIntersectingFormattingOptions = (body, allTextNodes): any => {
+function getIntersectingFormattingOptions(body, allTextNodes): any {
     let align = false;
     const formatApplied = new Set([...availableFormats]);
     for (const node of allTextNodes) {
@@ -45,23 +44,7 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
             break;
         }
     }
-    return [formatApplied, align];
-}
-
-/**
- * @details Get applied style on a particular text node.
- * @param editor main editor node to work on.
- * @param node Node element to evaluate it's style.
- */
- const getAppliedStyles = (editor, node) => {
-    const styles = [];
-    while (node !== editor) {
-        if (availableFormats.has(node.nodeName)) {
-            styles.push(node.nodeName);
-        }
-        node = node.parentNode;
-    }
-    return styles;
+    return [allTextNodes.length ? formatApplied: [], align];
 }
 
 /**
@@ -83,35 +66,13 @@ const getIntersectingFormattingOptions = (body, allTextNodes): any => {
                 .inner([...node.childNodes])
                 .replaceWith(node)
                 .get();
+
             blockNodes[index] = blockElement;
         }
     });
 }
 
-/**
- * @brief Set the caret to select the entire text entered in here.
- * @param {HTMLElement} editor 
- */
-const selectAll = (editor: HTMLElement | Node): void => {;
-    let startNode = editor.childNodes[0], 
-        endNode = editor.childNodes[editor.childNodes.length - 1];
-    while (startNode.childNodes && startNode.childNodes.length) {
-        startNode = startNode.childNodes[0];
-    }
-    while (endNode.childNodes && endNode.childNodes.length) {
-        endNode = endNode.childNodes[endNode.childNodes.length - 1];
-    }
-    selection.setSelectionAt({
-        startNode: startNode,
-        endNode: endNode,
-        startOffset: 0,
-        endOffset: endNode.textContent.length
-    });
-}
-
 export { 
     getIntersectingFormattingOptions,
-    getAppliedStyles,
-    applyBlockNodes,
-    selectAll
+    applyBlockNodes
 };

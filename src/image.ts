@@ -1,8 +1,8 @@
 import selection from './selection';
 import { isABlockNode } from './editor/block';
 import { el, elQuery } from 'element/helper';
-import { iterToParIncl } from 'utils/iter';
 import { Option } from 'utils/option';
+import { nodeIter } from 'utils/iter';
 
 export default class Image {
     mainBody: HTMLElement;
@@ -103,7 +103,7 @@ export default class Image {
 
         let node = selection.getCurrentNodeFromCaretPosition(selection.sel().get());
 
-        node = iterToParIncl(node).till(n => !isABlockNode(n)).last();        
+        node = nodeIter(node, n => n.parentNode, true).till(n => !isABlockNode(n)).last();        
         this.setImageEvents(imageNode);
         
         el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);

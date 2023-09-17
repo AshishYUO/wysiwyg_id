@@ -1,12 +1,17 @@
 class IterWrapper<T> {
-    iterable;
-    [Symbol.iterator]() {
+    iterable: IterableIterator<T>;
+    [Symbol.iterator](): IterableIterator<T> {
         return this.iterable;
     };
     constructor(
-        iterable: Iterable<T>
+        iterable: IterableIterator<T>
     ) {
         this.iterable = iterable;
+    }
+
+    next(): IteratorResult<T> {
+        const res = this.iterable.next();
+        return res;
     }
 
     /**
@@ -51,7 +56,7 @@ class IterWrapper<T> {
                     yield fn(value, index);
                     index += 1;
                 }
-            }(this) as Iterable<U>
+            }(this) as IterableIterator<U>
         );
     }
 
@@ -69,7 +74,7 @@ class IterWrapper<T> {
                     }
                     index += 1;
                 }
-            }(this) as Iterable<T>
+            }(this) as IterableIterator<T>
         );
     }
 
@@ -78,93 +83,6 @@ class IterWrapper<T> {
      */
     collect(): Array<T> {
         return [...this.iterable];
-    }
-}
-
-/**
- * Iterate outwards to the parent of each node
- * @param value Value to iterate towards document
- * @returns wrapper for the Iterator
- */
-export function iterToPar(value: HTMLElement | Node) {
-    return new ParentIterWrapper(value, (par) => par !== null);
-}
-
-class ParentIterWrapper extends IterWrapper<HTMLElement> {
-    constructor(
-        private currNode: HTMLElement | Node,
-        private until: (_: HTMLElement | Node) => boolean
-    ) { 
-        super(undefined);
-        super[Symbol.iterator] = this[Symbol.iterator] = function*() {
-            while (this.until(this.currNode)) {
-                const value = this.currNode;
-                this.currNode = this.currNode.parentNode as HTMLElement;
-                yield value;
-            }(this)
-        }
-    }
-
-    till(fn: (_: HTMLElement | Node) => boolean) {
-        this.until = fn;
-        return this;
-    }
-
-    /**
-     * Returns the last element returned from the iterator
-     * @returns The last element from the iterator
-     */
-    last(): HTMLElement {
-        let value = null;
-        for (const i of this) {
-            value = i;
-        }
-        return value;
-    }
-}
-
-/**
- * Iterate outwards to the parent of each node,
- * yielding last invalid value as well.
- * @param value Value to iterate towards document
- * @returns wrapper for the Iterator
- */
-export function iterToParIncl(value: HTMLElement | Node) {
-    return new ParentIncIterWrapper(value, (par) => par !== null);
-}
-
-class ParentIncIterWrapper {
-    constructor(
-        private currNode: HTMLElement | Node,
-        private until: (_: HTMLElement | Node) => boolean
-    ) {} 
-
-    [Symbol.iterator]() {
-        return function*(node: ParentIncIterWrapper) {
-            while (node.until(node.currNode)) {
-                const value = node.currNode
-                node.currNode = node.currNode.parentNode as HTMLElement;
-                yield value;
-            }
-            yield node.currNode;
-        }(this);
-    }
-
-    till(fn: (_: HTMLElement | Node) => boolean) {
-        this.until = fn;
-        return this;
-    }
-
-    /**
-     * Returns the last element returned from the iterator
-     * @returns The last element from the iterator
-     */
-    last(): HTMLElement {
-        let value = null;
-        for (const i of this) {
-            value = i;
-        }
-        return value;
     }
 }
 
@@ -197,17 +115,16 @@ class NodeIterWrapper<YieldType> extends IterWrapper<YieldType> implements Itera
         private until: (_: YieldType) => boolean
     ) {
         super(undefined);
-        
-        super.iterable = this[Symbol.iterator] = function*() {
-            while (this.until(this.currNode)) {
-                const value = this.currNode;
-                this.currNode = this.stride(this.currNode);
+        super.iterable = function*(container) {
+            while (container.until(container.currNode)) {
+                const value = container.currNode;
+                container.currNode = container.stride(container.currNode);
                 yield value;
             }
-            if (this.inclusive) {
-                yield this.currNode;
+            if (container.inclusive) {
+                yield container.currNode;
             }
-        };
+        }(this) as IterableIterator<YieldType>;
     }
 
     till(fn: (_: YieldType) => boolean) {

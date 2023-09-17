@@ -43,9 +43,11 @@ function insertString(editor: HTMLElement, str: string) {
     }
 }
 
+type TraverseInfo = [Option<Node>, Option<Node>];
+
 function makeMove(
-    [prevNode, currNode]: [Option<Node>, Option<Node>]
-): [Option<Node>, Option<Node>]  {
+    [prevNode, currNode]: TraverseInfo
+): TraverseInfo  {
     if (prevNode.isSome() && currNode.isSome()) {
         const [prev, curr] = [prevNode.get(), currNode.get()];
         if (curr === prev.parentNode) {
@@ -69,9 +71,9 @@ function makeMove(
             return [currNode, Some(curr.childNodes[0])]
         } else if (curr.nextSibling) {
             return [currNode, Some(curr.nextSibling)];
-        } else {
-            return [currNode, Some(curr.parentNode)];
-        }
+        } 
+        
+        return [currNode, Some(curr.parentNode)];
     }
     return [None(), None()];
 }
@@ -87,7 +89,7 @@ function getAllTextNodes(
     startNode: Node, 
     endNode: Node
 ) {
-    const initialState: [Option<Node>, Option<Node>] = [None<Node>(), Some(startNode)];
+    const initialState: TraverseInfo = [None<Node>(), Some(startNode)];
     // const textNodes = startNode === endNode ? [startNode] : [];
     const textNodes = [
         ...nodeIter(initialState, makeMove, true)

@@ -1,6 +1,6 @@
 import selection, { SelectionInfo } from '../selection';
 import { applyBlockNodes } from '../formatting';
-import { iterToPar, nodeIter } from 'utils/iter';
+import { nodeIter } from 'utils/iter';
 
 const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'DIV', 'PRE', 'P', 'DL', 'ADDRESS', 'IMG', 'LI', 'TABLE', 'TR']);
 
@@ -23,7 +23,7 @@ const blockInEditor = (
     editor: HTMLElement | Node,
     node: Node,
 ): Node => {
-    return iterToPar(node)
+    return nodeIter(node, n => n.parentNode)
         .till(n => n !== editor)
         .last();
 }
