@@ -129,7 +129,7 @@ export function elQuery<
     node: HTMLElement | Document = document, 
 ): Option<Return>
 {
-    return Some(node.querySelector(query) as Return);
+    return Some(node.querySelector(query));
 }
 
 

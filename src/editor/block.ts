@@ -51,19 +51,12 @@ const getAllBlockNodesInCurrentSelection = (editor: HTMLElement): Array<Node> =>
     const [startBlockNode, endBlockNode] = getSelectedBlockNode(editor);
     // Assumption that the nodes are at a same level, and lists are not included.
     let nodeTraversal = startBlockNode;
-    // The equivalent operation is in the comment below the 
-    // return statement for reference
+
+    // Iterate through all the sibling of block nodes.
     return [
-        ...nodeIter(nodeTraversal, (n) => n.nextSibling, true)
+        ...nodeIter(nodeTraversal, n => n.nextSibling, true)
             .till(n => n !== null && n !== endBlockNode)
     ];
-    // while (nodeTraversal !== null && nodeTraversal !== endBlockNode) {
-    //     blockNodes.push(nodeTraversal);
-    //     nodeTraversal = nodeTraversal.nextSibling;
-    // }
-    // if (nodeTraversal) {
-    //     blockNodes.push(nodeTraversal);
-    // }
 }
 
 /**
@@ -132,7 +125,7 @@ const setCaretSelection = (
  * @param details containing node name.
  * @returns void but applies the node to selected block nodes.
  */
-const addBlock = (editor: HTMLElement, details: any): void => {
+function addBlock(editor: HTMLElement, details: any): void {
     const nodeType = details.nodeName;
     
     selection.getSelectionInfo().do(sel => {

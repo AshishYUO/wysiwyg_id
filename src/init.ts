@@ -146,19 +146,21 @@ export const initEditor = (enableTools=undefined) => {
                                 .attr('title', hint)
                                 .innerHtml(display)
                             ])
-                }));
-    
-                
+                    }));
+
                 if (toolBatch !== enableTools[enableTools.length - 1]) {
                     el(toolbar).extd([el('span').cls('separator')]);
                 }
             });
 
-            el(editor).extd([el(options).append(toolbar), el('div').attr('contenteditable').cls('bodyeditable')]);            
+            el(editor).extd([
+                el(options).append(toolbar),
+                el('div').attr('contenteditable').cls('bodyeditable')
+            ]);
+
             new Editor(editor);
         });
     });
 
-    
     initUIMode();
 };

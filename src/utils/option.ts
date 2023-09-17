@@ -65,7 +65,7 @@ export class Option<T> {
      * @param fn function to perform
      * @returns 
      */
-    do<U>(
+    do(
         fn: (_: T) => void
     ) {
         this.isSome() && fn(this.some);
@@ -76,7 +76,7 @@ export class Option<T> {
      * @param fn function to perform
      * @returns 
      */
-    doGet<U>(
+    doGet(
         fn: (_: T) => void
     ) {
         if (this.isSome()) {

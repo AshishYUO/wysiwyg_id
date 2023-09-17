@@ -1,5 +1,7 @@
+import { iter, nodeIter } from "utils/iter";
 import selection from "./selection";
 import { _, el } from "element/helper";
+import { None, Some } from "utils/option";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
 // const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
@@ -9,14 +11,11 @@ const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLO
  * @param setA 
  * @param setB 
  */
-const intersection = (setA, setB) => {
-    const toRemove = []
-    setA.forEach(element => {
-        if (!setB.has(element)) {
-            toRemove.push(element);
-        }
-    })
-    toRemove.forEach(element => setA.delete(element));
+function intersection(firstSet: Set<string>, secondSet: Set<string>): Set<string> {
+    return new Set<string>(
+        iter<string>(firstSet)
+            .filter(v => secondSet.has(v))
+    );
 }
 
 /**
@@ -25,26 +24,26 @@ const intersection = (setA, setB) => {
  * @param body editor body.
  * @returns set of all styles applied.
  */
-function getIntersectingFormattingOptions(body, allTextNodes): any {
-    let align = false;
-    const formatApplied = new Set([...availableFormats]);
-    for (const node of allTextNodes) {
-        align = align !== undefined ? false : align;
-        const currentFormat = new Set();
-        let traverse = node;
-        for (;traverse !== body; traverse = traverse.parentNode) {
-            if (formatApplied.has(traverse.nodeName)) {
+function getIntersectingFormattingOptions(body: HTMLElement, allTextNodes: HTMLElement[]): any {
+    let align = None<string>();
+    let formatApplied = new Set([...availableFormats]);
+    
+    iter(allTextNodes).takeWhile(_ => formatApplied.size > 0).forEach(node => {
+        const currentFormat = new Set<string>();
+
+        nodeIter(node, n => n.parentElement)
+            .till(n => n !== body)
+            .forEach(traverse => {
                 currentFormat.add(traverse.nodeName);
-            }
-            align = (traverse.style && traverse.style.textAlign) ? traverse.style.textAlign : align;
-        }
-        intersection(formatApplied, currentFormat);
-        align = !align ? undefined : align;
-        if (!formatApplied.size) {
-            break;
-        }
-    }
-    return [allTextNodes.length ? formatApplied: [], align];
+                align = traverse.style?.textAlign ? 
+                    Some(traverse.style.textAlign) : 
+                    align;
+            });
+
+        formatApplied = intersection(formatApplied, currentFormat);
+    });
+
+    return [allTextNodes.length ? formatApplied: [], align.get()];
 }
 
 /**

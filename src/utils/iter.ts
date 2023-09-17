@@ -1,3 +1,7 @@
+export function iter<T>(someContainer: T[] | Set<T>) {
+    return new IterWrapper<T>(someContainer[Symbol.iterator]());
+}
+
 class IterWrapper<T> {
     iterable: IterableIterator<T>;
     [Symbol.iterator](): IterableIterator<T> {
@@ -32,16 +36,18 @@ class IterWrapper<T> {
      * @param fn function for validation
      */
     takeWhile(fn: (_: T, index?: number) => boolean) {
-        return function*(container) {
-            let index = 0;
-            for (const value of container) {
-                if (!fn(value, index)) {
-                    break;
+        return new IterWrapper<T>(
+            function*(container) {
+                let index = 0;
+                for (const value of container) {
+                    if (!fn(value, index)) {
+                        break;
+                    }
+                    index += 1;
+                    yield value;
                 }
-                index += 1;
-                yield value;
-            }
-        }(this);
+            }(this) as IterableIterator<T>
+        );
     }
 
     /**
@@ -89,19 +95,26 @@ class IterWrapper<T> {
 /**
  * Convenient iterator for nodes.
  * @param value Value to iterate towards document
- * @param fn the function that yields the next node based on current node
+ * @param strideFn the function that yields the next node based on current node
+ * 
+ * For e.g.,
+ * ```
+ * strideFn = (n: Node) => n.parentNode
+ * ```
+ * will jump from current to parentNode
+ * 
  * @param incl Flag for inclusive, i.e., include value for which the generator does not
  * yield value further.
  * @returns wrapper for the Iterator
  */
 export function nodeIter<YieldType = HTMLElement | Node>(
     value: YieldType,
-    fn: (_: YieldType) => YieldType,
+    strideFn: (_: YieldType) => YieldType,
     incl: boolean = false
 ) {
     return new NodeIterWrapper<YieldType>(
         value,
-        fn,
+        strideFn,
         incl,
         (par) => par !== null
     );
