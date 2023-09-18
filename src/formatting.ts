@@ -1,17 +1,20 @@
 import { iter, nodeIter } from "utils/iter";
 import selection from "./selection";
 import { _, el } from "element/helper";
-import { None, Some } from "utils/option";
+import { None, Option, Some } from "utils/option";
 
 const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLOCKQUOTE', 'A', 'OL', 'UL' ]);
 // const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
 
 /**
  * @details Get intersection of setA and setB
- * @param setA 
- * @param setB 
+ * @param firstSet 
+ * @param secondSet 
  */
-function intersection(firstSet: Set<string>, secondSet: Set<string>): Set<string> {
+function intersection(
+    firstSet: Set<string>,
+    secondSet: Set<string>
+): Set<string> {
     return new Set<string>(
         iter<string>(firstSet)
             .filter(v => secondSet.has(v))
@@ -24,7 +27,10 @@ function intersection(firstSet: Set<string>, secondSet: Set<string>): Set<string
  * @param body editor body.
  * @returns set of all styles applied.
  */
-function getIntersectingFormattingOptions(body: HTMLElement, allTextNodes: HTMLElement[]): any {
+function getIntersectingFormattingOptions(
+    body: HTMLElement,
+    allTextNodes: HTMLElement[]
+): [Set<string> | [], string] {
     let align = None<string>();
     let formatApplied = new Set([...availableFormats]);
     

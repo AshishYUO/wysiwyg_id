@@ -10,7 +10,9 @@ export function None<T>(): Option<T> {
 }
 
 export class Option<T> {
-    /// Holds some value or nothing.
+    /**
+     * Variable that hold some or none
+     */
     some: T | None;
 
     constructor(value: T | None) { this.some = value }
@@ -26,7 +28,11 @@ export class Option<T> {
      */
     isNone() { return this.some === undefined || this.some === null; }
 
-    get(): T { return this.some }
+    /**
+     * @details Get the value defined here.
+     * @returns Some value of type T or undefined based on value stored
+     */
+    get(): T { return this.some || undefined }
 
 
     /**
@@ -51,7 +57,11 @@ export class Option<T> {
     }
 
     /**
-     * 
+     * @details Map value if value is a valid one
+     * otherwise resort to default value
+     * @param fn function that perform transformation
+     * @param def Default Value
+     * @returns Transformed value as Option
      */
     mapOr<U>(fn: (_: T) => U, def: U): Option<U> {
         if (this.isSome()) {
@@ -65,9 +75,7 @@ export class Option<T> {
      * @param fn function to perform
      * @returns 
      */
-    do(
-        fn: (_: T) => void
-    ) {
+    do(fn: (_: T) => void) {
         this.isSome() && fn(this.some);
     }
 
@@ -76,9 +84,7 @@ export class Option<T> {
      * @param fn function to perform
      * @returns 
      */
-    doGet(
-        fn: (_: T) => void
-    ) {
+    doGet(fn: (_: T) => void) {
         if (this.isSome()) {
             fn(this.some);
             return this.some;

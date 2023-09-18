@@ -14,35 +14,31 @@ export default class Image {
         this.mainBody = Node;
         
         this.imageButton = elQuery<HTMLImageElement>('.image').doGet(imgBtn => {
-            imgBtn.onclick = event => {
-                selection.sel().do(sel => {
-                    const url = sel.toString().trim();
-                    if (url.length) 
-                        if (this.matchesWithExtURL(url)) {
-                            this.loadImage(url);
-                        }
-                        else {
-                            alert('Invalid URL');
-                        }
-                    else {
-                        this.fileElement.click();
+            imgBtn.onclick = event => selection.sel().do(sel => {
+                const url = sel.toString().trim();
+                if (url.length) 
+                    if (this.matchesWithExtURL(url)) {
+                        this.loadImage(url);
+                    } else {
+                        alert('Invalid URL');
                     }
-                });
-            };
+                else {
+                    this.fileElement.click();
+                }
+            });
         });
 
-        this.fileElement = el('input')
+        this.fileElement = el<HTMLInputElement>('input')
             .attr('type', 'file')
             .evt('change', (e: any) => {
-                const image = e.target.files[0];
-                this.fileReader.readAsDataURL(image);
+                this.fileReader.readAsDataURL(e.target.files[0]);
             })
             .get<HTMLImageElement>();
 
         this.fileReader = new FileReader();
 
-        this.fileReader.onload = (event: any) => {
-            selection.sel().do(_ => this.loadImage(event.target.result)) 
+        this.fileReader.onload = (event: ProgressEvent<FileReader>) => {
+            selection.sel().do(_ => this.loadImage(event.target.result as string)) 
         }
     }
 
@@ -101,12 +97,14 @@ export default class Image {
             ['tabindex', '0']
         ]).get<HTMLImageElement>();
 
-        let node = selection.getCurrentNodeFromCaretPosition(selection.sel().get());
+        selection.getCurrentNodeFromCaretPosition().do(node => {
+            node = nodeIter(node, n => n.parentNode, true)
+                .till(n => !isABlockNode(n))
+                .last();
 
-        node = nodeIter(node, n => n.parentNode, true).till(n => !isABlockNode(n)).last();        
-        this.setImageEvents(imageNode);
-        
-        el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);
+            this.setImageEvents(imageNode);
+            el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);
+        });        
     }
 
     matchesWithExtURL(str: string){

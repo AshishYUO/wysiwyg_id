@@ -124,14 +124,13 @@ const selection = {
      * @param {*} selectionObj 
      * @returns 
      */
-    getCurrentNodeFromCaretPosition: (sel: Selection = undefined): Node => {
-        const currSelection = sel || selection.sel().get();
-        if (currSelection.anchorNode && 
-                currSelection.anchorNode.nodeName === '#text') {
-            return currSelection.anchorNode.parentNode;
-        } else {
-            return currSelection.anchorNode;
-        }
+    getCurrentNodeFromCaretPosition: (sel: Selection = undefined): Option<Node> => {
+        return selection.sel().map(currSel => {
+            switch (currSel.anchorNode?.nodeType) {
+                case 3:  return currSel.anchorNode.parentNode;
+                default: return currSel.anchorNode;
+            }
+        });
     },
 
     getCommonParentFromCurrentSelection: (): Option<Node> => {

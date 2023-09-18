@@ -1,36 +1,6 @@
 import selection from "../selection";
 import { el } from "element/helper";
 
-/**
- * 
- * @param {HTMLDivElement} editor 
- */
-const assertSelectionOnEmpty = (editor: HTMLElement | Node): void => {
-    let {
-        startNode,
-        endNode,
-        startOffset,
-        endOffset
-    } = selection.getSelectionInfo().get();
-    if (startNode === endNode && startOffset === endOffset) {
-        while (startNode.childNodes.length && startNode.nodeName !== 'BR') {
-            startNode = startNode.childNodes[0];
-        }
-        if (startNode.nodeType === 1) {
-            if (startNode.nodeName !== 'BR' && !startNode.childNodes.length) {
-                startNode.appendChild(el('br').get());
-                startNode = startNode.childNodes[0];
-                selection.setSelectionAt({
-                    startNode: startNode,
-                    endNode: startNode,
-                    startOffset: 0,
-                    endOffset: 0
-                });
-            }
-        }
-    }
-}
-
 // return true or false depending on whether to 
 // prevent default actions or not.
 const eventKeys = {
@@ -145,7 +115,6 @@ function handleKeyboardUpEvent(
     if (editor.textContent.length === 0) {
         el(editor as HTMLElement).innerHtml('<div><br /></div>');
     }
-    assertSelectionOnEmpty(editor);
 }
 
 export {
