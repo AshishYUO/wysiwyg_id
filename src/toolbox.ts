@@ -6,7 +6,7 @@ import { nodeIter } from 'utils/iter';
 import { Option, Some } from 'utils/option';
 
 export default class ToolBox {
-    editorHandler: Editor;
+    editor: Editor;
     mainNode: HTMLDivElement;
     symbolTable: HTMLElement;
     toolbox: HTMLElement;
@@ -38,7 +38,7 @@ export default class ToolBox {
      * @param  mainEditor 
      */
     constructor(Node: HTMLElement, mainEditor) {
-        this.editorHandler = mainEditor;
+        this.editor = mainEditor;
         this.mainNode = Node as HTMLDivElement;
         this.toolbox = elQuery('.options').get();
         this.bodyNode = elQuery('.bodyeditable').get();
@@ -75,7 +75,7 @@ export default class ToolBox {
 
         this.hr = elQuery<HTMLButtonElement>('.hr', Node).map(btn => {
             btn.onclick = evt => (this.applyTools(event => {
-                this.editorHandler.addInline({
+                this.editor.addInline({
                     cmd: 'insertHTML',
                     valArg: '<hr class="hline" style="width: 80%; height: 0; border: 0; border-bottom: 1px solid #ccc;" />'
                 })
@@ -85,26 +85,23 @@ export default class ToolBox {
 
         this.anchor = elQuery('.link');
         (this.anchor.get().onclick = event => this.applyTools(event => {
-            const parent = selection.getCurrentNodeFromCaretPosition();
-            if (parent && parent.nodeName === 'A') {
-                this.editorHandler.addInline({
-                    cmd: 'unlink',
-                    showDef: false,
-                });
-            } else {
-                const url = prompt('Enter the URL');
-                console.log(url);
-                if (url) {
-                    this.editorHandler.addInline({
-                        cmd: 'createLink',
-                        showDef: false,
-                        valArg: url
-                    });
+            selection.getCurrentNodeFromCaretPosition().do(parent => {
+                if (parent && parent.nodeName === 'A') {
+                    this.editor.addInline({ cmd: 'unlink', showDef: !!0 });
                 } else {
-                    alert('Please enter the link');
+                    let valArg: string;
+                    if (valArg = prompt('Enter the URL')) {
+                        this.editor.addInline({
+                            cmd: 'createLink',
+                            showDef: !!0,
+                            valArg
+                        });
+                    } else {
+                        alert('Please enter the link');
+                    }
                 }
-            }
-            this.formatsOnCurrentCaret();
+                this.formatsOnCurrentCaret();
+            });
         }, event));
 
         this.header1 = elQuery<HTMLButtonElement>('.header-1', Node).map(btn => {
@@ -125,7 +122,7 @@ export default class ToolBox {
 
         this.alignLeft = elQuery<HTMLButtonElement>('.align-left').map(btn => {
             btn.onclick = event => this.applyTools(event => {
-                this.editorHandler.addInline({
+                this.editor.addInline({
                     cmd: 'justifyLeft'
                 });
                 this.formatsOnCurrentCaret();
@@ -135,7 +132,7 @@ export default class ToolBox {
 
         this.alignRight = elQuery('.align-right');
         this.alignRight.get().onclick = event => this.applyTools(event => {
-            this.editorHandler.addInline({
+            this.editor.addInline({
                 cmd: 'justifyRight'
             });
             this.formatsOnCurrentCaret();
@@ -143,7 +140,7 @@ export default class ToolBox {
 
         this.alignCenter = elQuery('.align-center');
         this.alignCenter.get().onclick = event => this.applyTools(event => {
-            this.editorHandler.addInline({
+            this.editor.addInline({
                 cmd: 'justifyCenter'
             });
             this.formatsOnCurrentCaret();
@@ -151,7 +148,7 @@ export default class ToolBox {
 
         this.alignJustify = elQuery<HTMLButtonElement>('.align-justify').map(btn => {;
             btn.onclick = event => this.applyTools(event => {
-                this.editorHandler.addInline({
+                this.editor.addInline({
                     cmd: 'justifyFull'
                 });
                 this.formatsOnCurrentCaret();
@@ -209,17 +206,14 @@ export default class ToolBox {
      * @returns none.
      */
     executeCommand(details) {
+        const { command: cmd, type } = details;
         this.applyTools(event => {
-            switch(details.type) {
+            switch(type) {
                 case 'inline':
-                    this.editorHandler.addInline({
-                        cmd: details.command
-                    });
+                    this.editor.addInline({ cmd });
                     break;
                 case 'block':
-                    this.editorHandler.applyBlocks({
-                        nodeName: details.command
-                    });
+                    this.editor.applyBlocks({ nodeName: cmd });
                     break;
                 default:
                     break;
@@ -262,7 +256,7 @@ export default class ToolBox {
                 .cls('symbol-blocks')
                 .attr('title', `&#${i};`)
                 .innerHtml(`&#${i};`)
-                .evt('click', (e, curr) => this.editorHandler.insertString(`&#${i};`))
+                .evt('click', (e, curr) => this.editor.insertString(`&#${i};`))
                 .get();
             
             table.appendChild(symbolButtons);
@@ -280,10 +274,10 @@ export default class ToolBox {
     applyTools(call: (some: any) => void, callData) {
         selection.getSelectionInfo().do(({ startNode }) => {
             let par = nodeIter(startNode, n => n.parentNode, true)
-                .till(n => n.parentNode && n !== this.editorHandler.editor)
+                .till(n => n.parentNode && n !== this.editor.editor)
                 .last();
 
-            if (this.editorHandler.editor === par) {
+            if (this.editor.editor === par) {
                 call(callData);
             }
         });
@@ -308,8 +302,11 @@ export default class ToolBox {
      */
     formatsOnCurrentCaret(): void {
         this.clearAllFormats();
-        const nodeArray = this.editorHandler.getAllTextNodeInsideSelection();
-        const [formatApplied, align] = getIntersectingFormattingOptions(this.editorHandler.editor, nodeArray);
+        const nodeArray = this.editor.getAllTextNodeInsideSelection();
+        const [formatApplied, align] = getIntersectingFormattingOptions(
+            this.editor.editor,
+            nodeArray
+        );
 
         formatApplied.forEach(tagName => {
             this.elementReferences[tagName].do(btn => {

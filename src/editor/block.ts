@@ -9,7 +9,7 @@ const blockSet: Set<string> = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOC
  * @param node node to check
  * @returns true if it's a block node else false
  */
-const isABlockNode = (node: HTMLElement | Node): boolean => {
+function isABlockNode(node: HTMLElement | Node): boolean {
     return blockSet.has(node.nodeName);
 }
 
@@ -19,10 +19,7 @@ const isABlockNode = (node: HTMLElement | Node): boolean => {
  * @param node the node to evaluate it's parent.
  * @returns block node that is just below main text editor.
  */
-const blockInEditor = (
-    editor: HTMLElement | Node,
-    node: Node,
-): Node => {
+function blockInEditor(editor: HTMLElement | Node, node: Node): Node {
     return nodeIter(node, n => n.parentNode)
         .till(n => n !== editor)
         .last();
@@ -32,11 +29,12 @@ const blockInEditor = (
  * @details Get block node that are selected.
  * @returns start node and endNode.
  */
-const getSelectedBlockNode = (editor: HTMLElement): [Node, Node] => {
+function getSelectedBlockNode(editor: HTMLElement): [Node, Node] {
     const {
         startNode,
         endNode,
     } = selection.getSelectionInfo().get();
+
     return [
         blockInEditor(editor, startNode),
         blockInEditor(editor, endNode)
@@ -47,9 +45,10 @@ const getSelectedBlockNode = (editor: HTMLElement): [Node, Node] => {
  * @details Get all block nodes in the current selection.
  * @returns List of all selected block nodes.
  */
-const getAllBlockNodesInCurrentSelection = (editor: HTMLElement): Array<Node> => {
+function getAllBlockNodesInCurrentSelection(editor: HTMLElement): Array<Node> {
     const [startBlockNode, endBlockNode] = getSelectedBlockNode(editor);
-    // Assumption that the nodes are at a same level, and lists are not included.
+    // Assumption that the nodes are at a same level, 
+    // and lists are not included.
     let nodeTraversal = startBlockNode;
 
     // Iterate through all the sibling of block nodes.
@@ -65,10 +64,7 @@ const getAllBlockNodesInCurrentSelection = (editor: HTMLElement): Array<Node> =>
  * @param nodeName name of node to check
  * @returns true if all blockNodes has the same name
  */
-const isEachNodeSame = (
-    blockNodes: Array<Node>, 
-    nodeName: string
-): boolean => {
+function isEachNodeSame(blockNodes: Array<Node>, nodeName: string): boolean {
     return blockNodes.every(node => node.nodeName === nodeName);
 }
 
@@ -79,12 +75,12 @@ const isEachNodeSame = (
  * @param offset offset of the selected node.
  * @returns The selection of the node and it's offset.
  */
-const setNodes = (
+function setNodes(
     editor: HTMLElement,
     blockNode: Node,
     node: Node,
     offset: number
-): [Node, number] => {
+): [Node, number] {
     if (node === editor) {
         if (offset < editor.childNodes.length) {
             return [editor.childNodes[offset], 0];
@@ -104,20 +100,28 @@ const setNodes = (
  * @param selectionInfo caret selection
  * @return new selection based on applied block information.
  */
-const setCaretSelection = (
+function setCaretSelection(
     editor: HTMLElement,
     blockNodes: Array<Node>,
     selectionInfo: SelectionInfo
-): SelectionInfo => {
-    const { startNode, startOffset, endNode, endOffset } = selectionInfo;
-    const [newStNode, newStOffset] = setNodes(editor, blockNodes[0], startNode, startOffset);
-    const [newEndNode, newEndOffset] = setNodes(editor, blockNodes[blockNodes.length - 1], endNode, endOffset);
-    return {
-        startNode: newStNode,
-        endNode: newEndNode,
-        startOffset: newStOffset,
-        endOffset: newEndOffset
-    };
+): SelectionInfo {
+    let { startNode, startOffset, endNode, endOffset } = selectionInfo;
+    
+    [startNode, startOffset] = setNodes(
+        editor,
+        blockNodes[0],
+        startNode,
+        startOffset
+    );
+    
+    [endNode, endOffset] = setNodes(
+        editor,
+        blockNodes[blockNodes.length - 1],
+        endNode,
+        endOffset
+    );
+
+    return { startNode, endNode, startOffset, endOffset };
 }
 
 /**
@@ -130,7 +134,9 @@ function addBlock(editor: HTMLElement, details: any): void {
     
     selection.getSelectionInfo().do(sel => {
         const blockNodes = getAllBlockNodesInCurrentSelection(editor);
-        const nodeName = isEachNodeSame(blockNodes, nodeType) ? 'DIV' : nodeType;
+        const nodeName = isEachNodeSame(blockNodes, nodeType) ? 
+            'DIV' : 
+            nodeType;
 
         applyBlockNodes(blockNodes, nodeName);
         selection.setSelectionAt(setCaretSelection(editor, blockNodes, sel));

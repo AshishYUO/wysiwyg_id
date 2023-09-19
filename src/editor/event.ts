@@ -78,7 +78,7 @@ const parent: Array<{
  * @param {Event} event 
  * @returns boolean if preventDefault
  */
-const handleKeyboardDownEvent = (editor: HTMLElement, event: KeyboardEvent) => {
+function handleKeyboardDownEvent(editor: HTMLElement, event: KeyboardEvent) {
     if (keyPressed.hasOwnProperty(event.key)) {
         parent.push({
             key: event.key,

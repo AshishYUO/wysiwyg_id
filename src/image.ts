@@ -103,11 +103,13 @@ export default class Image {
                 .last();
 
             this.setImageEvents(imageNode);
-            el<HTMLElement>(node as HTMLElement).innerHtml('').appendChild(imageNode);
+            el<HTMLElement>(node as HTMLElement)
+                .innerHtml('')
+                .appendChild(imageNode);
         });        
     }
 
-    matchesWithExtURL(str: string){
-        return str.match(/https?:\/\/.*/);
+    matchesWithExtURL(str: string) {
+        return str.match(/https?:\/\/.*/).length > 0;
     }
 }

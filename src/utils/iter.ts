@@ -156,7 +156,10 @@ export function nodeIter<YieldType = HTMLElement | Node>(
     );
 }
 
-class NodeIterWrapper<YieldType> extends IterWrapper<YieldType> implements Iterable<YieldType>  {
+class NodeIterWrapper<YieldType> 
+    extends IterWrapper<YieldType> 
+    implements Iterable<YieldType>
+{
     until: (_: YieldType) => boolean;
     constructor(
         currNode: YieldType,

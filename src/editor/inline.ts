@@ -93,7 +93,9 @@ function getAllTextNodes(
     // const textNodes = startNode === endNode ? [startNode] : [];
     const textNodes = [
         ...nodeIter(initialState, makeMove, true)
-            .till(([_, curr]) => curr.isSomeAnd(n => n !== endNode && n !== null))
+            .till(([_, curr]) => curr.isSomeAnd(n => (
+                n !== endNode && n !== null
+            )))
             .filter(([_, curr]) => curr.get().nodeType === 3)
             .map(([_, curr]) => curr.get())
     ];

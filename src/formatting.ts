@@ -7,7 +7,7 @@ const availableFormats = new Set([ 'B', 'I', 'U', 'SUB', 'SUP', 'H1', 'H2', 'BLO
 // const inlineStyles = new Set(['B', 'I', 'U', 'SUB', 'SUP', 'A']);
 
 /**
- * @details Get intersection of setA and setB
+ * @details Get intersection of firstSet and secondSet
  * @param firstSet 
  * @param secondSet 
  */
