@@ -1,5 +1,4 @@
 import { iter, nodeIter } from "utils/iter";
-import selection from "./selection";
 import { _, el } from "element/helper";
 import { None, Option, Some } from "utils/option";
 
@@ -15,10 +14,7 @@ function intersection(
     firstSet: Set<string>,
     secondSet: Set<string>
 ): Set<string> {
-    return new Set<string>(
-        iter<string>(firstSet)
-            .filter(v => secondSet.has(v))
-    );
+    return new Set<string>(iter(firstSet).filter(v => secondSet.has(v)));
 }
 
 /**

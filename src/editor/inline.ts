@@ -65,7 +65,7 @@ function makeMove(
 
             return [Some(curr), Some(curr.parentNode)];
         }
-    } else if (prevNode.isNone()) {
+    } else if (currNode.isSome() && prevNode.isNone()) {
         const curr = currNode.get();
         if (curr.childNodes && curr.childNodes.length >= 1) {
             return [currNode, Some(curr.childNodes[0])]
@@ -96,7 +96,7 @@ function getAllTextNodes(
             .till(([_, curr]) => curr.isSomeAnd(n => (
                 n !== endNode && n !== null
             )))
-            .filter(([_, curr]) => curr.get().nodeType === 3)
+            .filter(([_, curr]) => curr.isSome() && curr.get().nodeType === 3)
             .map(([_, curr]) => curr.get())
     ];
 

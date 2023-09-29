@@ -8,9 +8,7 @@ const selection = {
      * @brief Returns the current selection in the document, restricted to editor
      * @returns Selection object
      */
-    sel: function() {
-        return Some(document.getSelection());
-    },
+    sel: () => Some(document.getSelection()),
     
     /**
      * @brief sets the caret position to the start of given node
@@ -18,11 +16,12 @@ const selection = {
      * @returns undefined
      */
     setCaretPositionAtNode: function(newNode: Node) {
-        const selection = getSelection();
-        const NewRange = document.createRange();
-        selection.removeAllRanges();
-        NewRange.setStart(newNode, 0);
-        selection.addRange(NewRange);
+        selection.sel().do(select => {
+            const NewRange = document.createRange();
+            select.removeAllRanges();
+            NewRange.setStart(newNode, 0);
+            select.addRange(NewRange);
+        });
     },
 
     /**
@@ -34,11 +33,12 @@ const selection = {
         newNode: Node,
         offset: number
     ) => {
-        const selection = getSelection();
-        selection.removeAllRanges();
-        const NewRange = document.createRange();
-        NewRange.setStart(newNode, offset);
-        selection.addRange(NewRange);
+        selection.sel().do(select => {
+            select.removeAllRanges();
+            const NewRange = document.createRange();
+            NewRange.setStart(newNode, offset);
+            select.addRange(NewRange);
+        });
     },
 
     /**

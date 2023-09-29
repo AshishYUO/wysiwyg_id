@@ -89,6 +89,7 @@ function handleKeyboardDownEvent(editor: HTMLElement, event: KeyboardEvent) {
         }
         keyPressed = keyPressed[event.key];
     }
+
     if (editor.textContent.length === 0) {
         el(editor as HTMLElement).innerHtml('<div><br /></div>');
     }
@@ -100,7 +101,7 @@ function handleKeyboardDownEvent(editor: HTMLElement, event: KeyboardEvent) {
  * @param {KeyboardEvent} event 
  */
 function handleKeyboardUpEvent(
-    editor: HTMLElement | Node, 
+    editor: HTMLElement, 
     event: KeyboardEvent
 ): void {
     if (parent.length) {
@@ -112,6 +113,7 @@ function handleKeyboardUpEvent(
             keyPressed = keyEvent.pos;
         }
     }
+
     if (editor.textContent.length === 0) {
         el(editor as HTMLElement).innerHtml('<div><br /></div>');
     }

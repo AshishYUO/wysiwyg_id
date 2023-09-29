@@ -13,7 +13,7 @@ class IterWrapper<T> {
         return this.iterable;
     };
     constructor(
-        iterable: IterableIterator<T>
+        iterable?: IterableIterator<T>
     ) {
         this.iterable = iterable;
     }
@@ -162,9 +162,9 @@ class NodeIterWrapper<YieldType>
 {
     until: (_: YieldType) => boolean;
     constructor(
-        currNode: YieldType,
-        stride: (_: YieldType) => YieldType,
-        inclusive: boolean = false,
+        private currNode: YieldType,
+        private stride: (_: YieldType) => YieldType,
+        private inclusive: boolean = false,
         until: (_: YieldType) => boolean
     ) {
         super(
@@ -183,8 +183,22 @@ class NodeIterWrapper<YieldType>
         this.until = until;
     }
 
+    private genIterator() {
+        return function*(container) {
+            while (container.until(container.currNode)) {
+                const value = container.currNode;
+                container.currNode = container.stride(container.currNode);
+                yield value;
+            }
+            if (container.inclusive) {
+                yield container.currNode;
+            }
+        }(this) as IterableIterator<YieldType>
+    }
+
     till(fn: (_: YieldType) => boolean) {
         this.until = fn;
+        super[Symbol.iterator] = () => this.genIterator();
         return this;
     }
 

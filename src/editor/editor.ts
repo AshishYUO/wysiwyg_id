@@ -33,9 +33,9 @@ export default class Editor {
                 .evt('keydown', (evt: KeyboardEvent) => {
                     handleKeyboardDownEvent(this.editor, evt);
                 })
-                .evt('keyup', (event: KeyboardEvent) => {
+                .evt('keyup', (evt: KeyboardEvent) => {
                     toolbox.formatsOnCurrentCaret();
-                    handleKeyboardUpEvent(this.editor, event);
+                    handleKeyboardUpEvent(this.editor, evt);
                 })
             ));
     }

@@ -1,13 +1,12 @@
 import selection from './selection';
 import { isABlockNode } from './editor/block';
 import { el, elQuery } from 'element/helper';
-import { Option } from 'utils/option';
 import { nodeIter } from 'utils/iter';
 
 export default class Image {
     mainBody: HTMLElement;
     imageButton: HTMLElement;
-    fileElement: HTMLElement;
+    fileElement: HTMLInputElement;
     fileReader: FileReader;
 
     constructor (Node: HTMLElement) {
@@ -16,13 +15,13 @@ export default class Image {
         this.imageButton = elQuery<HTMLImageElement>('.image').doGet(imgBtn => {
             imgBtn.onclick = event => selection.sel().do(sel => {
                 const url = sel.toString().trim();
-                if (url.length) 
+                if (url.length) {
                     if (this.matchesWithExtURL(url)) {
                         this.loadImage(url);
                     } else {
                         alert('Invalid URL');
                     }
-                else {
+                } else {
                     this.fileElement.click();
                 }
             });
@@ -33,12 +32,14 @@ export default class Image {
             .evt('change', (e: any) => {
                 this.fileReader.readAsDataURL(e.target.files[0]);
             })
-            .get<HTMLImageElement>();
+            .get();
 
         this.fileReader = new FileReader();
 
         this.fileReader.onload = (event: ProgressEvent<FileReader>) => {
-            selection.sel().do(_ => this.loadImage(event.target.result as string)) 
+            selection.sel().do(_ => (
+                this.loadImage(event.target.result as string)
+            ));
         }
     }
 
@@ -82,7 +83,7 @@ export default class Image {
     executeResizingEvent (event: MouseEvent): void {
         const imageElement = event.target as HTMLImageElement;
         const cursor = imageElement.style.cursor.split('-')[0];
-        switch(cursor) {
+        switch (cursor) {
             case 'e':
             case 'se':
                 el(imageElement).attr('width', `${event.offsetX + 5}`);

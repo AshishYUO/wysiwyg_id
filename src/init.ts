@@ -4,7 +4,7 @@ import '../styles/style.css';
 import '../styles/theme.css';
 import { el, elQueryAll } from 'element/helper';
 
-export const initEditor = (enableTools=undefined) => {
+export function initEditor(enableTools: Array<Array<string>> = undefined) {
     const enablingTools = {
         bold: {
             hint: 'Bold text',
@@ -104,28 +104,21 @@ export const initEditor = (enableTools=undefined) => {
     }
 
     el<HTMLLinkElement>('link')
-        .attrs([['rel', 'stylesheet'], ['href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css']])
+        .attrs([
+            ['rel', 'stylesheet'], 
+            ['href', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css']
+        ])
         .appendTo(document.head);
 
     if (!Array.isArray(enableTools)) {
-        enableTools = [['bold', 'italic', 'underline', 'subscript', 'superscript'], 
+        enableTools = [
+            ['bold', 'italic', 'underline', 'subscript', 'superscript'], 
             ['blockquote', 'header1', 'header2'],
             // ['unorderedList', 'orderedList'],
             ['align-left', 'align-right', 'align-center', 'align-justify'],
             ['math', 'currency'],
-            ['link', 'image']];
-    } else {
-        for (const toolsArray of enableTools) {
-            if (!Array.isArray(toolsArray)) {
-                enableTools = [['bold', 'italic', 'underline', 'subscript', 'superscript'], 
-                    ['blockquote', 'header1', 'header2'],
-                    // ['unorderedList', 'orderedList'],
-                    ['align-left', 'align-right', 'align-center', 'align-justify'],
-                    ['math', 'currency'],
-                    ['link', 'image']];
-                break;
-            }
-        }
+            ['link', 'image']
+        ];
     }
 
     elQueryAll('.editor').do(allEditorDom => {
@@ -138,7 +131,8 @@ export const initEditor = (enableTools=undefined) => {
                 /// Append all the values to toolbar
                 el(toolbar).extd(
                     toolBatch.map(toolInfo => {
-                        const { hint, classname, display } = enablingTools[toolInfo];
+                        const { hint, classname, display } =    
+                            enablingTools[toolInfo];
                         return el('span')
                             .cls('tool')
                             .inner([el('button')
